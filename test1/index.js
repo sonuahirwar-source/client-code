@@ -83,6 +83,33 @@ function updateTotalPrice() {
         element.textContent = totalPrice;
     });
 }
+function ensureDefaultQuantity() {
+    const hasQuantity = Object.values(selectedQuantities)
+        .some(quantity => quantity > 0);
+
+    if (hasQuantity) return;
+
+    const firstVariant = matchedVariants[0]?.variant;
+    if (!firstVariant) return;
+
+    selectedQuantities[firstVariant.id] = 1;
+
+    const firstRow = list.querySelector(
+        `[data-variant-id="${firstVariant.id}"]`
+    );
+
+    if (firstRow) {
+        firstRow.querySelector(
+            ".gmd-custom-variant-qty"
+        ).textContent = "1";
+
+        firstRow.querySelector(
+            ".gmd-custom-variant-quantity button:first-child"
+        ).disabled = false;
+    }
+
+    updateTotalPrice();
+}
         async function getVariantStockStatus(variantId) {
             try {
                 const url = new URL(window.location.href);
@@ -432,11 +459,7 @@ else {
             }))
             .filter(item => item.variant);
 
-        const stockStatuses = await Promise.all(
-            matchedVariants.map(({ variant }) =>
-                getVariantStockStatus(variant.id)
-            )
-        );
+const stockStatuses = matchedVariants.map(() => "Checking stock...");
 
         matchedVariants.forEach(({ variant }, index) => {
             const row = document.createElement("div");
@@ -470,24 +493,11 @@ else {
             const stock = document.createElement("div");
             stock.className = "gmd-custom-variant-stock";
 
-            const status = stockStatuses[index];
+           const status = stockStatuses[index];
+
             stock.textContent = status;
-// Add available class when Shopify says variant is available
-if (
-    variant.available === true &&
-    status.toLowerCase() === "out of stock"
-) {
-    stock.classList.add("available");
-}
-            if (status.toLowerCase() === "in stock") {
-                stock.classList.add("is-in-stock");
-            } else if (status.toLowerCase() === "almost out of stock") {
-                stock.classList.add("is-low-stock");
-            } else if (status.toLowerCase() === "out of stock") {
-                stock.classList.add("is-out-of-stock");
-            } else {
-                stock.classList.add("is-stock-unknown");
-            }
+            stock.classList.add("is-stock-unknown");
+            stock.dataset.stockLoaded = "false";
 
             const quantity = document.createElement("div");
             quantity.className = "gmd-custom-variant-quantity";
@@ -509,26 +519,39 @@ if (
 
             let count = 0;
 
-  // Allow quantity increase for every variant, including out of stock
-plus.disabled = false;
-plus.removeAttribute("disabled");
-plus.setAttribute("aria-disabled", "false");
+            // Allow quantity increase for every variant, including out of stock
+            plus.disabled = false;
+            plus.removeAttribute("disabled");
+            plus.setAttribute("aria-disabled", "false");
 
             minus.addEventListener("click", () => {
                 count = Math.max(0, count - 1);
+
+                qty.textContent = count;
+                selectedQuantities[variant.id] = count;
+                minus.disabled = count === 0;
+
+                ensureDefaultQuantity();
+
+                // Sync local count if the first variant was auto-selected
+                const firstVariant = matchedVariants[0]?.variant;
+
+                if (firstVariant && variant.id === firstVariant.id) {
+                    count = selectedQuantities[variant.id];
+                    qty.textContent = count;
+                    minus.disabled = count === 0;
+                }
+
+                updateTotalPrice();
+            });
+
+                plus.addEventListener("click", () => {
+                count++;
                 qty.textContent = count;
                 selectedQuantities[variant.id] = count;
                 minus.disabled = count === 0;
                 updateTotalPrice();
             });
-
-      plus.addEventListener("click", () => {
-    count++;
-    qty.textContent = count;
-    selectedQuantities[variant.id] = count;
-    minus.disabled = count === 0;
-    updateTotalPrice();
-});
 
             quantity.append(minus, qty, plus);
 
@@ -563,7 +586,77 @@ plus.setAttribute("aria-disabled", "false");
         });
 
         picker.insertAdjacentElement("afterend", list);
+        // Fetch stock statuses in the background after rendering the list.
+        (async function updateStockInBackground() {
+            await Promise.all(
+                matchedVariants.map(async ({ variant }) => {
+                    const row = list.querySelector(
+                        `[data-variant-id="${variant.id}"]`
+                    );
 
+                    if (!row) return;
+
+                    const stock = row.querySelector(".gmd-custom-variant-stock");
+
+                    try {
+                        const status = await getVariantStockStatus(variant.id);
+                        const normalizedStatus = status.trim().toLowerCase();
+
+                        stock.textContent = status;
+
+                        stock.classList.remove(
+                            "is-in-stock",
+                            "is-low-stock",
+                            "is-out-of-stock",
+                            "is-stock-unknown",
+                            "available"
+                        );
+
+                        if (
+                            variant.available === true &&
+                            normalizedStatus === "out of stock"
+                        ) {
+                            stock.classList.add("available");
+                        }
+
+                        if (normalizedStatus === "in stock") {
+                            stock.classList.add("is-in-stock");
+                        } else if (normalizedStatus === "almost out of stock") {
+                            stock.classList.add("is-low-stock");
+                        } else if (normalizedStatus === "out of stock") {
+                            stock.classList.add("is-out-of-stock");
+                        } else {
+                            stock.classList.add("is-stock-unknown");
+                        }
+
+                        stock.dataset.stockLoaded = "true";
+
+                        // Add Keep me posted for sold-out variants after stock loads.
+                        if (
+                            normalizedStatus === "out of stock" &&
+                            !row.querySelector(".gmd-posted")
+                        ) {
+                            const posted = document.createElement("button");
+                            posted.type = "button";
+                            posted.className = "gmd-posted";
+                            posted.textContent = "Keep me posted";
+
+                            posted.addEventListener("click", () => {
+                                openPostedPopup(variant);
+                            });
+
+                            row.appendChild(posted);
+                        }
+                    } catch (error) {
+                        console.error(
+                            "Background stock update failed:",
+                            variant.id,
+                            error
+                        );
+                    }
+                })
+            );
+        })();
         // Existing product form: add selected variants to cart
         const productForm = document.querySelector(
             "form.product-info__buy-form"
@@ -588,23 +681,23 @@ plus.setAttribute("aria-disabled", "false");
                 const submitButton = productForm.querySelector(
                     'button[type="submit"]'
                 );
-const buttonContent = submitButton?.querySelector(":scope > div");
-const buttonLoader = submitButton?.querySelector(".button__loader");
+            const buttonContent = submitButton?.querySelector(":scope > div");
+            const buttonLoader = submitButton?.querySelector(".button__loader");
 
-if (submitButton) {
-    submitButton.classList.add("gmd-add-to-cart");
-    submitButton.classList.add("is-loading");
+            if (submitButton) {
+                submitButton.classList.add("gmd-add-to-cart");
+                submitButton.classList.add("is-loading");
 
-    if (buttonContent) {
-        buttonContent.style.transform = "translateY(-10px)";
-        buttonContent.style.opacity = "0";
-    }
+                if (buttonContent) {
+                    buttonContent.style.transform = "translateY(-10px)";
+                    buttonContent.style.opacity = "0";
+                }
 
-    if (buttonLoader) {
-        buttonLoader.style.transform = "translateY(0px)";
-        buttonLoader.style.opacity = "1";
-    }
-}
+                if (buttonLoader) {
+                    buttonLoader.style.transform = "translateY(0px)";
+                    buttonLoader.style.opacity = "1";
+                }
+            }
                 if (submitButton) submitButton.disabled = true;
 
                 try {
