@@ -59,14 +59,52 @@
             if (cents == null) return "";
 
             return new Intl.NumberFormat(
-                document.documentElement.lang || "nl-NL",
+    "nl-NL",
                 {
                     style: "currency",
                     currency: product.currency || "EUR"
                 }
             ).format(cents / 100);
         }
+        function addSelectQuantityMessage() {
+    const pathLanguage = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i);
+    const language = pathLanguage ? pathLanguage[1].toLowerCase() : "nl";
+
+    const messages = {
+        en: "Select a quantity",
+        nl: "Selecteer een aantal",
+        de: "Menge auswählen",
+        fr: "Sélectionnez une quantité",
+        es: "Selecciona una cantidad",
+        it: "Seleziona una quantità"
+    };
+
+    const button = document.querySelector(
+        ".gmd-02 form.product-info__buy-form button[type='submit']"
+    );
+
+    if (!button) return;
+
+    const buttonContent = button.querySelector(":scope > div");
+    if (!buttonContent) return;
+
+    let message = buttonContent.querySelector(".gmd-select-quantity");
+
+    if (!message) {
+        message = document.createElement("div");
+        message.className = "gmd-select-quantity";
+        buttonContent.appendChild(message);
+    }
+
+    message.textContent = messages[language] || messages.en;
+    message.style.display = button.disabled ? "block" : "none";
+}
 function updateTotalPrice() {
+    const totalQuantity = Object.values(selectedQuantities).reduce(
+        (sum, quantity) => sum + quantity,
+        0
+    );
+
     const total = Object.entries(selectedQuantities).reduce(
         (sum, [id, quantity]) => {
             const variant = variants.find(v => v.id === Number(id));
@@ -75,13 +113,77 @@ function updateTotalPrice() {
         0
     );
 
-    const totalPrice = money(total);
+   const totalPrice = totalQuantity === 0 ? money(0) : money(total);
 
     document.querySelectorAll(
-        ".gmd-02 price-list sale-price,.gmd-02  .button-price .current-price"
+        ".gmd-02 .product-info price-list sale-price, .gmd-02 .button-price .current-price"
     ).forEach(element => {
         element.textContent = totalPrice;
     });
+
+    const addToCartButton = document.querySelector(
+        "form.product-info__buy-form button[type='submit']"
+    );
+
+    if (addToCartButton) {
+        addToCartButton.disabled = totalQuantity === 0;
+    }
+    addSelectQuantityMessage();
+}
+function setInitialZeroPrice() {
+
+    const priceSelectors = [
+        ".gmd-02 .product-info price-list sale-price",
+        ".gmd-02 .button-price .current-price"
+    ];
+
+    function forceZeroPrice() {
+
+        const totalQuantity = Object.values(selectedQuantities).reduce(
+            (sum, quantity) => sum + quantity,
+            0
+        );
+
+        // Do not override price after quantity selection
+        if (totalQuantity > 0) return;
+
+        priceSelectors.forEach(selector => {
+            document.querySelectorAll(selector).forEach(element => {
+                const zeroPrice = money(0);
+
+                if (element.textContent.trim() !== zeroPrice) {
+                    element.textContent = zeroPrice;
+                }
+            });
+        });
+
+        const addToCartButton = document.querySelector(
+            ".gmd-02 form.product-info__buy-form button[type='submit']"
+        );
+
+        if (addToCartButton) {
+            addToCartButton.disabled = true;
+        }
+    }
+
+    // Set initial zero price
+    forceZeroPrice();
+
+    requestAnimationFrame(forceZeroPrice);
+
+    // Observe Shopify theme price re-rendering
+    if (!window.gmd02PriceObserver) {
+
+        window.gmd02PriceObserver = new MutationObserver(() => {
+            forceZeroPrice();
+        });
+
+        window.gmd02PriceObserver.observe(document.body, {
+            childList: true,
+            subtree: true,
+            characterData: true
+        });
+    }
 }
 function ensureDefaultQuantity() {
     const hasQuantity = Object.values(selectedQuantities)
@@ -135,7 +237,106 @@ function ensureDefaultQuantity() {
                 return "Stock unavailable";
             }
         }
+async function getVariantDeliveryStatus(variantId) {
+    try {
+        const url = new URL(window.location.href);
+        url.searchParams.set("variant", variantId);
 
+        const response = await fetch(url.pathname + url.search);
+
+        if (!response.ok) return "";
+
+        const html = await response.text();
+
+        const doc = new DOMParser().parseFromString(
+            html,
+            "text/html"
+        );
+
+        const delivery = doc.querySelector(".delivery_info span");
+
+        return delivery?.textContent.trim() || "";
+
+    } catch (error) {
+        console.error("Delivery status error:", variantId, error);
+        return "";
+    }
+}
+function updatePreOrderButtonText() {
+    const language = window.location.pathname.match(/^\/(en|nl|de|fr|es|it)(\/|$)/i)?.[1]?.toLowerCase() || 'nl';
+
+    const translations = {
+        en: 'Add to cart',
+        nl: 'Toevoegen aan winkelwagen',
+        de: 'In den Warenkorb',
+        fr: 'Ajouter au panier',
+        es: 'Añadir al carrito',
+        it: 'Aggiungi al carrello'
+    };
+
+    document.querySelectorAll('.gmd-02 .product-info__buy-buttons button').forEach(button => {
+        const textDiv = button.querySelector(':scope > div');
+        if (!textDiv) return;
+
+        const text = textDiv.firstChild;
+
+        if (text?.textContent.trim() === 'Pre-order') {
+            text.textContent = translations[language] + ' ';
+        }
+    });
+}
+
+updatePreOrderButtonText();
+function updateDeliveryText() {
+    const language = window.location.pathname.match(/^\/(en|nl|de|fr|es|it)(\/|$)/i)?.[1]?.toLowerCase() || 'nl';
+
+    const translations = {
+        en: 'Select a quantity',
+        nl: 'Selecteer een aantal',
+        de: 'Menge auswählen',
+        fr: 'Sélectionnez une quantité',
+        es: 'Selecciona una cantidad',
+        it: 'Seleziona una quantità'
+    };
+
+    const selectedRows = [...document.querySelectorAll('.gmd-02 .gmd-custom-variant-row')]
+        .filter(row => Number(selectedQuantities[row.dataset.variantId] || 0) > 0);
+
+    // Koi variant selected nahi hai
+    if (!selectedRows.length) {
+        document.querySelectorAll('.gmd-02 .delivery_info span').forEach(span => {
+            span.textContent = translations[language];
+        });
+        return;
+    }
+
+    // Sirf normal variants lo, Pre-order ko ignore karo
+    const normalRows = selectedRows.filter(row => row.dataset.isPreorder !== 'true');
+
+    // Sirf Pre-order selected hai to existing text change mat karo
+    if (!normalRows.length) return;
+
+    const deliveries = normalRows
+        .map(row => {
+            const text = row.querySelector('.gmd-custom-variant-delivery')?.textContent.trim() || '';
+            const match = text.match(/(\d+)\s*[-–—]\s*(\d+)/);
+
+            return match ? {
+                text,
+                maxDays: Number(match[2])
+            } : null;
+        })
+        .filter(Boolean)
+        .sort((a, b) => b.maxDays - a.maxDays);
+
+    if (deliveries.length) {
+        document.querySelectorAll('.gmd-02 .delivery_info span').forEach(span => {
+            span.textContent = deliveries[0].text;
+        });
+    }
+}
+
+updateDeliveryText();
         // Create popup once
         function createPostedPopup() {
             if (document.querySelector(".gmd-02 .gmd-posted-modal")) return;
@@ -238,6 +439,139 @@ function ensureDefaultQuantity() {
 
                 </div>
             `;
+
+const pathLanguage = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i);
+const language = pathLanguage ? pathLanguage[1].toLowerCase() : "nl";
+
+const translations = {
+    en: {
+        close: "Close popup",
+        title: "Keep me posted",
+        description: "This product is currently sold out. Enter your email address below and get notified as soon as this option is back in stock.",
+        email: "Your email address",
+        submit: "NOTIFY ME",
+        privacy: "We only use your email address to notify you about this product's availability.",
+        successTitle: "You're on the list",
+        successBefore: "Thank you! We'll notify you as soon as the",
+        successAfter: "is back in stock.",
+        successClose: "Close"
+    },
+    nl: {
+        close: "Popup sluiten",
+        title: "Houd me op de hoogte",
+        description: "Dit product is momenteel uitverkocht. Laat hieronder je e-mailadres achter en ontvang direct een melding zodra deze optie weer op voorraad is.",
+        email: "Je e-mailadres",
+        submit: "MELD MIJ AAN",
+        privacy: "We gebruiken je e-mailadres alleen om je te informeren over de beschikbaarheid van dit product.",
+        successTitle: "Je staat op de lijst",
+        successBefore: "Bedankt! We geven je een seintje zodra de",
+        successAfter: "weer op voorraad is.",
+        successClose: "Sluiten"
+    },
+    de: {
+        close: "Popup schließen",
+        title: "Benachrichtige mich",
+        description: "Dieses Produkt ist derzeit ausverkauft. Hinterlasse unten deine E-Mail-Adresse und wir benachrichtigen dich, sobald diese Option wieder verfügbar ist.",
+        email: "Deine E-Mail-Adresse",
+        submit: "BENACHRICHTIGE MICH",
+        privacy: "Wir verwenden deine E-Mail-Adresse ausschließlich, um dich über die Verfügbarkeit dieses Produkts zu informieren.",
+        successTitle: "Du stehst auf der Liste",
+        successBefore: "Vielen Dank! Wir benachrichtigen dich, sobald die",
+        successAfter: "wieder verfügbar ist.",
+        successClose: "Schließen"
+    },
+    fr: {
+        close: "Fermer la fenêtre",
+        title: "Prévenez-moi",
+        description: "Ce produit est actuellement en rupture de stock. Saisissez votre adresse e-mail ci-dessous pour être averti dès que cette option sera de nouveau disponible.",
+        email: "Votre adresse e-mail",
+        submit: "M'AVERTIR",
+        privacy: "Nous utilisons votre adresse e-mail uniquement pour vous informer de la disponibilité de ce produit.",
+        successTitle: "Vous êtes sur la liste",
+        successBefore: "Merci ! Nous vous informerons dès que",
+        successAfter: "sera de nouveau disponible.",
+        successClose: "Fermer"
+    },
+    es: {
+        close: "Cerrar ventana",
+        title: "Avísame",
+        description: "Este producto está agotado actualmente. Deja tu correo electrónico a continuación y te avisaremos cuando esta opción vuelva a estar disponible.",
+        email: "Tu dirección de correo electrónico",
+        submit: "AVÍSAME",
+        privacy: "Utilizamos tu dirección de correo electrónico únicamente para informarte sobre la disponibilidad de este producto.",
+        successTitle: "Estás en la lista",
+        successBefore: "¡Gracias! Te avisaremos en cuanto",
+        successAfter: "vuelva a estar disponible.",
+        successClose: "Cerrar"
+    },
+    it: {
+        close: "Chiudi finestra",
+        title: "Avvisami",
+        description: "Questo prodotto è attualmente esaurito. Inserisci qui sotto il tuo indirizzo email e ti avviseremo quando questa opzione sarà nuovamente disponibile.",
+        email: "Il tuo indirizzo email",
+        submit: "AVVISAMI",
+        privacy: "Utilizziamo il tuo indirizzo email esclusivamente per informarti sulla disponibilità di questo prodotto.",
+        successTitle: "Sei nella lista",
+        successBefore: "Grazie! Ti avviseremo non appena",
+        successAfter: "sarà nuovamente disponibile.",
+        successClose: "Chiudi"
+    }
+};
+
+const t = translations[language] || translations.en;
+
+// Popup heading
+overlay.querySelector("#gmd-posted-title").textContent = t.title;
+
+// Close button accessibility
+overlay.querySelector(".gmd-posted-close").setAttribute(
+    "aria-label",
+    t.close
+);
+
+// Description
+overlay.querySelector(".gmd-posted-description").textContent =
+    t.description;
+
+// Email input
+const emailInput = overlay.querySelector(".gmd-posted-email");
+emailInput.placeholder = t.email;
+emailInput.setAttribute("aria-label", t.email);
+
+// Submit button
+overlay.querySelector(".gmd-posted-submit").textContent = t.submit;
+
+// Privacy text
+overlay.querySelector(".gmd-posted-privacy").textContent =
+    t.privacy;
+
+// Success heading
+overlay.querySelector(".gmd-posted-success h2").textContent =
+    t.successTitle;
+
+// Success paragraph with dynamic variant name
+const successParagraph = overlay.querySelector(
+    ".gmd-posted-success > p"
+);
+
+const successVariant = successParagraph.querySelector(
+    ".gmd-posted-success-variant"
+);
+
+successParagraph.textContent = "";
+successParagraph.append(
+    document.createTextNode(t.successBefore + " ")
+);
+
+successParagraph.appendChild(successVariant);
+
+successParagraph.append(
+    document.createTextNode(" " + t.successAfter)
+);
+
+// Success close button
+overlay.querySelector(".gmd-posted-success-close").textContent =
+    t.successClose;
 
             document.body.appendChild(overlay);
 
@@ -466,12 +800,13 @@ const stockStatuses = matchedVariants.map(() => "Checking stock...");
             row.className = "gmd-custom-variant-row";
             row.dataset.variantId = variant.id;
 
-            selectedQuantities[variant.id] = 0;
+    selectedQuantities[variant.id] = 0;
 
             const name = document.createElement("div");
             name.className = "gmd-custom-variant-name";
             name.textContent = variant.title;
-
+const priceQuantityWrapper = document.createElement("div");
+priceQuantityWrapper.className = "gmd-price-quantity-wrapper";
             const prices = document.createElement("div");
             prices.className = "gmd-custom-variant-prices";
 
@@ -506,18 +841,18 @@ const stockStatuses = matchedVariants.map(() => "Checking stock...");
             minus.type = "button";
             minus.textContent = "−";
             minus.setAttribute("aria-label", "Decrease quantity");
-            minus.disabled = true;
+       minus.disabled = selectedQuantities[variant.id] === 0;
 
             const qty = document.createElement("span");
-            qty.className = "gmd-custom-variant-qty";
-            qty.textContent = "0";
+     qty.className = "gmd-custom-variant-qty";
+qty.textContent = selectedQuantities[variant.id];
 
             const plus = document.createElement("button");
             plus.type = "button";
             plus.textContent = "+";
             plus.setAttribute("aria-label", "Increase quantity");
 
-            let count = 0;
+        let count = selectedQuantities[variant.id];
 
             // Allow quantity increase for every variant, including out of stock
             plus.disabled = false;
@@ -531,132 +866,245 @@ const stockStatuses = matchedVariants.map(() => "Checking stock...");
                 selectedQuantities[variant.id] = count;
                 minus.disabled = count === 0;
 
-                ensureDefaultQuantity();
+         
 
-                // Sync local count if the first variant was auto-selected
-                const firstVariant = matchedVariants[0]?.variant;
-
-                if (firstVariant && variant.id === firstVariant.id) {
-                    count = selectedQuantities[variant.id];
-                    qty.textContent = count;
-                    minus.disabled = count === 0;
-                }
+       
 
                 updateTotalPrice();
             });
 
-                plus.addEventListener("click", () => {
-                count++;
-                qty.textContent = count;
-                selectedQuantities[variant.id] = count;
-                minus.disabled = count === 0;
-                updateTotalPrice();
-            });
+plus.addEventListener("click", () => {
+    count++;
 
-            quantity.append(minus, qty, plus);
+    qty.textContent = count;
+    selectedQuantities[variant.id] = count;
 
-            row.append(name, stock, prices, quantity);
+    minus.disabled = count === 0;
+
+    updateTotalPrice();
+    updateDeliveryText();
+});
+quantity.append(minus, qty, plus);
+priceQuantityWrapper.append(prices, quantity);
+// Delivery status
+const delivery = document.createElement("div");
+delivery.className = "gmd-custom-variant-delivery";
+delivery.textContent = "Checking delivery...";
+
+row.append(name, stock, priceQuantityWrapper, delivery);
 
             // Keep me posted for this specific sold-out variant
-            if (status.toLowerCase() === "out of stock") {
-                const posted = document.createElement("button");
-                posted.type = "button";
-                posted.className = "gmd-posted";
-
-                posted.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         width="20" height="20"
-                         viewBox="0 0 20 20" fill="none">
-                        <path d="M16.5 16.825H3.51877C2.87894 16.825 2.26531 16.5708 1.81288 16.1184C1.36044 15.666 1.10627 15.0523 1.10627 14.4125V5.54375C1.10545 5.22641 1.16724 4.91203 1.28811 4.61861C1.40899 4.32519 1.58656 4.0585 1.81066 3.83381C2.03477 3.60913 2.30099 3.43087 2.5941 3.30924C2.88721 3.18761 3.20143 3.125 3.51877 3.125H16.5C17.1388 3.12665 17.7508 3.38156 18.2019 3.83381C18.653 4.28606 18.9063 4.89875 18.9063 5.5375V14.4125C18.9063 15.0513 18.653 15.6639 18.2019 16.1162C17.7508 16.5684 17.1388 16.8233 16.5 16.825ZM3.51877 4.69375C3.29334 4.69375 3.07714 4.7833 2.91773 4.94271C2.75832 5.10212 2.66877 5.31832 2.66877 5.54375V14.4125C2.66877 14.6379 2.75832 14.8541 2.91773 15.0135C2.91773 15.0135 3.07714 15.1729 3.51877 15.2625H16.5C16.6114 15.2625 16.7216 15.2405 16.8244 15.1977C16.9271 15.1549 17.0204 15.0922 17.0989 15.0132C17.1773 14.9342 17.2393 14.8404 17.2813 14.7373C17.3234 14.6342 17.3446 14.5238 17.3438 14.4125V5.54375C17.3446 5.43242 17.3234 5.32203 17.2813 5.21894C17.2393 5.11585 17.1773 5.0221 17.0989 4.94308C17.0204 4.86407 16.9271 4.80136 16.8244 4.75857C16.7216 4.71578 16.6114 4.69375 16.5 4.69375H3.51877Z" fill="#2E2E2E"/>
-                        <path d="M10.075 12.1C9.76839 12.0992 9.47434 11.978 9.25626 11.7625L2.62501 5.31873C2.47583 5.17452 2.39004 4.97695 2.38653 4.76949C2.38301 4.56203 2.46205 4.36166 2.60626 4.21248C2.75047 4.0633 2.94804 3.97751 3.1555 3.97399C3.36297 3.97048 3.56333 4.04952 3.71251 4.19373L10.075 10.3812L16.5375 4.04373C16.609 3.96518 16.6958 3.90204 16.7926 3.85817C16.8893 3.81431 16.994 3.79063 17.1002 3.7886C17.2064 3.78656 17.3119 3.80621 17.4103 3.84634C17.5087 3.88647 17.5978 3.94624 17.6723 4.02199C17.7468 4.09774 17.805 4.18789 17.8435 4.28692C17.8819 4.38595 17.8998 4.49178 17.8959 4.59794C17.8921 4.7041 17.8666 4.80875 17.8211 4.90436C17.7756 5.00035 17.711 5.08606 17.6313 5.15623L10.9 11.7562C10.7922 11.8654 10.6637 11.952 10.5221 12.011C10.3804 12.0701 10.2285 12.1003 10.075 12.1Z" fill="#2E2E2E"/>
-                        <path d="M17.1437 16.3C17.0235 16.3014 16.9045 16.2751 16.7961 16.2231C16.6877 16.171 16.5928 16.0947 16.5187 16L11.7062 9.81246C11.5929 9.64746 11.5472 9.44524 11.5786 9.24754C11.61 9.04983 11.7161 8.87172 11.875 8.74996C11.9553 8.68579 12.0476 8.63836 12.1465 8.61048C12.2454 8.58261 12.3489 8.57485 12.4509 8.58767C12.5529 8.60049 12.6512 8.63362 12.7402 8.68512C12.8291 8.73661 12.9068 8.80541 12.9687 8.88746L17.7812 15.0687C17.9079 15.2332 17.9646 15.441 17.9388 15.647C17.913 15.853 17.8079 16.0405 17.6437 16.1687C17.496 16.2662 17.3203 16.3123 17.1437 16.3Z" fill="#2E2E2E"/>
-                        <path d="M3.01252 16.3C2.83886 16.2987 2.6702 16.2417 2.53127 16.1375C2.36937 16.0084 2.26464 15.821 2.23868 15.6155C2.21299 15.41 2.26864 15.2026 2.39377 15.0375L7.20627 8.85627C7.26906 8.7742 7.3474 8.70529 7.43681 8.65349C7.52623 8.60169 7.62498 8.56801 7.72741 8.55437C7.82985 8.54073 7.93396 8.5474 8.03382 8.574C8.13368 8.6006 8.22732 8.64661 8.30939 8.7094C8.39147 8.77218 8.46037 8.85052 8.51218 8.93994C8.56398 9.02936 8.59766 9.12811 8.6113 9.23054C8.62493 9.33297 8.61826 9.43709 8.59166 9.53695C8.56506 9.63681 8.51906 9.73044 8.45627 9.81252L3.63127 16C3.55692 16.0929 3.46281 16.2417 3.35577 16.2199C3.24873 16.2718 3.13147 16.2992 3.01252 16.3Z" fill="#2E2E2E"/>
-                    </svg>
-                    <span>Keep me posted</span>
-                `;
-
-                posted.addEventListener("click", () => {
-                    openPostedPopup(variant);
-                });
-
-                row.appendChild(posted);
-            }
+         
 
             list.appendChild(row);
         });
 
-        picker.insertAdjacentElement("afterend", list);
+
+const pathLanguage = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i);
+const language = pathLanguage ? pathLanguage[1].toLowerCase() : "nl";
+
+const optionMessages = {
+    en: "Choose your options",
+    nl: "Kies je opties",
+    de: "Wähle deine Optionen",
+    fr: "Choisissez vos options",
+    es: "Elige tus opciones",
+    it: "Scegli le tue opzioni"
+};
+
+const optionsHeading = document.createElement("div");
+optionsHeading.className = "gmd-variant-options-heading";
+optionsHeading.textContent = optionMessages[language] || optionMessages.en;
+
+picker.insertAdjacentElement("afterend", optionsHeading);
+optionsHeading.insertAdjacentElement("afterend", list);
+picker.classList.add("gmd-hide-now");
+
+setInitialZeroPrice();
+
+updateTotalPrice();
         // Fetch stock statuses in the background after rendering the list.
-        (async function updateStockInBackground() {
-            await Promise.all(
-                matchedVariants.map(async ({ variant }) => {
-                    const row = list.querySelector(
-                        `[data-variant-id="${variant.id}"]`
-                    );
-
-                    if (!row) return;
-
-                    const stock = row.querySelector(".gmd-custom-variant-stock");
-
-                    try {
-                        const status = await getVariantStockStatus(variant.id);
-                        const normalizedStatus = status.trim().toLowerCase();
-
-                        stock.textContent = status;
-
-                        stock.classList.remove(
-                            "is-in-stock",
-                            "is-low-stock",
-                            "is-out-of-stock",
-                            "is-stock-unknown",
-                            "available"
-                        );
-
-                        if (
-                            variant.available === true &&
-                            normalizedStatus === "out of stock"
-                        ) {
-                            stock.classList.add("available");
-                        }
-
-                        if (normalizedStatus === "in stock") {
-                            stock.classList.add("is-in-stock");
-                        } else if (normalizedStatus === "almost out of stock") {
-                            stock.classList.add("is-low-stock");
-                        } else if (normalizedStatus === "out of stock") {
-                            stock.classList.add("is-out-of-stock");
-                        } else {
-                            stock.classList.add("is-stock-unknown");
-                        }
-
-                        stock.dataset.stockLoaded = "true";
-
-                        // Add Keep me posted for sold-out variants after stock loads.
-                        if (
-                            normalizedStatus === "out of stock" &&
-                            !row.querySelector(".gmd-posted")
-                        ) {
-                            const posted = document.createElement("button");
-                            posted.type = "button";
-                            posted.className = "gmd-posted";
-                            posted.textContent = "Keep me posted";
-
-                            posted.addEventListener("click", () => {
-                                openPostedPopup(variant);
-                            });
-
-                            row.appendChild(posted);
-                        }
-                    } catch (error) {
-                        console.error(
-                            "Background stock update failed:",
-                            variant.id,
-                            error
-                        );
-                    }
-                })
+       // Fetch stock statuses in the background after rendering the list.
+(async function updateStockInBackground() {
+    await Promise.all(
+        matchedVariants.map(async ({ variant }) => {
+            const row = list.querySelector(
+                `[data-variant-id="${variant.id}"]`
             );
-        })();
+
+            if (!row) return;
+
+            const stock = row.querySelector(
+                ".gmd-custom-variant-stock"
+            );
+const delivery = row.querySelector(
+    ".gmd-custom-variant-delivery"
+);
+
+const deliveryStatus = await getVariantDeliveryStatus(variant.id);
+
+delivery.textContent = deliveryStatus;
+delivery.style.display = deliveryStatus ? "block" : "none";
+            try {
+                const status = await getVariantStockStatus(variant.id);
+
+                // Keep original store language text.
+                stock.textContent = status;
+                // Generate class from stock status text
+const statusClass = status
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+if (statusClass) {
+    stock.classList.forEach(className => {
+        if (className.startsWith("stock-text-")) {
+            stock.classList.remove(className);
+        }
+    });
+
+    stock.classList.add(`stock-text-${statusClass}`);
+}
+const normalizedStatus = status
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ");
+
+const outOfStockLabels = [
+    "out of stock",
+    "uitverkocht",
+    "ausverkauft",
+    "nicht auf lager",
+    "rupture de stock",
+    "epuise",
+    "agotado",
+    "sin existencias",
+    "esaurito"
+];
+
+stock.querySelector(".gmd-pre-order")?.remove();
+
+if (outOfStockLabels.includes(normalizedStatus)) {
+const language = window.location.pathname.match(/^\/(en|nl|de|fr|es|it)(\/|$)/i)?.[1]?.toLowerCase() || 'nl';
+
+const preOrderTranslations = {
+    en: 'Pre-order',
+    nl: 'Pre-order',
+    de: 'Vorbestellung',
+    fr: 'Précommande',
+    es: 'Pedido anticipado',
+    it: 'Preordine'
+};
+
+const preOrder = document.createElement("div");
+preOrder.className = "gmd-pre-order";
+preOrder.textContent = preOrderTranslations[language] || 'Pre-order';
+
+stock.appendChild(preOrder);
+}
+                stock.classList.remove(
+                    "is-in-stock",
+                    "is-low-stock",
+                    "is-out-of-stock",
+                    "is-stock-unknown",
+                    "available"
+                );
+
+                // Stock functionality depends on Shopify availability,
+                // NOT on the translated stock text.
+                if (variant.available === false) {
+
+                    stock.classList.add("is-out-of-stock");
+
+                    // Add Keep me posted only for unavailable variants.
+                    if (!row.querySelector(".gmd-posted")) {
+                        const posted = document.createElement("button");
+
+                        posted.type = "button";
+                        posted.className = "gmd-posted";
+
+                        posted.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+  <path d="M16.5 16.825H3.51877C2.87894 16.825 2.26531 16.5708 1.81288 16.1184C1.36044 15.666 1.10627 15.0523 1.10627 14.4125V5.54375C1.10545 5.22641 1.16724 4.91203 1.28811 4.61861C1.40899 4.32519 1.58656 4.0585 1.81066 3.83381C2.03477 3.60913 2.30099 3.43087 2.5941 3.30924C2.88721 3.18761 3.20143 3.125 3.51877 3.125H16.5C17.1388 3.12665 17.7508 3.38156 18.2019 3.83381C18.653 4.28606 18.9063 4.89875 18.9063 5.5375V14.4125C18.9063 15.0513 18.653 15.6639 18.2019 16.1162C17.7508 16.5684 17.1388 16.8233 16.5 16.825V16.825ZM3.51877 4.69375C3.29334 4.69375 3.07714 4.7833 2.91773 4.94271C2.75832 5.10212 2.66877 5.31832 2.66877 5.54375V14.4125C2.66877 14.6379 2.75832 14.8541 2.91773 15.0135C3.07714 15.1729 3.29334 15.2625 3.51877 15.2625H16.5C16.6114 15.2625 16.7216 15.2405 16.8244 15.1977C16.9271 15.1549 17.0204 15.0922 17.0989 15.0132C17.1773 14.9342 17.2393 14.8404 17.2813 14.7373C17.3234 14.6342 17.3446 14.5238 17.3438 14.4125V5.54375C17.3446 5.43242 17.3234 5.32203 17.2813 5.21894C17.2393 5.11585 17.1773 5.0221 17.0989 4.94308C17.0204 4.86407 16.9271 4.80136 16.8244 4.75857C16.7216 4.71578 16.6114 4.69375 16.5 4.69375H3.51877Z" fill="#2E2E2E"/>
+  <path d="M10.075 12.1C9.76839 12.0992 9.47434 11.978 9.25626 11.7625L2.62501 5.31873C2.47583 5.17452 2.39004 4.97695 2.38653 4.76949C2.38301 4.56203 2.46205 4.36166 2.60626 4.21248C2.75047 4.0633 2.94804 3.97751 3.1555 3.97399C3.36297 3.97048 3.56333 4.04952 3.71251 4.19373L10.075 10.3812L16.5375 4.04373C16.609 3.96518 16.6958 3.90204 16.7926 3.85817C16.8893 3.81431 16.994 3.79063 17.1002 3.7886C17.2064 3.78656 17.3119 3.80621 17.4103 3.84634C17.5087 3.88647 17.5978 3.94624 17.6723 4.02199C17.7468 4.09774 17.805 4.18789 17.8435 4.28692C17.8819 4.38595 17.8998 4.49178 17.8959 4.59794C17.8921 4.7041 17.8666 4.80837 17.8211 4.90436C17.7756 5.00035 17.711 5.08606 17.6313 5.15623L10.9 11.7562C10.7922 11.8654 10.6637 11.952 10.5221 12.011C10.3804 12.0701 10.2285 12.1003 10.075 12.1Z" fill="#2E2E2E"/>
+  <path d="M17.1437 16.3C17.0235 16.3014 16.9045 16.2751 16.7961 16.2231C16.6877 16.171 16.5928 16.0947 16.5187 16L11.7062 9.81246C11.5929 9.64746 11.5472 9.44524 11.5786 9.24754C11.61 9.04983 11.7161 8.87172 11.875 8.74996C11.9553 8.68579 12.0476 8.63836 12.1465 8.61048C12.2454 8.58261 12.3489 8.57485 12.4509 8.58767C12.5529 8.60049 12.6512 8.63362 12.7402 8.68512C12.8291 8.73661 12.9068 8.80541 12.9687 8.88746L17.7812 15.0687C17.9079 15.2332 17.9646 15.441 17.9388 15.647C17.9131 15.853 17.807 16.0405 17.6437 16.1687C17.496 16.2662 17.3203 16.3123 17.1437 16.3V16.3Z" fill="#2E2E2E"/>
+  <path d="M3.01252 16.3C2.83886 16.2987 2.6702 16.2417 2.53127 16.1375C2.36937 16.0084 2.26437 15.821 2.23868 15.6155C2.21299 15.41 2.26864 15.2026 2.39377 15.0375L7.20627 8.85627C7.26906 8.7742 7.3474 8.70529 7.43681 8.65349C7.52623 8.60169 7.62498 8.56801 7.72741 8.55437C7.82985 8.54073 7.93396 8.5474 8.03382 8.574C8.13368 8.6006 8.22732 8.64661 8.30939 8.7094C8.39147 8.77218 8.46037 8.85052 8.51218 8.93994C8.56398 9.02936 8.59766 9.12811 8.6113 9.23054C8.62493 9.33297 8.61826 9.43709 8.59166 9.53695C8.56506 9.63681 8.51906 9.73044 8.45627 9.81252L3.63127 16C3.55692 16.0929 3.46281 16.168 3.35577 16.2199C3.24873 16.2718 3.13147 16.2992 3.01252 16.3V16.3Z" fill="#2E2E2E"/>
+</svg>
+                           
+<span>${({
+    en: "Keep me posted",
+    nl: "Houd me op de hoogte",
+    de: "Benachrichtige mich",
+    fr: "Prévenez-moi",
+    es: "Avísame",
+    it: "Avvisami"
+})[language] || "Keep me posted"}</span>
+
+                        `;
+
+                        posted.addEventListener("click", () => {
+                            openPostedPopup(variant);
+                        });
+
+                        row.appendChild(posted);
+                    }
+
+             } else {
+    stock.classList.add("available");
+    if (Number(variant.inventory_quantity) > 0) {
+    stock.classList.add("high");
+}
+
+const normalizedStatus = status
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+const outOfStockLabels = [
+    "out of stock",       // EN
+    "uitverkocht",        // NL
+    "ausverkauft",        // DE
+    "nicht auf lager",    // DE
+    "rupture de stock",   // FR
+    "epuise",             // FR
+    "agotado",            // ES
+    "sin existencias",    // ES
+    "esaurito"            // IT
+];
+
+const isOutOfStock = outOfStockLabels.some(label =>
+    normalizedStatus.includes(label)
+);
+
+
+}
+
+                stock.dataset.stockLoaded = "true";
+
+            } catch (error) {
+                console.error(
+                    "Background stock update failed:",
+                    variant.id,
+                    error
+                );
+
+                stock.textContent = "Stock unavailable";
+                stock.classList.remove(
+                    "is-in-stock",
+                    "is-low-stock",
+                    "is-out-of-stock"
+                );
+                stock.classList.add("is-stock-unknown");
+            }
+        })
+    );
+})();
         // Existing product form: add selected variants to cart
         const productForm = document.querySelector(
             "form.product-info__buy-form"
@@ -778,7 +1226,7 @@ const stockStatuses = matchedVariants.map(() => "Checking stock...");
                     alert(error.message || "Something went wrong.");
                 } finally {
     if (submitButton) {
-        submitButton.disabled = false;
+        updateTotalPrice();
 
         setTimeout(() => {
             if (buttonContent) {
@@ -821,9 +1269,10 @@ const stockStatuses = matchedVariants.map(() => "Checking stock...");
     if (optionName) {
         fieldset.classList.add(`option-${optionName}`);
     }
+    
 });
 
-    });
+    }); 
 })();
 // out of stock
 // https://www.zeuzfitness.com/en/products/zeuz-kettlebells
