@@ -1223,7 +1223,7 @@ const isOutOfStock = outOfStockLabels.some(label =>
                     }
                 } catch (error) {
                     console.error("Add to cart error:", error);
-                    alert(error.message || "Something went wrong.");
+             
                 } finally {
     if (submitButton) {
         updateTotalPrice();
