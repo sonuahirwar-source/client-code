@@ -1,0 +1,201 @@
+.gmd-03-v2 div#block-discount {
+    border-radius: 4px;
+    border: 1px solid #30BF39;
+    background: rgba(48, 191, 57, 0.10);
+    padding: 0px 16px;
+}
+
+.gmd-03-v2 form#discount-coupon-form input {
+    border-radius: 4px;
+    border: 1px solid #B1BDC8;
+    background: #FFF;
+    color: #6C757D;
+    font-family: Verdana;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    padding: 12px;
+    height: auto;
+}
+
+.gmd-03-v2 .product-add-form .buybuttonnew button {
+    color: #FFF;
+    text-align: center;
+    font-family: Verdana;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 700;
+    /* 214.286% */
+    letter-spacing: 1px;
+    padding: 12px;
+}
+
+.gmd-03-v2 .gmd-welcome-discount {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+}
+
+.gmd-03-v2 .gmd-discount-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.gmd-03-v2 .gmd-discount-left>svg {
+    flex-shrink: 0;
+}
+
+.gmd-03-v2 .gmd-discount-message {
+    display: flex;
+    flex-direction: column;
+    color: #000;
+    font-family: Verdana;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    gap: 3px;
+
+}
+
+.gmd-03-v2 .product-add-form .buybuttonnew button.gmd-discount-copy {
+    background: #fff !IMPORTANT;
+    color: #000;
+    font-family: Verdana;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+}
+
+.gmd-03-v2 .gmd-discount-message strong {
+    font-weight: 700 !important;
+    font-family: Verdana;
+}
+
+.gmd-03-v2 .gmd-discount-message span b {
+    font-weight: 700;
+}
+
+.gmd-03-v2 .gmd-discount-copy {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 12px;
+    flex-shrink: 0;
+    border-radius: 4px;
+    border: 1px dashed #F77268;
+    background: #FFF;
+    color: #222;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.gmd-03-v2 .gmd-discount-copy strong {
+    font-weight: 700;
+}
+
+.gmd-03-v2 .gmd-discount-copy svg {
+    flex-shrink: 0;
+}
+.gmd-03-v2 .cart-summary form#discount-coupon-form input {
+    height: 36px;
+    margin-right: 22px;
+    min-width: 100%;
+    max-width: 100%;
+}
+.gmd-03-v2 .cart-summary button.btn-blue {
+    height: 36px;
+    margin-left: 10px;
+    border-radius: 4px;
+}
+.gmd-03-v2 .cart-summary  .coupon-form {
+    border-radius: 4px;
+    border: 1px solid #30BF39;
+    background: rgba(48, 191, 57, 0.10);
+    padding: 12px 16px;
+}
+.gmd-03-v2 .border-gray-300:has(.summary) {
+    border: none;
+    padding-bottom: 0;
+}
+.gmd-03-v2 .cart-summary button.btn-blue span {
+    font-size: 16px;
+}
+/* Mobile */
+@media (max-width: 768px) {
+    .gmd-03-v2 .cart-summary button.btn-blue span {
+    font-size: 14px !important;
+}
+    .gmd-03-v2 .coupon-form-title {
+        font-size: 14px;
+    }
+
+    .gmd-03-v2 .coupon-form-title>span svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .gmd-03-v2 .coupon-form-title::after {
+        width: 16px;
+        height: 10px;
+    }
+
+    .gmd-03-v2 .product-add-form .buybuttonnew button.gmd-discount-copy {
+        padding:  8px;
+    }
+
+    .gmd-03-v2 form#discount-coupon-form input {
+        font-size: 13px;
+    }
+
+    .gmd-03-v2 .gmd-discount-left {
+        flex-direction: column;
+        align-items: start;
+    }
+
+    .gmd-03-v2 .gmd-discount-left>svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .gmd-03-v2 .gmd-welcome-discount {
+        padding-top: 32px;
+        position: relative;
+
+    }
+}
+
+@media (max-width: 450px) {
+    .gmd-03-v2 div#amasty-stripe-button-modal form#discount-coupon-form button span {
+        font-size: 14px;
+    }
+
+    .gmd-03-v2 div#amasty-stripe-button-modal form#discount-coupon-form>div>* {
+        min-width: 123px;
+        width: auto;
+
+    }
+}
+
+@media (max-width: 480px) {
+    .gmd-03-v2 .gmd-welcome-discount {
+        gap: 8px;
+    }
+
+    .gmd-03-v2 .gmd-discount-message {
+        font-size: 13px;
+    }
+
+    .gmd-03-v2 .gmd-discount-copy {
+        padding: 8px;
+    }
+}
+
+

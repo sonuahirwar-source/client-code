@@ -1,0 +1,321 @@
+
+.gmd-03 {
+    div[x-data="discountForm"] {
+        border-radius: 4px;
+        border: 1px solid #B1BDC8;
+        background: #FFF;
+        padding: 10px 16px;
+    }
+
+    .py-3.border-x-0 {
+        border: none;
+        padding: 0;
+    }
+
+    strong#block-discount-heading {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        position: relative;
+        cursor: pointer;
+
+        * {
+            cursor: pointer;
+        }
+
+        label {
+            color: #000;
+            font-family: Verdana;
+            font-size: 16px;
+            font-style: normal;
+            font-weight: 700;
+            line-height: 32px;
+        }
+
+        &::before {
+            content: "";
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            flex-shrink: 0;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='25' viewBox='0 0 25 25' fill='none'%3E%3Cpath d='M0 12.3104V2.34375C0 1.04932 1.04932 0 2.34375 0H12.3104C12.932 0 13.5282 0.246935 13.9677 0.686475L24.3135 11.0323C25.2288 11.9476 25.2288 13.4315 24.3135 14.3468L14.3468 24.3135C13.4315 25.2288 11.9476 25.2288 11.0323 24.3135L0.686475 13.9677C0.246935 13.5282 0 12.932 0 12.3104ZM5.46875 3.125C4.17432 3.125 3.125 4.17432 3.125 5.46875C3.125 6.76318 4.17432 7.8125 5.46875 7.8125C6.76318 7.8125 7.8125 6.76318 7.8125 5.46875C7.8125 4.17432 6.76318 3.125 5.46875 3.125Z' fill='%234C74CD'/%3E%3C/svg%3E") center / contain no-repeat;
+        }
+
+        &::after {
+            content: "";
+            display: inline-block;
+            width: 20px;
+            height: 12px;
+            flex-shrink: 0;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='12' viewBox='0 0 20 12' fill='none'%3E%3Cpath d='M10.7772 11.6817L19.678 2.88158C20.1073 2.45716 20.1073 1.76907 19.678 1.34469L18.6399 0.318305C18.2114 -0.105391 17.5168 -0.106207 17.0873 0.316494L9.99998 7.29075L2.91274 0.316494C2.48319 -0.106207 1.78864 -0.105391 1.36009 0.318305L0.321957 1.34469C-0.107321 1.76912 -0.107321 2.45721 0.321957 2.88158L9.22271 11.6817C9.65199 12.1061 10.348 12.1061 10.7772 11.6817Z' fill='%232E2E2E'/%3E%3C/svg%3E") center / contain no-repeat;
+            margin-right: 0;
+            margin-left: auto;
+        }
+    }
+
+    form#discount-coupon-form {
+        input {
+            border-radius: 4px;
+            border: 1px solid #B1BDC8;
+            background: #FFF;
+            color: #6C757D;
+            font-family: Verdana;
+            font-size: 16px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+        }
+    }
+
+    div#amasty-stripe-button-modal {
+        form#discount-coupon-form {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            visibility: hidden;
+            transition: max-height 0.35s ease, opacity 0.3s ease, visibility 0.35s ease;
+
+            &.active {
+                max-height: 150px;
+                opacity: 1;
+                visibility: visible;
+                padding-top: 10px;
+            }
+        }
+    }
+
+    div[x-data="discountForm"] {
+        .pb-3.text-blue {
+            padding: 0;
+        }
+    }
+
+    .active strong#block-discount-heading::after {
+        transform: rotate(181deg);
+    }
+
+    .coupon-form-title {
+        padding-bottom: 0;
+    }
+
+    .coupon-form {
+        border-radius: 4px;
+        border: 1px solid #B1BDC8;
+        background: #FFF;
+        padding: 10px 16px;
+
+        form#discount-coupon-form {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            visibility: hidden;
+            padding-top: 0;
+            transition:
+                max-height 0.35s ease,
+                opacity 0.3s ease,
+                padding-top 0.35s ease,
+                visibility 0.35s ease;
+
+            &.active {
+                max-height: 150px;
+                opacity: 1;
+                visibility: visible;
+                padding-top: 12px;
+            }
+        }
+    }
+
+    .cart-summary {
+        fieldset.fieldset {
+            display: flex;
+        }
+
+        form#discount-coupon-form {
+            input {
+                &::placeholder {
+                    color: #6C757D;
+                    font-family: Verdana;
+                    font-size: 16px;
+                    font-style: normal;
+                    font-weight: 400;
+                    line-height: normal;
+                }
+
+                height: 36px;
+                margin-right: 22px;
+                min-width: 100%;
+                max-width: 100%;
+            }
+        }
+
+        button.btn-blue {
+            height: 36px;
+            margin-left: 10px;
+            border-radius: 4px;
+        }
+
+        .coupon-form-title {
+            color: #000;
+        }
+    }
+
+    .coupon-form-title {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        position: relative;
+        color: #4C74CD;
+        font-family: Verdana;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 32px;
+        padding-bottom: 0;
+
+        > span {
+            display: flex;
+            align-items: center;
+            margin-right: 10px;
+
+            svg {
+                width: 25px;
+                height: 25px;
+            }
+        }
+
+        &::after {
+            content: "";
+            width: 20px;
+            height: 12px;
+            flex-shrink: 0;
+            margin-left: auto;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='12' viewBox='0 0 20 12' fill='none'%3E%3Cpath d='M10.7772 11.6817L19.678 2.88158C20.1073 2.45716 20.1073 1.76907 19.678 1.34469L18.6399 0.318305C18.2114 -0.105391 17.5168 -0.106207 17.0873 0.316494L9.99998 7.29075L2.91274 0.316494C2.48319 -0.106207 1.78864 -0.105391 1.36009 0.318305L0.321957 1.34469C-0.107321 1.76912 -0.107321 2.45721 0.321957 2.88158L9.22271 11.6817C9.65199 12.1061 10.348 12.1061 10.7772 11.6817Z' fill='%232E2E2E'/%3E%3C/svg%3E") center / contain no-repeat;
+            transition: transform 0.3s ease;
+        }
+
+        &.active::after {
+            transform: rotate(180deg);
+        }
+
+        > span {
+            display: none;
+        }
+
+        &::before {
+            content: "";
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            flex-shrink: 0;
+            margin-right: 10px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='25' viewBox='0 0 25 25' fill='none'%3E%3Cpath d='M0 12.3104V2.34375C0 1.04932 1.04932 0 2.34375 0H12.3104C12.932 0 13.5282 0.246935 13.9677 0.686475L24.3135 11.0323C25.2288 11.9476 25.2288 13.4315 24.3135 14.3468L14.3468 24.3135C13.4315 25.2288 11.9476 25.2288 11.0323 24.3135L0.686475 13.9677C0.246935 13.5282 0 12.932 0 12.3104ZM5.46875 3.125C4.17432 3.125 3.125 4.17432 3.125 5.46875C3.125 6.76318 4.17432 7.8125 5.46875 7.8125C6.76318 7.8125 7.8125 6.76318 7.8125 5.46875C7.8125 4.17432 6.76318 3.125 5.46875 3.125Z' fill='%234C74CD'/%3E%3C/svg%3E") center / contain no-repeat;
+        }
+    }
+
+    .product-add-form {
+        .buybuttonnew {
+            button {
+                span {
+                    font-size: 16px;
+                }
+
+                &:not(.absolute) {
+                    padding: 8px 12px;
+                }
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        strong#block-discount-heading {
+            &::before {
+                height: 20px;
+                width: 20px;
+            }
+
+            label {
+                font-size: 14px;
+                line-height: normal;
+            }
+
+            &::after {
+                width: 16px;
+                height: 10px;
+            }
+        }
+
+        form#discount-coupon-form {
+            input {
+                font-size: 13px;
+            }
+        }
+
+        div#amasty-stripe-button-modal {
+            form#discount-coupon-form {
+                button span {
+                    font-size: 16px;
+                }
+
+                > div {
+                    display: grid;
+                    grid-template-columns: 2fr 1fr;
+
+                    > * {
+                        min-width: auto;
+                        width: auto;
+                    }
+                }
+            }
+        }
+
+        .catalog-product-view {
+            .product-add-form {
+                .buybuttonnew button {
+                    padding: 8px;
+                }
+            }
+        }
+
+        div[x-ref="amasty-stripe-button-modal"] {
+            padding-left: 10px;
+            padding-right: 10px;
+            overflow-x: hidden;
+        }
+
+        .coupon-form-title {
+            &::before {
+                width: 20px;
+                height: 20px;
+            }
+
+            font-size: 14px;
+
+            > span svg {
+                width: 22px;
+                height: 22px;
+            }
+
+            &::after {
+                width: 16px;
+                height: 10px;
+            }
+        }
+    }
+
+    @media (max-width: 450px) {
+        div#amasty-stripe-button-modal {
+            form#discount-coupon-form {
+                button span {
+                    font-size: 13px;
+                }
+
+                > div > * {
+                    min-width: 133px;
+                    width: auto;
+                    padding: 5px 8px;
+                    height: 40px;
+                }
+            }
+        }
+    }
+}
