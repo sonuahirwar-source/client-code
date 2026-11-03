@@ -100,13 +100,13 @@ function updateAppliedCouponClass() {
 
     // Detect Coupon Input Changes
     document.addEventListener('input', function(e) {
-        if (e.target.matches('input[name="coupon_code"]')) {
+        if (e.target.matches('.gmd-23-v2 input[name="coupon_code"]')) {
             updateAppliedCouponClass();
         }
     });
 
     document.addEventListener('change', function(e) {
-        if (e.target.matches('input[name="coupon_code"]')) {
+        if (e.target.matches('.gmd-23-v2 input[name="coupon_code"]')) {
             updateAppliedCouponClass();
         }
     });
