@@ -994,7 +994,7 @@ const language = window.location.pathname.match(/^\/(en|nl|de|fr|es|it)(\/|$)/i)
 
 const preOrderTranslations = {
     en: 'Pre-order',
-    nl: 'Pre-order',
+    nl: 'Voorbestellen',
     de: 'Vorbestellung',
     fr: 'Précommande',
     es: 'Pedido anticipado',
@@ -1104,6 +1104,15 @@ const isOutOfStock = outOfStockLabels.some(label =>
             }
         })
     );
+    document.querySelectorAll(
+    '.gmd-custom-variant-stock.stock-text-out-of-stock.is-out-of-stock'
+).forEach(el => {
+    const text = el.childNodes[0];
+
+    if (text && text.textContent.trim() === 'Out of stock') {
+        text.textContent = 'Sold out';
+    }
+});
 })();
         // Existing product form: add selected variants to cart
         const productForm = document.querySelector(
@@ -1224,7 +1233,7 @@ const isOutOfStock = outOfStockLabels.some(label =>
                 } catch (error) {
                     console.error("Add to cart error:", error);
              
-                } finally {
+                } finally { 
     if (submitButton) {
         updateTotalPrice();
 
