@@ -3,90 +3,141 @@
     'use strict';
 
     const testInfo = {
-        className: 'gmd-03',
+        className: 'gmd-23',
         debug: 0,
-        testName: 'Test Name',
+        testName: 'T23 | Optimize discount-code visibility during checkout',
         testVersion: 'v1'
     };
 
-    let debounceTimeout;
+    // Track manual close
+    const manuallyClosed = new WeakSet();
 
-    function waitForElement(
-        waitFor,
-        callback,
-        minElements = 1,
-        isVariable = false,
-        timer = 10000,
-        frequency = 25
-    ) {
-        let elements = isVariable
-            ? window[waitFor]
-            : document.querySelectorAll(waitFor);
+    function waitForElement(waitFor, callback, minElements = 1, isVariable = false, timer = 10000, frequency = 25) {
+        let elements = isVariable ? window[waitFor] : document.querySelectorAll(waitFor);
 
         if (timer <= 0) return;
 
-        (!isVariable && elements.length >= minElements) ||
-        (isVariable && typeof window[waitFor] !== 'undefined')
+        (!isVariable && elements.length >= minElements) || (isVariable && typeof window[waitFor] !== 'undefined')
             ? callback(elements)
-            : setTimeout(
-                () => waitForElement(
-                    waitFor,
-                    callback,
-                    minElements,
-                    isVariable,
-                    timer - frequency,
-                    frequency
-                ),
-                frequency
-            );
+            : setTimeout(() => waitForElement(waitFor, callback, minElements, isVariable, timer - frequency), frequency);
     }
 
-    waitForElement(
-        '.pdp-info-accordion  .emo-sticky-ats-wrapper .emo-btn-wrapper .emo-buy-now-btn, .checkout-cart-index .cart-summary .coupon-form',
-        ([pdp]) => {
+    function isCouponApplied(form) {
+        if (!form) return false;
 
+        const remove = form.querySelector('.gmd-23 input[name="remove"]');
+        const couponInput = form.querySelector('.gmd-23 input[name="coupon_code"]');
+
+        return !!(
+            remove &&
+            remove.value === '1' &&
+            couponInput &&
+            couponInput.disabled
+        );
+    }
+
+    function checkCouponApplied(heading, form) {
+        if (!heading || !form) return;
+
+        if (isCouponApplied(form) && !manuallyClosed.has(heading)) {
+            heading.classList.add('active');
+            form.classList.add('active');
+        }
+    }
+
+    function handleToggle(heading, form) {
+        if (!heading || !form) return;
+
+        const isActive = heading.classList.contains('active');
+
+        if (isActive) {
+            heading.classList.remove('active');
+            form.classList.remove('active');
+
+            // Prevent automatic reopening
+            manuallyClosed.add(heading);
+        } else {
+            heading.classList.add('active');
+            form.classList.add('active');
+
+            manuallyClosed.delete(heading);
+        }
+    }
+
+    // Amasty Stripe Discount
+    waitForElement(
+        ".pdp-info-accordion .product-info-block .product-quickbuy-button",
+        () => {
             document.body.classList.add(testInfo.className);
 
-            // Amasty Stripe Discount
-            document.addEventListener('click', function (e) {
+            const observer = new MutationObserver(() => {
+                const modal = document.querySelector('#amasty-stripe-button-modal');
+                if (!modal) return;
 
+                const heading = modal.querySelector(
+                    '.gmd-23 div[x-data="discountForm"]>div>div:has(strong#block-discount-heading)'
+                );
+
+                const form = modal.querySelector('form#discount-coupon-form');
+
+                if (!heading || !form) return;
+
+                checkCouponApplied(heading, form);
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['disabled', 'value']
+            });
+
+            document.addEventListener('click', function(e) {
                 const heading = e.target.closest(
-                    '.gmd-03 div#amasty-stripe-button-modal div#block-discount .pb-3.text-blue'
+                    '.gmd-23 #amasty-stripe-button-modal div[x-data="discountForm"] .pb-3.text-blue'
                 );
 
                 if (!heading) return;
 
-                const form = document.querySelector(
-                    '.gmd-03 div#amasty-stripe-button-modal form#discount-coupon-form'
-                );
+                const modal = heading.closest('#amasty-stripe-button-modal');
+                const form = modal && modal.querySelector('form#discount-coupon-form');
 
                 if (!form) return;
 
-                heading.classList.toggle('active');
-                form.classList.toggle('active');
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
 
-            });
+                handleToggle(heading, form);
+            }, true);
+        }
+    );
 
-            // Cart Coupon Form
-            document.addEventListener('click', function (e) {
+    // Cart Coupon Form
+    waitForElement(
+        ".checkout-cart-index .cart-summary .coupon-form",
+        ([cart]) => {
+            document.body.classList.add(testInfo.className);
 
-                const heading = e.target.closest('.gmd-03 .coupon-form-title');
+            const heading = cart.querySelector('.coupon-form-title');
+            const form = cart.querySelector('#discount-coupon-form');
 
-                if (!heading) return;
+            checkCouponApplied(heading, form);
 
-                const wrapper = heading.closest('.gmd-03 .coupon-form');
-
-                const form = wrapper?.querySelector(
-                    '.gmd-03 #discount-coupon-form'
+            document.addEventListener('click', function(e) {
+                const clickedHeading = e.target.closest(
+                    '.gmd-23 .coupon-form-title'
                 );
 
-                if (!form) return;
+                if (!clickedHeading) return;
 
-                heading.classList.toggle('active');
-                form.classList.toggle('active');
+                const wrapper = clickedHeading.closest('.coupon-form');
+                const couponForm = wrapper && wrapper.querySelector('#discount-coupon-form');
 
+                if (!couponForm) return;
+
+                handleToggle(clickedHeading, couponForm);
             });
-
         }
     );
 
