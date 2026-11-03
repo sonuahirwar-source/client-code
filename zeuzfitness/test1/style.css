@@ -96,7 +96,7 @@
   pointer-events: auto;
 }
 .gmd-02 .product-info .gmd-custom-variant-name {
-  font-family: "trade-gothic-next-condensed";
+  font-family: 'trade-gothic-next';
   font-size: 16px;
   font-style: normal;
   font-weight: 700;
@@ -120,8 +120,11 @@
 }
 .gmd-02 .gmd-select-quantity {
     font-size: initial;
+        font-family: 'trade-gothic-next-condensed';
 }
-
+.gmd-02 .product-info .buy-button-group .product-info__buy-buttons button{
+    font-family: 'trade-gothic-next-condensed';
+} 
 .gmd-02 .buy-button-group .product-info__buy-buttons button[disabled]>div .square {
     display: none;
 }
