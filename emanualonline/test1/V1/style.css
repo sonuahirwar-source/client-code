@@ -1,13 +1,23 @@
-.gmd-23 div[x-data="discountForm"] {
+.gmd-23 #block-discount>div:has(#block-discount-heading) {
     border-radius: 4px;
     border: 1px solid #B1BDC8;
     background: #FFF;
     padding: 10px 16px;
+    margin-bottom: 8px;
 }
 
 .gmd-23 #block-discount>div {
     border: none;
     padding: 0;
+}
+
+
+/* .gmd-23 #block-discount>div:has(#block-discount-heading)~div:not(.gmd-23 #block-discount>div:has(.active #block-discount-heading) ~ div) {
+    display: none;
+} */
+
+.gmd-23 #block-discount>div>div:has(span[x-html="successMessage"]):not(.gmd-23 #block-discount > div .active ~ :has(span[x-html="successMessage"])) {
+    display: none;
 }
 
 .gmd-23 strong#block-discount-heading label {
@@ -78,7 +88,11 @@
     max-height: 150px;
     opacity: 1;
     visibility: visible;
-    padding-top: 10px;
+    padding: 10px 0 8px;
+}
+
+.gmd-23 #block-discount>div>div:has(span[x-html="successMessage"]) {
+    margin: 8px 0;
 }
 
 .gmd-23 div[x-data="discountForm"]>div>div:has(strong#block-discount-heading) {
@@ -260,7 +274,7 @@
     font-size: 16px;
 }
 
-.gmd-23 .product-add-form .buybuttonnew button:not(button[aria-label="Close"]) {
+.gmd-23 .product-add-form #discount-coupon-form button:not(button[aria-label="Close"]) {
     padding: 8px 12px;
 }
 
