@@ -6,6 +6,11 @@
 }
 .gmd-price-quantity-wrapper {
     display: flex;
+    gap: 5px;
+    margin-left: auto;
+}
+.gmd-02 .buy-button-group .product-info__buy-buttons button[disabled] .button-price {
+    display: none;
 }
 @media (min-width: 1000px) and (max-width: 1150px) {
 
@@ -57,15 +62,20 @@
 .gmd-02 .product-info .gmd-custom-variant-row:has(.is-out-of-stock) > *:not(.gmd-posted) {
   opacity: 0.5;
   pointer-events: none;
+     
+}
+.gmd-02 .product-info .gmd-custom-variant-row:has(.is-out-of-stock) > .is-out-of-stock {
+    padding-left: 18px;
+     font-size: 11px !IMPORTANT;
 }
 .gmd-02 .product-info .gmd-custom-variant-row:has(.gmd-custom-variant-regular) .gmd-custom-variant-stock {
   font-size: 0;
 }
-.gmd-02 .product-info .gmd-custom-variant-row:has(.gmd-custom-variant-regular) .gmd-custom-variant-stock::before {
+/* .gmd-02 .product-info .gmd-custom-variant-row:has(.gmd-custom-variant-regular) .gmd-custom-variant-stock::before {
   width: 7px;
   height: 7px;
   top: 5px;
-}
+} */
 .gmd-02 .product-info .gmd-custom-variant-stock.available.is-out-of-stock ~ .gmd-posted {
     display: none;
 }
@@ -152,16 +162,29 @@ display:block !important;
 
 .gmd-02 .product-info .gmd-custom-variant-stock::before {
     position: absolute;
-    top: 7px;
-    left: 0;
-    width: 5px;
-    height: 5px;
+         top: 6px;
+    left: 4px;
+    width: 7px;
+    height: 7px;
     background: var(--dot-color);
     border-radius: 100%;
     content: "";
     animation: gmd-stock-pulse 1.5s infinite;
 }
 
+@keyframes gmd-stock-pulse1 {
+    0% {
+        box-shadow: 0 0 0 0 color-mix(in srgb, #ababab 70%, transparent);
+    }
+
+    70% {
+        box-shadow: 0 0 0 6px transparent;
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 transparent;
+    }
+}
 @keyframes gmd-stock-pulse {
     0% {
         box-shadow: 0 0 0 0 color-mix(in srgb, var(--dot-color) 70%, transparent);
@@ -184,7 +207,7 @@ display:block !important;
 }
 .gmd-02 .product-info .gmd-custom-variant-stock.is-out-of-stock::before {
   background: #585858;
-      animation: none;
+  animation: gmd-stock-pulse1 1.5s infinite;
 }
 .gmd-02 .product-info .gmd-custom-variant-stock.is-stock-unknown {
   color: #777;
@@ -303,11 +326,12 @@ color:green;
     display: none;
 }
 .gmd-02 .product-info .gmd-custom-variant-stock {
-    font-size: 0;
+    font-size: 0 !important;
 }
 .gmd-02 .product-info .gmd-custom-variant-stock.available:has(.gmd-pre-order) {
     font-size: 0;
         display: flex;
+            gap: 6px;
 }
 .gmd-02 .product-info .gmd-custom-variant-stock.available:has(.gmd-pre-order)::before{
 background: #5A78FF;
