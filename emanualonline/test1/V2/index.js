@@ -1,60 +1,36 @@
-
 (() => {
     'use strict';
 
     const testInfo = {
-        className: 'gmd-03-v2',
+        className: 'gmd-23-v2',
         debug: 0,
-        testName: 'Test Name',
+        testName: 'T23 | Optimize discount-code visibility during checkout',
         testVersion: 'v2'
     };
 
     let debounceTimeout;
+    let observerStarted = false;
 
-    function waitForElement(
-        waitFor,
-        callback,
-        minElements = 1,
-        isVariable = false,
-        timer = 10000,
-        frequency = 25
-    ) {
-        let elements = isVariable
-            ? window[waitFor]
-            : document.querySelectorAll(waitFor);
+    function waitForElement(waitFor, callback, minElements = 1, isVariable = false, timer = 10000, frequency = 25) {
+        let elements = isVariable ? window[waitFor] : document.querySelectorAll(waitFor);
 
         if (timer <= 0) return;
 
-        (!isVariable && elements.length >= minElements) ||
-        (isVariable && typeof window[waitFor] !== 'undefined')
+        (!isVariable && elements.length >= minElements) || (isVariable && typeof window[waitFor] !== 'undefined')
             ? callback(elements)
-            : setTimeout(
-                () => waitForElement(
-                    waitFor,
-                    callback,
-                    minElements,
-                    isVariable,
-                    timer - frequency,
-                    frequency
-                ),
-                frequency
-            );
+            : setTimeout(() => waitForElement(waitFor, callback, minElements, isVariable, timer - frequency), frequency);
     }
 
-    waitForElement(
-        '.pdp-info-accordion  .emo-sticky-ats-wrapper .emo-btn-wrapper .emo-buy-now-btn, .checkout-cart-index .cart-summary .coupon-form',
-        ([pdp]) => {
+    document.body.classList.add(testInfo.className);
 
-            document.body.classList.add(testInfo.className);
-
-(() => {
-    const selector = '.gmd-03-v2 div#block-discount .pb-3.text-blue ,.gmd-03-v2 .cart-summary .coupon-form-title';
+    const selector = '.gmd-23-v2 div[x-data="discountForm"]>div>div:has(strong#block-discount-heading), .gmd-23-v2 .cart-summary .coupon-form-title';
 
     function updateDiscountHTML() {
         document.querySelectorAll(selector).forEach(el => {
             if (el.dataset.gmdUpdated === 'true') return;
 
             el.innerHTML = `
+           <div class="gmd-diy-success">DIY20 successfully applied! 🎉</div>
                 <div class="gmd-welcome-discount">
                     <div class="gmd-discount-left">
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="25" viewBox="0 0 22 25" fill="none">
@@ -70,7 +46,7 @@
                     <button type="button" class="gmd-discount-copy" aria-label="Copy discount code">
                         <strong>DIY20</strong>
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16" fill="none">
-                            <path d="M10 14V15.25C10 15.6642 9.66422 16 9.25 16H0.75C0.335781 16 0 15.6642 0 15.25V3.75C0 3.33578 0.335781 3 0.75 3H3V12.25C3 13.215 3.78503 14 4.75 14H10ZM10 3.25V0H4.75C4.33578 0 4 0.335781 4 0.75V12.25C4 12.6642 4.33578 13 4.75 13H13.25C13.6642 13 14 12.6642 14 12.25V4H10.75C10.3375 4 10 3.6625 10 3.25ZM13.7803 2.28034L11.7197 0.219656C11.579 0.0790133 11.3882 1.03999e-06 11.1893 0L11 0V3H14V2.81066C14 2.61175 13.921 2.42099 13.7803 2.28034Z" fill="#6C757D"/>
+                            <path d="M10 14V15.25C10 15.6642 9.66422 16 9.25 16H0.75C0.335781 16 0 15.6642 0 15.25V3.75C0 3.33578 0.335781 3 0.75 3H3V12.25C3 13.215 3.78503 14 4.75 14H10V14ZM10 3.25V0H4.75C4.33578 0 4 0.335781 4 0.75V12.25C4 12.6642 4.33578 13 4.75 13H13.25C13.6642 13 14 12.6642 14 12.25V4H10.75C10.3375 4 10 3.6625 10 3.25ZM13.7803 2.28034L11.7197 0.219656C11.579 0.0790133 11.3882 1.03999e-06 11.1893 0L11 0V3H14V2.81066C14 2.61175 13.921 2.42099 13.7803 2.28034Z" fill="#6C757D"/>
                         </svg>
                     </button>
                 </div>
@@ -78,14 +54,42 @@
 
             el.dataset.gmdUpdated = 'true';
         });
+
+        updateAppliedCouponClass();
     }
 
-    document.addEventListener('click', function (e) {
+    // Check Applied Coupon
+function updateAppliedCouponClass() {
+    document.querySelectorAll('.gmd-23-v2 .gmd-welcome-discount').forEach(el => {
+
+        const wrapper = el.closest('[x-data="discountForm"]') ||
+                        el.closest('.cart-summary') ||
+                        el.closest('#amasty-stripe-button-modal') ||
+                        document;
+
+        const couponInput = wrapper.querySelector(
+            'form#discount-coupon-form input[name="coupon_code"]'
+        );
+
+        const couponCode = couponInput?.value.trim().toLowerCase() || '';
+
+        const isDisabled = couponInput?.disabled === true;
+
+        el.classList.toggle(
+            'gmd-diy-20',
+            couponCode === 'diy20' && isDisabled
+        );
+    });
+}
+    // Copy Discount Code
+    document.addEventListener('click', function(e) {
         const copyBtn = e.target.closest('.gmd-discount-copy');
+
         if (!copyBtn) return;
 
         navigator.clipboard.writeText('DIY20').then(() => {
             const originalHTML = copyBtn.innerHTML;
+
             copyBtn.querySelector('strong').textContent = 'COPIED!';
 
             setTimeout(() => {
@@ -94,14 +98,55 @@
         });
     });
 
-    updateDiscountHTML();
-
-    const observer = new MutationObserver(updateDiscountHTML);
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
+    // Detect Coupon Input Changes
+    document.addEventListener('input', function(e) {
+        if (e.target.matches('input[name="coupon_code"]')) {
+            updateAppliedCouponClass();
+        }
     });
-})();
+
+    document.addEventListener('change', function(e) {
+        if (e.target.matches('input[name="coupon_code"]')) {
+            updateAppliedCouponClass();
+        }
+    });
+
+    // Mutation Observer
+    function startObserver() {
+        if (observerStarted) return;
+
+        observerStarted = true;
+
+        const observer = new MutationObserver(() => {
+            clearTimeout(debounceTimeout);
+
+            debounceTimeout = setTimeout(() => {
+                updateDiscountHTML();
+                updateAppliedCouponClass();
+            }, 50);
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+
+    // PDP / Amasty Modal
+    waitForElement(
+        ".pdp-info-accordion .product-info-block .product-quickbuy-button",
+        () => {
+            updateDiscountHTML();
+            startObserver();
+        }
+    );
+
+    // Cart Coupon Form
+    waitForElement(
+        ".checkout-cart-index .cart-summary .coupon-form",
+        () => {
+            updateDiscountHTML();
+            startObserver();
         }
     );
 
