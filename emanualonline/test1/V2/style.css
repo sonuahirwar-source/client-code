@@ -18,6 +18,7 @@
     line-height: normal;
     padding: 12px;
     height: auto;
+    text-transform: capitalize;
 }
 
 .gmd-23-v2 .product-add-form #discount-coupon-form button {
@@ -79,6 +80,7 @@
     font-style: normal;
     font-weight: 400;
     line-height: normal;
+    text-transform: capitalize;
 }
 
 .gmd-23-v2 .gmd-discount-left {
@@ -108,7 +110,7 @@
     background: #fff !IMPORTANT;
     color: #000;
     font-family: Verdana;
-    font-size: 16px;
+    font-size: 14px;
     font-style: normal;
     font-weight: 700;
 }
@@ -126,8 +128,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 9px 12px;
+    gap: 6px;
+    padding: 8px;
     flex-shrink: 0;
     border-radius: 4px;
     border: 1px dashed #F77268;
@@ -150,6 +152,11 @@
     margin-right: 22px;
     min-width: 100%;
     max-width: 100%;
+    text-transform: capitalize;
+}
+
+.gmd-23-v2 .cart-summary form#discount-coupon-form input::placeholder {
+    text-transform: capitalize;
 }
 
 .gmd-23-v2 .cart-summary button {
@@ -174,12 +181,40 @@
     font-size: 16px;
 }
 
+@media (min-width: 769px) {
+    .gmd-23-v2 div#block-discount .gmd-discount-message {
+        font-size: 16px;
+    }
+    .gmd-23-v2 div#block-discount .gmd-discount-message {
+        font-size: 16px;
+    }
+    .gmd-23-v2 div[x-ref="amasty-stripe-button-modal"] {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+    .gmd-23-v2 .cart-summary button.gmd-discount-copy {
+        font-size: 14px !important;
+    }
+    .gmd-23-v2 div#block-discount .gmd-discount-message span {
+        font-size: 14px;
+    }
+    .gmd-23-v2 .cart-summary .gmd-discount-message strong {
+        font-size: 16px;
+    }
+}
+
 
 /* Mobile */
 
 @media (max-width: 768px) {
+    .gmd-23-v2 .gmd-discount-message strong {
+        font-size: 14px !important;
+    }
+    .gmd-23-v2 .cart-summary .gmd-discount-message strong {
+        font-size: 14px !important;
+    }
     .gmd-23-v2 .cart-summary button span {
-        font-size: 14px;
+        font-size: 14px !important;
     }
     .gmd-23-v2 .cart-summary button {
         font-size: 14px !important;
