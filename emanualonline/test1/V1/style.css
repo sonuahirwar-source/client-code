@@ -90,6 +90,18 @@
     height: 44px;
 }
 
+.gmd-23 .cart-summary form#discount-coupon-form input {
+    text-transform: capitalize;
+}
+
+.gmd-23 .cart-summary form#discount-coupon-form input::placeholder {
+    text-transform: capitalize;
+}
+
+.gmd-23-v2 form#discount-coupon-form input {
+    text-transform: capitalize;
+}
+
 .gmd-23 div#amasty-stripe-button-modal form#discount-coupon-form {
     max-height: 0;
     opacity: 0;
