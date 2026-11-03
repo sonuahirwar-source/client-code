@@ -16,8 +16,22 @@
     display: none;
 } */
 
-.gmd-23 #block-discount>div>div:has(span[x-html="successMessage"]):not(.gmd-23 #block-discount > div .active ~ :has(span[x-html="successMessage"])) {
-    display: none;
+.gmd-23 #block-discount>div>div:has(span[x-html="successMessage"]) {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    visibility: hidden;
+    margin: 0;
+    padding: 0;
+    transition: max-height 0.35s ease, opacity 0.3s ease, margin 0.35s ease, padding 0.35s ease, visibility 0.35s ease;
+}
+
+.gmd-23 #block-discount>div:has(.active #block-discount-heading)>div:has(span[x-html="successMessage"]) {
+    max-height: 200px;
+    opacity: 1;
+    visibility: visible;
+    margin: 8px 0;
+    padding: 8px;
 }
 
 .gmd-23 strong#block-discount-heading label {
@@ -89,10 +103,6 @@
     opacity: 1;
     visibility: visible;
     padding: 10px 0 8px;
-}
-
-.gmd-23 #block-discount>div>div:has(span[x-html="successMessage"]) {
-    margin: 8px 0;
 }
 
 .gmd-23 div[x-data="discountForm"]>div>div:has(strong#block-discount-heading) {
