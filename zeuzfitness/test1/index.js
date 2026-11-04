@@ -3,7 +3,7 @@
     const testInfo = {
         className: 'gmd-02',
         debug: 0,
-        testName: 'Test Name',
+        testName: 'T16 | Meerdere productvarianten tegelijk selecteren',
         testVersion: 'v1'
     };
  
