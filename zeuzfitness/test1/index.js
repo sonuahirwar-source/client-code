@@ -1,25 +1,67 @@
 (() => {
     'use strict';
         // Run test only on matching product URLs
-    const allowedUrlKeywords = [
-        'sandbag',
-        'dumbbell',
-        'plates',
-        'wall-ball',
-        'resistance-band',
-        'kettlebell',
-        'slam-ball',
-        'powerbag',
-        'weight-plate',
-    ];
+   const allowedUrlKeywords = [
+    // EN
+    'sandbag',
+    'dumbbell',
+    'plates',
+    'wall-ball',
+    'resistance-band',
+    'kettlebell',
+    'slam-ball',
+    'powerbag',
+    'weight-plate',
 
-    const currentUrl = window.location.pathname.toLowerCase();
+    // NL
+    'zandzak',
+    'halter',
+    'halterschijven',
+    'weerstandsband',
+    'kettlebell',
+    'slam-bal',
 
-    const isAllowedProduct = allowedUrlKeywords.some(keyword =>
-        currentUrl.includes(keyword)
-    );
+    // DE
+    'sandsack',
+    'hantel',
+    'gewichtsscheiben',
+    'widerstandsband',
+    'kugelhantel',
+    'slam-ball',
 
-    if (!isAllowedProduct) return;
+    // FR
+    'sac-de-sable',
+    'halteres',
+    'disques',
+    'bande-de-resistance',
+    'kettlebell',
+    'slam-ball',
+
+    // ES
+    'saco-de-arena',
+    'mancuernas',
+    'discos',
+    'banda-de-resistencia',
+    'kettlebell',
+    'slam-ball',
+
+    // IT
+    'sacco-di-sabbia',
+    'manubri',
+    'dischi',
+    'bande-elastiche',
+    'kettlebell',
+    'slam-ball'
+];
+
+const currentUrl = window.location.pathname.toLowerCase();
+
+const isAllowedProduct = allowedUrlKeywords.some(keyword =>
+    currentUrl.includes(keyword)
+);
+
+if (!isAllowedProduct) return;
+
     const testInfo = {
         className: 'gmd-16',
         debug: 0,
@@ -94,7 +136,7 @@ function hasColourOption() {
         }
      function addSelectQuantityMessage() {
     // Colour products: do not modify button message
-    if (hasColourOption()) return;
+    
 
     const pathLanguage = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i);
     const language = pathLanguage ? pathLanguage[1].toLowerCase() : "nl";
@@ -143,7 +185,7 @@ function updateTotalPrice() {
     );
 
     // Colour products: do not change price or button disabled state
-    if (!hasColourOption()) {
+
         const totalPrice = totalQuantity === 0 ? money(0) : money(total);
 
         document.querySelectorAll(
@@ -161,10 +203,10 @@ function updateTotalPrice() {
         }
 
         addSelectQuantityMessage();
-    }
+    
 }
 function setInitialZeroPrice() {
-   if (hasColourOption()) return;
+
     const priceSelectors = [
         ".gmd-16 .product-info price-list sale-price",
         ".gmd-16 .button-price .current-price"
@@ -867,15 +909,13 @@ else {
         const list = document.createElement("div");
         list.className = "gmd-custom-variant-list";
 
-        const matchedVariants = radios
-            .map(radio => ({
-                radio,
-                variant: variants.find(v =>
-                    v.title.trim().toLowerCase() ===
-                    radio.value.trim().toLowerCase()
-                )
-            }))
-            .filter(item => item.variant);
+    const matchedVariants = variants.map(variant => ({
+    radio: radios.find(radio =>
+        radio.value.trim().toLowerCase() ===
+        variant.title.trim().toLowerCase()
+    ),
+    variant
+}));
 
 const stockStatuses = matchedVariants.map(() => "Checking stock...");
 
@@ -1366,16 +1406,28 @@ const isOutOfStock = outOfStockLabels.some(label =>
         initVariantList();
     }
 })();
- document.querySelectorAll(".gmd-16 .variant-picker fieldset.variant-picker__option").forEach((fieldset) => {
+document.querySelectorAll(".gmd-16 .variant-picker fieldset.variant-picker__option").forEach((fieldset) => {
     const optionName = fieldset.querySelector("legend")?.textContent
         .replace(":", "")
         .trim()
         .toLowerCase();
 
-    if (optionName) {
+    if (!optionName) return;
+
+    const colourNames = [
+        "colour",
+        "color",
+        "kleur",
+        "farbe",
+        "couleur",
+        "color"
+    ];
+
+    if (colourNames.includes(optionName)) {
+        fieldset.classList.add("option-colour");
+    } else {
         fieldset.classList.add(`option-${optionName}`);
     }
-    
 });
 
     }); 
