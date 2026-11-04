@@ -1,7 +1,7 @@
 (() => {
     'use strict';
     const testInfo = {
-        className: 'gmd-02',
+        className: 'gmd-16',
         debug: 0,
         testName: 'T16 | Meerdere productvarianten tegelijk selecteren',
         testVersion: 'v1'
@@ -24,10 +24,10 @@
 (function () {
     async function initVariantList() {
         const picker = document.querySelector(
-            ".gmd-02 .variant-picker__option-values"
+            ".gmd-16 .variant-picker__option-values"
         );
 
-        if (!picker || document.querySelector(".gmd-02  .gmd-custom-variant-list")) {
+        if (!picker || document.querySelector(".gmd-16  .gmd-custom-variant-list")) {
             return;
         }
 
@@ -80,7 +80,7 @@
     };
 
     const button = document.querySelector(
-        ".gmd-02 form.product-info__buy-form button[type='submit']"
+        ".gmd-16 form.product-info__buy-form button[type='submit']"
     );
 
     if (!button) return;
@@ -116,7 +116,7 @@ function updateTotalPrice() {
    const totalPrice = totalQuantity === 0 ? money(0) : money(total);
 
     document.querySelectorAll(
-        ".gmd-02 .product-info price-list sale-price, .gmd-02 .button-price .current-price"
+        ".gmd-16 .product-info price-list sale-price, .gmd-16 .button-price .current-price"
     ).forEach(element => {
         element.textContent = totalPrice;
     });
@@ -133,8 +133,8 @@ function updateTotalPrice() {
 function setInitialZeroPrice() {
 
     const priceSelectors = [
-        ".gmd-02 .product-info price-list sale-price",
-        ".gmd-02 .button-price .current-price"
+        ".gmd-16 .product-info price-list sale-price",
+        ".gmd-16 .button-price .current-price"
     ];
 
     function forceZeroPrice() {
@@ -158,7 +158,7 @@ function setInitialZeroPrice() {
         });
 
         const addToCartButton = document.querySelector(
-            ".gmd-02 form.product-info__buy-form button[type='submit']"
+            ".gmd-16 form.product-info__buy-form button[type='submit']"
         );
 
         if (addToCartButton) {
@@ -274,7 +274,7 @@ function updatePreOrderButtonText() {
         it: 'Aggiungi al carrello'
     };
 
-    document.querySelectorAll('.gmd-02 .product-info__buy-buttons button').forEach(button => {
+    document.querySelectorAll('.gmd-16 .product-info__buy-buttons button').forEach(button => {
         const textDiv = button.querySelector(':scope > div');
         if (!textDiv) return;
 
@@ -299,12 +299,12 @@ function updateDeliveryText() {
         it: 'Seleziona una quantità'
     };
 
-    const selectedRows = [...document.querySelectorAll('.gmd-02 .gmd-custom-variant-row')]
+    const selectedRows = [...document.querySelectorAll('.gmd-16 .gmd-custom-variant-row')]
         .filter(row => Number(selectedQuantities[row.dataset.variantId] || 0) > 0);
 
     // Koi variant selected nahi hai
     if (!selectedRows.length) {
-        document.querySelectorAll('.gmd-02 .delivery_info span').forEach(span => {
+        document.querySelectorAll('.gmd-16 .delivery_info span').forEach(span => {
             span.textContent = translations[language];
         });
         return;
@@ -330,7 +330,7 @@ function updateDeliveryText() {
         .sort((a, b) => b.maxDays - a.maxDays);
 
     if (deliveries.length) {
-        document.querySelectorAll('.gmd-02 .delivery_info span').forEach(span => {
+        document.querySelectorAll('.gmd-16 .delivery_info span').forEach(span => {
             span.textContent = deliveries[0].text;
         });
     }
@@ -339,7 +339,7 @@ function updateDeliveryText() {
 updateDeliveryText();
         // Create popup once
         function createPostedPopup() {
-            if (document.querySelector(".gmd-02 .gmd-posted-modal")) return;
+            if (document.querySelector(".gmd-16 .gmd-posted-modal")) return;
 
             const overlay = document.createElement("div");
             overlay.className = "gmd-posted-modal";
@@ -581,7 +581,7 @@ overlay.querySelector(".gmd-posted-success-close").textContent =
                 document.body.classList.remove("gmd-posted-no-scroll");
             };
 
-            overlay.querySelector(".gmd-02 .gmd-posted-close")
+            overlay.querySelector(".gmd-16 .gmd-posted-close")
                 .addEventListener("click", closePopup);
 
             overlay.addEventListener("click", event => {
@@ -597,13 +597,13 @@ overlay.querySelector(".gmd-posted-success-close").textContent =
             // UI only: connect this form to a back-in-stock service/API
             // to actually save emails and send notifications.
      // Klaviyo back-in-stock subscription
-overlay.querySelector(".gmd-02 .gmd-posted-form")
+overlay.querySelector(".gmd-16 .gmd-posted-form")
     .addEventListener("submit", async event => {
         event.preventDefault();
 
-        const email = overlay.querySelector(".gmd-02 .gmd-posted-email");
-        const message = overlay.querySelector(".gmd-02 .gmd-posted-message");
-        const button = overlay.querySelector(".gmd-02 .gmd-posted-submit");
+        const email = overlay.querySelector(".gmd-16 .gmd-posted-email");
+        const message = overlay.querySelector(".gmd-16 .gmd-posted-message");
+        const button = overlay.querySelector(".gmd-16 .gmd-posted-submit");
 
         if (!email.checkValidity()) {
             email.reportValidity();
@@ -730,9 +730,9 @@ else {
         function openPostedPopup(variant) {
             createPostedPopup();
 
-            const overlay = document.querySelector(".gmd-02 .gmd-posted-modal");
+            const overlay = document.querySelector(".gmd-16 .gmd-posted-modal");
             overlay.dataset.variantId = variant.id;
-            const image = overlay.querySelector(".gmd-02 .gmd-posted-product-image");
+            const image = overlay.querySelector(".gmd-16 .gmd-posted-product-image");
 
             // Use variant image when available; otherwise use product image.
             const imageUrl =
@@ -757,25 +757,25 @@ else {
                 image.style.display = "none";
             }
 
-            overlay.querySelector(".gmd-02 .gmd-posted-product-title").textContent =
+            overlay.querySelector(".gmd-16 .gmd-posted-product-title").textContent =
                 product.title || "";
 
-            overlay.querySelector(".gmd-02 .gmd-posted-variant-title").textContent =
+            overlay.querySelector(".gmd-16 .gmd-posted-variant-title").textContent =
                 variant.title || "";
 
-            overlay.querySelector(".gmd-02 .gmd-posted-product-price").textContent =
+            overlay.querySelector(".gmd-16 .gmd-posted-product-price").textContent =
                 money(variant.price);
 
-            overlay.querySelector(".gmd-02 .gmd-posted-email").value = "";
-            overlay.querySelector(".gmd-02 .gmd-posted-message").textContent = "";
-            overlay.querySelector(".gmd-02 .gmd-posted-message")
+            overlay.querySelector(".gmd-16 .gmd-posted-email").value = "";
+            overlay.querySelector(".gmd-16 .gmd-posted-message").textContent = "";
+            overlay.querySelector(".gmd-16 .gmd-posted-message")
                 .classList.remove("is-visible");
 
             overlay.classList.add("is-open");
             overlay.setAttribute("aria-hidden", "false");
             document.body.classList.add("gmd-posted-no-scroll");
 
-            overlay.querySelector(".gmd-02 .gmd-posted-email").focus();
+            overlay.querySelector(".gmd-16 .gmd-posted-email").focus();
         }
 
         createPostedPopup();
@@ -1269,7 +1269,7 @@ const isOutOfStock = outOfStockLabels.some(label =>
         initVariantList();
     }
 })();
- document.querySelectorAll(".gmd-02 .variant-picker fieldset.variant-picker__option").forEach((fieldset) => {
+ document.querySelectorAll(".gmd-16 .variant-picker fieldset.variant-picker__option").forEach((fieldset) => {
     const optionName = fieldset.querySelector("legend")?.textContent
         .replace(":", "")
         .trim()
