@@ -1,7 +1,7 @@
 (() => {
     'use strict';
         // Run test only on matching product URLs
-   const allowedUrlKeywords = [
+  const allowedUrlKeywords = [
     // EN
     'sandbag',
     'dumbbell',
@@ -12,46 +12,68 @@
     'slam-ball',
     'powerbag',
     'weight-plate',
+    'medicine-ball',
 
     // NL
     'zandzak',
     'halter',
     'halterschijven',
+    'muurbal',
     'weerstandsband',
     'kettlebell',
     'slam-bal',
+    'powerbag',
+    'gewichtsschijf',
+    'medicine-ball',
 
     // DE
     'sandsack',
     'hantel',
     'gewichtsscheiben',
+    'wandball',
     'widerstandsband',
     'kugelhantel',
     'slam-ball',
+    'powerbag',
+    'gewichtsscheibe',
+    'medizinball',
 
     // FR
     'sac-de-sable',
     'halteres',
     'disques',
+    'wall-ball',
     'bande-de-resistance',
     'kettlebell',
     'slam-ball',
+    'powerbag',
+    'weight-plate',
+    'medecine-ball',
 
     // ES
     'saco-de-arena',
     'mancuernas',
     'discos',
+    'wall-ball',
     'banda-de-resistencia',
     'kettlebell',
     'slam-ball',
+    'powerbag',
+    'weight-plate',
+    'balon-medicinal',
 
     // IT
     'sacco-di-sabbia',
     'manubri',
     'dischi',
+    'palla-murale',
     'bande-elastiche',
     'kettlebell',
-    'slam-ball'
+    'slam-ball',
+    'powerbag',
+    'weight-plate',
+    'palla-medica',
+    'medicine-ball'
 ];
 
 const currentUrl = window.location.pathname.toLowerCase();
