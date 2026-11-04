@@ -418,6 +418,12 @@ background: #5A78FF;
 .gmd-16 .product-info .instock[data-product-instock] {
   display: none;
 }
+.gmd-16 .product-info .buy-button-group .product-info__notify.visible {
+    display: none;
+}
+.gmd-16 .product-info .buy-button-group:has(.product-info__notify.visible) {
+    margin: 0;
+}
 .gmd-custom-variant-discount span {
     margin-left: auto;
     border-radius: 2px;
