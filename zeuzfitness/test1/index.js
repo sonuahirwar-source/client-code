@@ -9,7 +9,8 @@
         'resistance-band',
         'kettlebell',
         'slam-ball',
-        'powerbag'
+        'powerbag',
+        'weight-plate',
     ];
 
     const currentUrl = window.location.pathname.toLowerCase();
