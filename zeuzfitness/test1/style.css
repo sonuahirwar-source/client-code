@@ -161,7 +161,7 @@
     display: none;
 }
 .gmd-custom-variant-prices:has(.gmd-custom-variant-regular) .gmd-custom-variant-sale {
-    color: #EB001B;
+       color: #EB001B !important;
 }
 .gmd-16 .product-info .buy-button-group .product-info__buy-buttons button span.compare-price {
     display: none;
@@ -445,6 +445,7 @@ background: #5A78FF;
 
 .gmd-custom-variant-discount {
     width: 100%;
+        display: none !IMPORTANT;
 }
 .gmd-16 .gmd-custom-variant-row:not(:has(.gmd-custom-variant-regular)) .gmd-custom-variant-discount {
     display: none !important;
