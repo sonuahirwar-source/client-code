@@ -47,7 +47,7 @@
     content: "";
     position: absolute;
     inset: 0;
-    background: rgb(247 243 243 / 58%);
+    background: rgba(255, 255, 255, 0.7);
     z-index: 10;
     pointer-events: all;
 }
