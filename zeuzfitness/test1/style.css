@@ -36,7 +36,7 @@
 @media (max-width: 767px) {
   .gmd-16 .product-info .gmd-posted {
     min-height: 32px !important;
-        padding: 5px;
+        padding: 8px;
 }
   .gmd-16 .product-info .gmd-custom-variant-list {
     grid-template-columns: 1fr;
