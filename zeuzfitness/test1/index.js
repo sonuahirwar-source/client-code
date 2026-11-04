@@ -1,85 +1,105 @@
 (() => {
     'use strict';
-        // Run test only on matching product URLs
-  const allowedUrlKeywords = [
-    // EN
-    'sandbag',
-    'dumbbell',
-    'plates',
-    'wall-ball',
-    'resistance-band',
-    'kettlebell',
-    'slam-ball',
-    'powerbag',
-    'weight-plate',
-    'medicine-ball',
+ const allowedProductUrls = [
+'/products/zeuz-husafell-zandzak-sandbag-40-t-m-180-kg',
 
-    // NL
-    'zandzak',
-    'halter',
-    'halterschijven',
-    'muurbal',
-    'weerstandsband',
-    'kettlebell',
-    'slam-bal',
-    'powerbag',
-    'gewichtsschijf',
-    'medicine-ball',
+    '/products/zeuz-strongman-atlas-stone-sandbag-20-to-140-kg',
+    '/products/zeuz-strongman-atlas-stone-zandzak-20-t-m-140-kg',
+    '/products/zeuz-strongman-atlas-stone-sacco-di-sabbia-20-t-m-140-kg',
+    '/products/zeuz-strongman-atlas-stone-sandsack-20-bis-140-kg',
+    '/products/zeuz-strongman-saco-de-arena-atlas-stone-20-a-140-kg',
+    '/products/zeuz-strongman-sac-de-sable-atlas-stone-20-a-140-kg',
 
-    // DE
-    'sandsack',
-    'hantel',
-    'gewichtsscheiben',
-    'wandball',
-    'widerstandsband',
-    'kugelhantel',
-    'slam-ball',
-    'powerbag',
-    'gewichtsscheibe',
-    'medizinball',
+    '/products/zeuz-strongman-throwing-sandbag-5-to-35-kg',
+    '/products/zeuz-strongman-throwing-zandzak-5-t-m-35-kg',
+    '/products/zeuz-strongman-sacco-di-sabbia-per-lancio-da-5-a-35-kg',
+    '/products/zeuz-strongman-wurfsandsack-5-bis-35-kg',
+    '/products/zeuz-strongman-saco-de-arena-para-lanzamientos-5-a-35-kg',
+    '/products/zeuz-strongman-sac-de-lancer-5-a-35-kg',
 
-    // FR
-    'sac-de-sable',
-    'halteres',
-    'disques',
-    'wall-ball',
-    'bande-de-resistance',
-    'kettlebell',
-    'slam-ball',
-    'powerbag',
-    'weight-plate',
-    'medecine-ball',
+    '/products/zeuz-strongman-sandbag',
+    '/products/sacco-da-pesista-zeuz',
+    '/products/zeuz-strongman-sandsack',
+    '/products/zeuz-saco-de-arena-strongman',
+    '/products/zeuz-sandbag-strongman',
 
-    // ES
-    'saco-de-arena',
-    'mancuernas',
-    'discos',
-    'wall-ball',
-    'banda-de-resistencia',
-    'kettlebell',
-    'slam-ball',
-    'powerbag',
-    'weight-plate',
-    'balon-medicinal',
+    '/products/zeuz-training-sandbag',
 
-    // IT
-    'sacco-di-sabbia',
-    'manubri',
-    'dischi',
-    'palla-murale',
-    'bande-elastiche',
-    'kettlebell',
-    'slam-ball',
-    'powerbag',
-    'weight-plate',
-    'palla-medica',
-    'medicine-ball'
+    '/products/zeuz-hex-dumbbell',
+    '/products/zeuz-hexa-dumbell',
+    '/products/zeuz-esagonale-manubrio',
+    '/products/zeuz-hexa-hantel',
+    '/products/zeuz-mancuerna-hexa',
+    '/products/zeuz-haltere-hexa',
+
+    '/products/zeuz-dumbbell-rek-incl-hexagon-dumbbells-5-40-kg',
+
+'/products/zeuz-barbell-plates-weight-plates',
+'/products/zeuz-bumper-plates',
+'/products/zeuz-dischi-pesi-sollevamento',
+'/products/zeuz-hantelscheiben-gewichtsplatten',
+'/products/zeuz-discos-de-pesas-placas-de-peso',
+'/products/zeuz-disques-halterophilie-poids',
+    
+    '/products/weight-plates',
+    '/products/halterschijven',
+    '/products/dischi-di-peso',
+    '/products/hantelscheiben',
+    '/products/discos-de-pesas',
+    '/products/disques-dhalteres',
+
+    '/products/zeuz-change-weight-plates',
+    '/products/zeuz-halterschijf-change-plates',
+    '/products/zeuz-dischi-cambio-pesi',
+    '/products/zeuz-hantelscheibe-change-plates',
+    '/products/zeuz-disco-de-pesas-change-plate',
+    '/products/zeuz-disques-halterophilie-disques-de-change',
+
+    '/products/zeuz-training-weight-plate',
+    '/products/zeuz-training-halterschijf',
+    '/products/piastra-da-pesi-training-zeuz',
+    '/products/zeuz-trainings-hantelscheibe',
+    '/products/zeuz-disco-de-pesas-para-entrenamiento',
+    '/products/zeuz-disque-dentrainement',
+
+    '/products/zeuz-competition-weight-plate',
+    '/products/zeuz-competitie-halterschijf',
+    '/products/zeuz-disco-competizione-bilanciere',
+    '/products/zeuz-wettkampf-hantelscheibe',
+    '/products/zeuz-disco-para-competicion',
+    '/products/zeuz-disque-halterophilie-competition',
+
+    '/products/zeuz-wall-ball-pro',
+    '/products/zeuz-premium-wall-ball',
+    '/products/zeuz-palla-medica-premium',
+    '/products/zeuz-pelota-wall-ball-premium',
+    '/products/zeuz-wall-ball-premium',
+
+    '/products/zeuz-powerbands-resistance-bands',
+    '/products/zeuz-powerbands-weerstandsbanden',
+    '/products/zeuz-powerbands-bande-elastiche',
+    '/products/zeuz-powerbands-widerstandsbander',
+    '/products/zeuz-powerbands-bandas-de-resistencia',
+    '/products/zeuz-bandes-de-resistance-powerbands',
+
+    '/products/zeuz-kettlebells',
+    '/products/zeuz-kettlebell',
+
+    '/products/zeuz-slam-ball',
+
+    '/products/zeuz-powerbag',
+    '/products/sacchi-pesanti',
+    '/products/sacos-de-potencia',
+    '/products/sacs-de-puissance'
 ];
 
-const currentUrl = window.location.pathname.toLowerCase();
+const currentUrl = window.location.pathname
+    .toLowerCase()
+    .replace(/^\/(en|nl|de|fr|es|it)(?=\/)/, '')
+    .replace(/\/$/, '');
 
-const isAllowedProduct = allowedUrlKeywords.some(keyword =>
-    currentUrl.includes(keyword)
+const isAllowedProduct = allowedProductUrls.some(url =>
+    currentUrl === url.toLowerCase().replace(/\/$/, '')
 );
 
 if (!isAllowedProduct) return;
