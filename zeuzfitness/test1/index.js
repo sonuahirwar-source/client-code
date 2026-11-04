@@ -1,5 +1,24 @@
 (() => {
     'use strict';
+        // Run test only on matching product URLs
+    const allowedUrlKeywords = [
+        'sandbag',
+        'dumbbell',
+        'plates',
+        'wall-ball',
+        'resistance-band',
+        'kettlebell',
+        'slam-ball',
+        'powerbag'
+    ];
+
+    const currentUrl = window.location.pathname.toLowerCase();
+
+    const isAllowedProduct = allowedUrlKeywords.some(keyword =>
+        currentUrl.includes(keyword)
+    );
+
+    if (!isAllowedProduct) return;
     const testInfo = {
         className: 'gmd-16',
         debug: 0,
@@ -52,8 +71,14 @@
             return;
         }
 
-        const variants = product.variants || [];
-        const selectedQuantities = {};
+   const variants = product.variants || [];
+const selectedQuantities = {};
+
+function hasColourOption() {
+    return !!document.querySelector(
+        ".gmd-16 .variant-picker__option.option-colour"
+    );
+}
 
         function money(cents) {
             if (cents == null) return "";
@@ -66,7 +91,10 @@
                 }
             ).format(cents / 100);
         }
-        function addSelectQuantityMessage() {
+     function addSelectQuantityMessage() {
+    // Colour products: do not modify button message
+    if (hasColourOption()) return;
+
     const pathLanguage = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i);
     const language = pathLanguage ? pathLanguage[1].toLowerCase() : "nl";
 
@@ -113,25 +141,29 @@ function updateTotalPrice() {
         0
     );
 
-   const totalPrice = totalQuantity === 0 ? money(0) : money(total);
+    // Colour products: do not change price or button disabled state
+    if (!hasColourOption()) {
+        const totalPrice = totalQuantity === 0 ? money(0) : money(total);
 
-    document.querySelectorAll(
-        ".gmd-16 .product-info price-list sale-price, .gmd-16 .button-price .current-price"
-    ).forEach(element => {
-        element.textContent = totalPrice;
-    });
+        document.querySelectorAll(
+            ".gmd-16 .product-info price-list sale-price, .gmd-16 .button-price .current-price"
+        ).forEach(element => {
+            element.textContent = totalPrice;
+        });
 
-    const addToCartButton = document.querySelector(
-        "form.product-info__buy-form button[type='submit']"
-    );
+        const addToCartButton = document.querySelector(
+            "form.product-info__buy-form button[type='submit']"
+        );
 
-    if (addToCartButton) {
-        addToCartButton.disabled = totalQuantity === 0;
+        if (addToCartButton) {
+            addToCartButton.disabled = totalQuantity === 0;
+        }
+
+        addSelectQuantityMessage();
     }
-    addSelectQuantityMessage();
 }
 function setInitialZeroPrice() {
-
+   if (hasColourOption()) return;
     const priceSelectors = [
         ".gmd-16 .product-info price-list sale-price",
         ".gmd-16 .button-price .current-price"
@@ -262,6 +294,33 @@ async function getVariantDeliveryStatus(variantId) {
         return "";
     }
 }
+async function getVariantDiscountStatus(variantId) {
+    try {
+        const url = new URL(window.location.href);
+        url.searchParams.set("variant", variantId);
+
+        const response = await fetch(url.pathname + url.search);
+
+        if (!response.ok) return "";
+
+        const html = await response.text();
+
+        const doc = new DOMParser().parseFromString(
+            html,
+            "text/html"
+        );
+
+        const badge = doc.querySelector(
+            ".price-list__badge.price-list__badge--bf"
+        );
+
+        return badge?.textContent.trim() || "";
+
+    } catch (error) {
+        console.error("Discount status error:", variantId, error);
+        return "";
+    }
+}
 function updatePreOrderButtonText() {
     const language = window.location.pathname.match(/^\/(en|nl|de|fr|es|it)(\/|$)/i)?.[1]?.toLowerCase() || 'nl';
 
@@ -288,6 +347,30 @@ function updatePreOrderButtonText() {
 
 updatePreOrderButtonText();
 function updateDeliveryText() {
+
+    const allRows = [
+        ...document.querySelectorAll('.gmd-16 .gmd-custom-variant-row')
+    ];
+
+    // Wait until stock status is loaded for every variant
+    if (
+        !allRows.length ||
+        allRows.some(row =>
+            row.querySelector('.gmd-custom-variant-stock')?.dataset.stockLoaded !== 'true'
+        )
+    ) {
+        return;
+    }
+
+    // If ALL variants are out of stock, don't change delivery text
+    const allOutOfStock = allRows.every(row =>
+        row.querySelector('.gmd-custom-variant-stock')
+            ?.classList.contains('is-out-of-stock')
+    );
+
+    if (allOutOfStock) return;
+
+    // Existing logic continues unchanged
     const language = window.location.pathname.match(/^\/(en|nl|de|fr|es|it)(\/|$)/i)?.[1]?.toLowerCase() || 'nl';
 
     const translations = {
@@ -299,10 +382,10 @@ function updateDeliveryText() {
         it: 'Seleziona una quantità'
     };
 
-    const selectedRows = [...document.querySelectorAll('.gmd-16 .gmd-custom-variant-row')]
-        .filter(row => Number(selectedQuantities[row.dataset.variantId] || 0) > 0);
+    const selectedRows = allRows.filter(row =>
+        Number(selectedQuantities[row.dataset.variantId] || 0) > 0
+    );
 
-    // Koi variant selected nahi hai
     if (!selectedRows.length) {
         document.querySelectorAll('.gmd-16 .delivery_info span').forEach(span => {
             span.textContent = translations[language];
@@ -310,10 +393,10 @@ function updateDeliveryText() {
         return;
     }
 
-    // Sirf normal variants lo, Pre-order ko ignore karo
-    const normalRows = selectedRows.filter(row => row.dataset.isPreorder !== 'true');
+    const normalRows = selectedRows.filter(row =>
+        row.dataset.isPreorder !== 'true'
+    );
 
-    // Sirf Pre-order selected hai to existing text change mat karo
     if (!normalRows.length) return;
 
     const deliveries = normalRows
@@ -810,10 +893,10 @@ priceQuantityWrapper.className = "gmd-price-quantity-wrapper";
             const prices = document.createElement("div");
             prices.className = "gmd-custom-variant-prices";
 
-            if (
-                variant.compare_at_price != null &&
-                variant.compare_at_price > 0
-            ) {
+        if (
+    variant.compare_at_price != null &&
+    variant.compare_at_price > variant.price
+) {
                 const regular = document.createElement("span");
                 regular.className = "gmd-custom-variant-regular";
                 regular.textContent = money(variant.compare_at_price);
@@ -859,19 +942,16 @@ qty.textContent = selectedQuantities[variant.id];
             plus.removeAttribute("disabled");
             plus.setAttribute("aria-disabled", "false");
 
-            minus.addEventListener("click", () => {
-                count = Math.max(0, count - 1);
+       minus.addEventListener("click", () => {
+    count = Math.max(0, count - 1);
 
-                qty.textContent = count;
-                selectedQuantities[variant.id] = count;
-                minus.disabled = count === 0;
+    qty.textContent = count;
+    selectedQuantities[variant.id] = count;
+    minus.disabled = count === 0;
 
-         
-
-       
-
-                updateTotalPrice();
-            });
+    updateTotalPrice();
+    updateDeliveryText();
+});
 
 plus.addEventListener("click", () => {
     count++;
@@ -891,7 +971,11 @@ const delivery = document.createElement("div");
 delivery.className = "gmd-custom-variant-delivery";
 delivery.textContent = "Checking delivery...";
 
-row.append(name, stock, priceQuantityWrapper, delivery);
+// Variant discount badge
+const discountBadge = document.createElement("div");
+discountBadge.className = "gmd-custom-variant-discount";
+
+row.append(name, stock, priceQuantityWrapper, delivery, discountBadge);
 
             // Keep me posted for this specific sold-out variant
          
@@ -942,7 +1026,18 @@ const delivery = row.querySelector(
 );
 
 const deliveryStatus = await getVariantDeliveryStatus(variant.id);
+const discount = await getVariantDiscountStatus(variant.id);
 
+const discountElement = row.querySelector(
+    ".gmd-custom-variant-discount"
+);
+
+if (discountElement && discount) {
+    discountElement.innerHTML = `<span>${discount}</span>`;
+    discountElement.style.display = "block";
+} else if (discountElement) {
+    discountElement.style.display = "none";
+}
 delivery.textContent = deliveryStatus;
 delivery.style.display = deliveryStatus ? "block" : "none";
             try {
@@ -1113,6 +1208,7 @@ const isOutOfStock = outOfStockLabels.some(label =>
         text.textContent = 'Sold out';
     }
 });
+    updateDeliveryText();
 })();
         // Existing product form: add selected variants to cart
         const productForm = document.querySelector(
