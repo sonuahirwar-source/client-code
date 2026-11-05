@@ -434,7 +434,7 @@
               .querySelector(".gmd-custom-variant-stock")
               ?.classList.contains("is-out-of-stock"),
           );
-
+document.body.classList.toggle("gmd-all-oos", allOutOfStock);
           if (allOutOfStock) return;
 
           const translations = {
