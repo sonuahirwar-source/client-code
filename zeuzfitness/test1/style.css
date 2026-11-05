@@ -203,6 +203,9 @@
   span.compare-price {
   display: none;
 }
+.gmd-16.gmd-all-oos .buy-button-group .product-info__buy-buttons button[disabled] {
+    display: none;
+}
 .gmd-16 .product-info .gmd-custom-variant-regular {
   text-decoration-line: line-through;
 }
