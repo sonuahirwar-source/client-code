@@ -20,6 +20,10 @@
 .gmd-16 product-quick-add.product-quick-add.container.is-visible {
     display: none;
 }
+.gmd-16 .product-info .stock-text-almost-out-of-stock.gmd-custom-variant-stock::before {
+display:none;
+}
+
 @media(min-width:768px){
   .gmd-16 .gmd-show-more-button {
     display: none !IMPORTANT;
@@ -60,7 +64,7 @@
   font-size: 14px;
   font-weight: 600;
   width: fit-content;
-  border-radius: 100px;
+
 }
   .gmd-16 .product-info .gmd-posted {
     min-height: 32px !important;
