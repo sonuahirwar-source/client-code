@@ -1,0 +1,66 @@
+.gmd-41 .header-usps,
+.gmd-41 header ul.slimmenu,
+.gmd-41 header .gmd-mob-google-ratings,
+.gmd-41 .top .gmd-hero-slider {
+  display: none !important;
+}
+.gmd-41 .gmd-phone {
+  color: #737373;
+  font-family: Rubik;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 22.5px; /* 150% */
+  position: relative;
+  padding-left: 44px;
+  margin-left: auto;
+  text-decoration: none;
+}
+
+.gmd-41 .gmd-phone::before {
+  content: url(/wp-content/themes/rijbewijskeuringofficeel/images/svg/main/phone-menu.svg);
+  display: flex;
+  position: absolute;
+  justify-content: center;
+  align-items: center;
+  background: #ff6200;
+  color: white;
+  border-radius: 100%;
+  left: 0;
+  z-index: 1;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+@media screen and (max-width: 993px) {
+  .gmd-41 .gmd-phone {
+    margin-right: 40px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .gmd-41 .gmd-phone {
+    font-size: 12px;
+    line-height: 22px;
+    margin-right: 32px;
+  }
+
+  .gmd-41 header .navbar-custom .logo {
+    max-width: 173px;
+  }
+}
+@media screen and (max-width: 380px) {
+    .gmd-41 .gmd-phone {
+        margin-right: 22px;
+    }
+}
+@media screen and (max-width: 370px) {
+  .gmd-41 .gmd-phone {
+    margin-right: 18px;
+    padding-left: 39px;
+  }
+
+  .gmd-41 header .navbar-custom .logo {
+    max-width: 131px;
+  }
+}
