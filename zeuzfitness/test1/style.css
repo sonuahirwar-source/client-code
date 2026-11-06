@@ -17,7 +17,7 @@
   .button-price {
   display: none;
 }
-product-quick-add.product-quick-add.container.is-visible {
+.gmd-16 product-quick-add.product-quick-add.container.is-visible {
     display: none;
 }
 @media(min-width:768px){
