@@ -216,7 +216,52 @@
             currency: product.currency || "EUR",
           }).format(cents / 100);
         }
+      function showCartError(form, message) {
+  document.querySelectorAll(".gmd-cart-error").forEach((el) => el.remove());
 
+  const banner = document.createElement("div");
+  banner.className = "banner banner--error justify-center gmd-cart-error";
+  banner.setAttribute("role", "alert");
+  banner.style.cssText = "grid-column: 1 / -1; margin-bottom: 1rem;";
+
+  banner.innerHTML = `
+    <svg role="presentation" focusable="false" width="18" height="18" class="offset-icon icon icon-error" style="--icon-height: 18px" viewBox="0 0 18 18">
+      <path d="M0 9C0 4.02944 4.02944 0 9 0C13.9706 0 18 4.02944 18 9C18 13.9706 13.9706 18 9 18C4.02944 18 0 13.9706 0 9Z" fill="currentColor"></path>
+      <path d="M5.29289 6.70711L11.2929 12.7071L12.7071 11.2929L6.70711 5.29289L5.29289 6.70711ZM6.70711 12.7071L12.7071 6.70711L11.2929 5.2929L5.29289 11.2929L6.70711 12.7071Z" fill="#ffffff"></path>
+    </svg>
+    <p></p>
+  `;
+
+  banner.querySelector("p").textContent = message;
+
+  const buttons =
+    form.querySelector(".product-info__buy-buttons") ||
+    form.querySelector("button[type='submit']")?.parentElement;
+
+  if (buttons) {
+    buttons.insertAdjacentElement("beforebegin", banner);
+  } else {
+    form.prepend(banner);
+  }
+
+  setTimeout(() => banner.remove(), 5000);
+}
+function getFromPriceText() {
+  const lowestPrice = Math.min(...variants.map((v) => v.price));
+
+  const fromTranslations = {
+    en: "From",
+    nl: "Vanaf",
+    de: "Ab",
+    fr: "À partir de",
+    es: "Desde",
+    it: "Da",
+  };
+
+  const fromText = fromTranslations[pageLanguage] || fromTranslations.en;
+
+  return `${fromText} ${money(lowestPrice)}`;
+}
         function getTotalQuantity() {
           return Object.values(selectedQuantities).reduce(
             (sum, quantity) => sum + quantity,
@@ -268,7 +313,8 @@
             0,
           );
 
-          const totalPrice = totalQuantity === 0 ? money(0) : money(total);
+          const totalPrice =
+  totalQuantity === 0 ? getFromPriceText() : money(total);
 
           document
             .querySelectorAll(
@@ -294,7 +340,7 @@
           // Quantity select ho chuki hai to price override mat karo
           if (getTotalQuantity() > 0) return;
 
-          const zeroPrice = money(0);
+         const zeroPrice = getFromPriceText();
 
           document
             .querySelectorAll(
@@ -521,7 +567,14 @@ if (!showMoreButton.isConnected) {
             currentPicker.classList.add("gmd-hide-now");
           }
         }
-
+const maxQtyMessages = {
+  en: "The maximum quantity of this item is already in your cart.",
+  nl: "De maximale hoeveelheid van dit product zit al in je winkelwagen.",
+  de: "Die maximale Menge dieses Artikels befindet sich bereits in deinem Warenkorb.",
+  fr: "La quantité maximale de cet article est déjà dans votre panier.",
+  es: "La cantidad máxima de este artículo ya está en tu carrito.",
+  it: "La quantità massima di questo articolo è già nel carrello.",
+};
         const addToCartLabels = {
           en: "Add to cart",
           nl: "Toevoegen aan winkelwagen",
@@ -1480,10 +1533,12 @@ showMoreButton.style.display =
               }
               if (submitButton) submitButton.disabled = true;
 
-              try {
-                const root = window.Shopify?.routes?.root || "/";
+       let response;
 
-                const response = await fetch(root + "cart/add.js", {
+try {
+  const root = window.Shopify?.routes?.root || "/";
+
+  response = await fetch(root + "cart/add.js", {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
@@ -1552,9 +1607,18 @@ showMoreButton.style.display =
                     new CustomEvent("cart:open", { bubbles: true }),
                   );
                 }
-              } catch (error) {
-                console.error("Add to cart error:", error);
-              } finally {
+           } catch (error) {
+  console.error("Add to cart error:", error);
+
+  const isStockError = response && response.status === 422;
+
+  showCartError(
+    productForm,
+    isStockError
+      ? maxQtyMessages[pageLanguage] || maxQtyMessages.en
+      : error.message || "Unable to add variants to cart.",
+  );
+} finally {
                 if (submitButton) {
                   updateTotalPrice();
 
