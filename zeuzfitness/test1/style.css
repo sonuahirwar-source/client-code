@@ -17,6 +17,14 @@
   .button-price {
   display: none;
 }
+product-quick-add.product-quick-add.container.is-visible {
+    display: none;
+}
+@media(min-width:768px){
+  .gmd-16 .gmd-show-more-button {
+    display: none !IMPORTANT;
+}
+}
 @media (min-width: 1000px) and (max-width: 1150px) {
   .gmd-16 .product-info .gmd-custom-variant-name,
   .gmd-16 .product-info .gmd-custom-variant-sale,
@@ -36,6 +44,24 @@
   }
 }
 @media (max-width: 767px) {
+  .gmd-16 .gmd-custom-variant-list:not(.gmd-show-more)
+  .gmd-custom-variant-row:nth-child(n + 6) {
+  display: none;
+}
+
+.gmd-16 .gmd-show-more-button {
+  display: block;
+  width: 100%;
+  margin: 14px auto 0 auto;
+  padding: 5px 10px;
+  background: #e3240f;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  width: fit-content;
+  border-radius: 100px;
+}
   .gmd-16 .product-info .gmd-posted {
     min-height: 32px !important;
     padding: 8px;
