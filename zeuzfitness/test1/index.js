@@ -70,7 +70,7 @@
     "/products/zeuz-disque-halterophilie-competition",
 
     "/products/zeuz-wall-ball-pro",
-    "/products/zeuz-premium-wall-ball",
+  
     "/products/zeuz-palla-medica-premium",
     "/products/zeuz-pelota-wall-ball-premium",
     "/products/zeuz-wall-ball-premium",
@@ -86,8 +86,7 @@
     "/products/zeuz-kettlebell",
 
     "/products/zeuz-slam-ball",
-
-    "/products/zeuz-powerbag",
+  
     "/products/sacchi-pesanti",
     "/products/sacos-de-potencia",
     "/products/sacs-de-puissance",
@@ -434,7 +433,7 @@
               .querySelector(".gmd-custom-variant-stock")
               ?.classList.contains("is-out-of-stock"),
           );
-document.body.classList.toggle("gmd-all-oos", allOutOfStock);
+         document.body.classList.toggle("gmd-all-oos", allOutOfStock);
           if (allOutOfStock) return;
 
           const translations = {
@@ -515,7 +514,9 @@ document.body.classList.toggle("gmd-all-oos", allOutOfStock);
           if (!list.isConnected) {
             optionsHeading.insertAdjacentElement("afterend", list);
           }
-
+if (!showMoreButton.isConnected) {
+  list.insertAdjacentElement("afterend", showMoreButton);
+}
           if (!currentPicker.classList.contains("gmd-hide-now")) {
             currentPicker.classList.add("gmd-hide-now");
           }
@@ -1194,6 +1195,42 @@ document.body.classList.toggle("gmd-all-oos", allOutOfStock);
 
         picker.insertAdjacentElement("afterend", optionsHeading);
         optionsHeading.insertAdjacentElement("afterend", list);
+        // Show more translations
+const showMoreTranslations = {
+  en: { more: "Show more", less: "Show less" },
+  nl: { more: "Toon meer", less: "Toon minder" },
+  de: { more: "Mehr anzeigen", less: "Weniger anzeigen" },
+  fr: { more: "Voir plus", less: "Voir moins" },
+  es: { more: "Mostrar más", less: "Mostrar menos" },
+  it: { more: "Mostra altro", less: "Mostra meno" },
+};
+
+const showMoreText =
+  showMoreTranslations[pageLanguage] || showMoreTranslations.en;
+
+const visibleVariantCount = 5;
+
+const showMoreButton = document.createElement("button");
+showMoreButton.type = "button";
+showMoreButton.className = "gmd-show-more-button";
+showMoreButton.textContent = showMoreText.more;
+showMoreButton.setAttribute("aria-expanded", "false");
+
+showMoreButton.addEventListener("click", () => {
+  const isExpanded = list.classList.toggle("gmd-show-more");
+
+  showMoreButton.textContent = isExpanded
+    ? showMoreText.less
+    : showMoreText.more;
+
+  showMoreButton.setAttribute("aria-expanded", String(isExpanded));
+});
+
+list.insertAdjacentElement("afterend", showMoreButton);
+
+// 5 se zyada variants hon tabhi button show karo
+showMoreButton.style.display =
+  list.children.length > visibleVariantCount ? "block" : "none";
         picker.classList.add("gmd-hide-now");
 
         setInitialZeroPrice();
