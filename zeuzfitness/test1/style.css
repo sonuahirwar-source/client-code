@@ -20,6 +20,13 @@
 .gmd-16 product-quick-add.product-quick-add.container.is-visible {
     display: none;
 }
+.gmd-16 .product-info .gmd-custom-variant-stock.available::before {
+  display: none;
+}
+
+.gmd-16 .product-info .gmd-custom-variant-stock.available:has(.gmd-pre-order)::before {
+  display: block;
+}
 .gmd-16 .product-info .stock-text-almost-out-of-stock.gmd-custom-variant-stock::before {
 display:none;
 }
