@@ -19,13 +19,14 @@
     waitForElement("body:has(#wijcbf_step_indicator .progress-bar)", ([pdp]) => {
         document.body.classList.add(testInfo.className);
 
-        const targetDiv = document.querySelector(".gmd-41 header .navbar .logo");
-        if(targetDiv){
+   const targetDiv = document.querySelector(".gmd-41 header .navbar .logo");
+
+        if (targetDiv && !document.querySelector(".gmd-41 .gmd-phone")) {
             targetDiv.insertAdjacentHTML(
                 "afterend",
                 `<a href="tel:085 060 2626" class="gmd-phone">085 060 2626</a>`
             );
         }
     });
-})();
+})(); 
  
