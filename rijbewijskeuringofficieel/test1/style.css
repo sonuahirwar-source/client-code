@@ -39,8 +39,8 @@
 @media screen and (max-width: 993px) {
   .gmd-41 .gmd-phone::before {
   content: "";
-  width: 26px;   
-  height: 26px;
+  width: 28px;   
+  height: 27px;
   background: #ff6200 url(/wp-content/themes/rijbewijskeuringofficeel/images/svg/main/phone-menu.svg) no-repeat center;
   background-size: 27px 27px;
 }
@@ -63,7 +63,7 @@
 }
 @media screen and (max-width: 380px) {
     .gmd-41 .gmd-phone {
-        margin-right: 33px !important;
+        margin-right: 34px !important;
     }
 }
 @media screen and (max-width: 370px) {
