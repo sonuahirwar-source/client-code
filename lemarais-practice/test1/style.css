@@ -1,25 +1,22 @@
-/* Le Marais – "Maat" dropdown in the filter bar (variant)
-   Order: Filter | ^ Maat | Sorteren op: Relevantie ............ 328 Artikelen */
 
-/* ---------- Bar layout ---------- */
 .gmd-7 #collection-filters.lm-sf-ready > .grid {
   display: flex !important;
   align-items: center;
   gap: 40px;
 }
 
-/* 1. Filter */
+
 .gmd-7 #collection-filters.lm-sf-ready > .grid > :nth-child(1) {
   order: 1;
   flex: 0 0 auto;
 }
 
-/* 2. Maat (injected) */
+
 .gmd-7 #collection-filters.lm-sf-ready > .grid >  #lm-size-toggle {
   order: 2;
 }
 
-/* 3. Sorteren */
+
 .gmd-7 #collection-filters.lm-sf-ready > .grid > :nth-child(3) {
   order: 3;
   flex: 0 1 auto;
@@ -31,7 +28,6 @@
   padding-right: 0;
 }
 
-/* 4. Count – far right */
 .gmd-7 #collection-filters.lm-sf-ready > .grid > :nth-child(2) {
   order: 4;
   margin-left: auto;
