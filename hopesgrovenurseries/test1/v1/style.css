@@ -1,0 +1,551 @@
+.gmd-001 .ab-hide {
+  display: none !important;
+}
+
+.gmd-001 .product-listing.ab-tiers-card {
+  position: relative;
+  display: block;
+  margin: 36px 0 44px;
+  background: #fff;
+  border-radius: 12px;
+  overflow: visible;
+  font-family: "Roboto Slab", Georgia, serif;
+  color: #333;
+  box-sizing: border-box;
+  box-shadow: 0 0 0.5rem 0 rgba(126, 125, 73, 0.15);
+  padding: 1.50rem;
+  padding-top: 22px;
+}
+
+/* row */
+.gmd-001 .ab-tiers-card > .content {
+  display: grid;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 45px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  grid-template-columns: 1fr 0.8fr;
+}
+
+/* left column */
+.gmd-001 .ab-tiers-card .details {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  max-width: none;
+  float: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* right column */
+.gmd-001 .ab-tiers-card .ab-col-right {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 18px;
+}
+.gmd-001 .ab-tiers-card .ab-col-right .image {
+  max-width: 124px;
+  float: none;
+  margin: 0 auto;
+  padding: 0;
+  border-radius: 0;
+}
+.gmd-001 .ab-tiers-card .ab-col-right .purchase {
+  width: 100%;
+  float: none;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: 0;
+}
+
+/* =========================================================
+   DELIVERY PILL
+   ========================================================= */
+.gmd-001 .ab-tiers-card .ab-delivery-banner {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  white-space: nowrap;
+  margin: 0;
+}
+.gmd-001 .ab-tiers-card .ab-delivery-banner a {
+  background: #fff;
+  color: #4f7533;
+  text-decoration: none;
+  max-width: calc(100% - 2rem);
+  padding: 0.3rem 1.5rem;
+  border-radius: 30px;
+  box-shadow: 0 0 0.5rem 0 rgba(126, 125, 73, 0.25);
+  text-align: center;
+  font-family:
+    "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times,
+    "Times New Roman", serif;
+  font-style: normal;
+  color: #53753c;
+  font-size: 0.75rem;
+}
+
+/* =========================================================
+   TITLE
+   ========================================================= */
+.gmd-001 .ab-tiers-card .details .title {
+  margin: 0 0 15px;
+  padding: 0;
+  max-width: 340px;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 1.5rem;
+  color: rgb(83, 117, 60);
+}
+
+/* =========================================================
+   ICON LIST
+   ========================================================= */
+.gmd-001 .ab-tiers-card .details .icon-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  display: block;
+}
+.gmd-001 .ab-tiers-card .details .icon-list li {
+  position: relative;
+  display: block;
+  float: none;
+  width: auto;
+  padding: 0 0 0 25px;
+  margin: 0 0 5px;
+  background: none;
+  border: 0;
+  color: #333;
+  font-size: 15px;
+  font-family: "Roboto Slab Light";
+}
+.gmd-001 .ab-tiers-card .details .icon-list li:last-child {
+  margin-bottom: 0;
+  display: none;
+}
+.gmd-001 .ab-tiers-card .details .icon-list li p {
+  /* display: inline ; */
+  margin: 0;
+  padding: 0;
+  font-size: 15.6px;
+}
+.gmd-001 .ab-tiers-card .details .icon-list li strong {
+  font-weight: 700;
+  color: #373539;
+}
+/* hide any icon the live theme renders as an <img>/<i>/<svg> */
+.gmd-001 .ab-tiers-card .details .icon-list li > img,
+.gmd-001 .ab-tiers-card .details .icon-list li > i,
+.gmd-001 .ab-tiers-card .details .icon-list li > svg {
+  display: none;
+}
+
+.gmd-001 .ab-tiers-card .details .icon-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  transform: translateY(-50%);
+  background: transparent no-repeat center / contain;
+  font-size: 0;
+  color: transparent;
+  border: 0;
+}
+.gmd-001 .ab-tiers-card .details .icon-list li::after {
+  display: none;
+}
+
+.gmd-001 .ab-tiers-card .details .icon-list li.age::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23f3b13b'%3E%3Cpath d='M7 1h2v3h6V1h2v3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3zM4 9v11h16V9zm2 2h3v2.5H6zm4.5 0h3v2.5h-3zm4.5 0h3v2.5h-3zM6 15h3v2.5H6zm4.5 0h3v2.5h-3zm4.5 0h3v2.5h-3z'/%3E%3C/svg%3E");
+}
+.gmd-001 .ab-tiers-card .details .icon-list li.plants-per-metre::before {
+  width: 27px;
+  left: -3px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 24' fill='%23f3b13b'%3E%3Cpath d='M9 1l5 7h-2.5l4 5.5H13l4.5 6H10.5V23h-3v-3.5H.5l4.5-6H2.5l4-5.5H4z'/%3E%3Cpath d='M19 3l4.5 6.3h-2.2l3.7 5.2h-2.4l4.4 5H20V23h-2.6v-3.5h-2.2L19.3 14.5h-1.7l3-4.2h-1.9l2.2-3.1z'/%3E%3C/svg%3E");
+}
+.gmd-001 .ab-tiers-card .details .icon-list li.ab-stock::before,
+.gmd-001 .ab-tiers-card .details .icon-list li.minimum-quantity::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23f3b13b'%3E%3Cpath d='M5 3h6v5H2.2L4 4.2A2 2 0 0 1 5 3zm8 0h6a2 2 0 0 1 1.9 1.2L22.8 8H13zM2 10h20v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm7 2.5v1.8h6v-1.8z'/%3E%3C/svg%3E");
+}
+
+/* =========================================================
+   PRICE FOR EACH – TIER BOXES
+   ========================================================= */
+.gmd-001 .ab-tiers-card .ab-price {
+  margin: 0;
+  padding: 0;
+}
+.gmd-001 .ab-tiers-card .ab-price .ab-price-title {
+  margin: 0 0 12px;
+  padding: 0;
+  color: #373539;
+  font-size: 15.6px;
+  font-family: "Roboto Slab Bold";
+}
+.gmd-001 .ab-tiers-card .ab-price ul.ab-price-tiers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 13px;
+}
+.gmd-001 .ab-tiers-card .ab-price li.ab-tier {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 0;
+  padding: 7px 11px;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  list-style: none;
+  transition: background-color 0.15s ease;
+  width: 100%;
+}
+.gmd-001 .ab-tiers-card .ab-price li.ab-tier::before,
+.gmd-001 .ab-tiers-card .ab-price li.ab-tier::after {
+  content: none;
+  display: none;
+}
+.gmd-001 .ab-tiers-card .ab-price li.ab-tier:hover {
+    background-color: #f1f1e2;
+}
+.gmd-001 .ab-tiers-card .ab-price li.ab-tier:focus-visible {
+  box-shadow: 0 0 0 2px #4f7533;
+}
+
+.gmd-001 .ab-tiers-card .ab-tier span {
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+.gmd-001 .ab-tiers-card .ab-tier .ab-tier-qty {
+  color: #333;
+  font-size: 15px;
+  font-family: "Roboto Slab Bold";
+  color: #53753c;
+}
+.gmd-001 .ab-tiers-card .ab-tier .ab-tier-was {
+  color: #7a7a7a;
+  text-decoration: line-through;
+  font-size: 15px;
+  font-family: "Roboto Slab Light";
+}
+.gmd-001 .ab-tiers-card .ab-tier .ab-tier-now {
+  color: #333;
+  font-size: 15.6px;
+  font-family: "Roboto Slab Bold";
+}
+.gmd-001 .ab-tiers-card .ab-tier .ab-tier-check {
+  display: none;
+  position: absolute;
+  top: -9px;
+  right: 4px;
+  color: #4f7533;
+  line-height: 0;
+}
+.gmd-001 .ab-tiers-card .ab-tier .ab-tier-check svg {
+  width: 16px;
+  height: 23px;
+}
+
+.gmd-001 .ab-tiers-card .ab-price li.ab-tier.is-active {
+  background: #eef0e3;
+}
+.gmd-001 .ab-tiers-card .ab-tier.is-active .ab-tier-check {
+  display: block;
+}
+.gmd-001 .ab-tiers-card .ab-tier.is-active .ab-tier-qty,
+.gmd-001 .ab-tiers-card .ab-tier.is-active .ab-tier-now {
+  color: #53753c;
+}
+.gmd-001 .ab-tiers-card .ab-price li.ab-tier.ab-tier-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   IMAGE, 50% BADGE, ZOOM ICON
+   ========================================================= */
+.gmd-001 .ab-tiers-card .image .product-lightbox {
+  position: relative;
+  display: block;
+}
+.gmd-001 .ab-tiers-card .image .responsive-image-crop,
+.gmd-001 .ab-tiers-card .image .image-container {
+  border-radius: 0;
+}
+.gmd-001 .ab-tiers-card .image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.gmd-001 .ab-tiers-card .promo-image-bar.ab-badge {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  left: auto;
+  bottom: auto;
+  width: 45px;
+  height: 45px;
+  margin: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: #a7201f;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 10px;
+  text-transform: uppercase;
+  transform: none;
+  z-index: 3;
+  font-family: "Roboto Slab Bold";
+}
+.gmd-001 .ab-tiers-card .promo-image-bar.ab-badge span {
+  display: block;
+}
+
+.gmd-001 .ab-tiers-card .image .zoom {
+  position: absolute;
+  top: 6px;
+  left: 4px;
+  width: 31px;
+  height: 31px;
+  margin: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: #fff
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234f7533' stroke-width='2.4' stroke-linecap='square'%3E%3Cpath d='M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5'/%3E%3C/svg%3E")
+    no-repeat center / 18px;
+  font-size: 0;
+  color: transparent;
+  overflow: hidden;
+  z-index: 3;
+}
+.gmd-001 .ab-tiers-card .image .zoom::before,
+.gmd-001 .ab-tiers-card .image .zoom::after {
+  display: none;
+}
+
+/* =========================================================
+   PURCHASE: Quantity / Total / Add to basket
+   ========================================================= */
+.gmd-001 .ab-tiers-card .purchase .plant-calculator {
+  padding: 0;
+  margin: 0;
+  background: none;
+}
+.gmd-001 .ab-tiers-card .purchase form.cart {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  row-gap: 13px;
+  margin: 0;
+  padding: 0;
+}
+.gmd-001 .ab-tiers-card .purchase form.cart > p:first-child {
+  margin: 0;
+  padding: 0;
+  color: #515151;
+  font-size: 14.4px;
+  font-family: "Roboto Slab Light";
+}
+.gmd-001 .ab-tiers-card .purchase form.cart > .row {
+  justify-self: end;
+  margin: 0;
+  padding: 0;
+  width: auto;
+  display: block;
+}
+.gmd-001 .ab-tiers-card .purchase .quantity {
+  margin: 0;
+  padding: 0;
+  display: block;
+  width: auto;
+}
+.gmd-001 .ab-tiers-card .purchase .minus,
+.gmd-001 .ab-tiers-card .purchase .plus {
+  display: none;
+}
+.gmd-001 .ab-tiers-card .purchase input.qty {
+  width: 66px !important;
+  max-height: 18px;
+  margin: 0;
+  border: 3px solid #e7e8d6;
+  border-radius: 6px;
+  background: #f3f3f3;
+  box-shadow: none;
+  color: #333;
+  font-size: 0.9rem;
+  text-align: center;
+  font-family: "Roboto Slab Light";
+  min-height: 30px !important;
+}
+.gmd-001 .ab-tiers-card .purchase input.qty::-webkit-outer-spin-button,
+.gmd-001 .ab-tiers-card .purchase input.qty::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.gmd-001 .ab-tiers-card .purchase .total-price {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0;
+  padding: 0;
+  color: #373539;
+  font-size: 0.9rem;
+  font-family: "Roboto Slab Bold";
+  font-size: 0.9rem;
+  font-family: "Roboto Slab Bold";
+}
+.gmd-001 .ab-tiers-card .purchase .total-price strong {
+  font-size: 0.9rem;
+  font-family: "Roboto Slab Bold";
+  color: rgb(55, 53, 57) !important;
+}
+.gmd-001 .ab-tiers-card .purchase .total-price .price-total-original:empty {
+  display: none;
+}
+
+.gmd-001 .ab-tiers-card .purchase .single_add_to_cart_button {
+    grid-column: 1 / -1;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 4px 20px !important;
+    border: 0;
+    border-radius: 999px;
+    background: #557a35 !important;
+    box-shadow: none;
+    color: #fff;
+    font-size: 11.7px;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    cursor: pointer;
+    font-family: "Roboto Slab Bold";
+    min-height: 14px;
+    line-height: normal;
+    white-space: normal;
+}
+.gmd-001 .ab-tiers-card .purchase .single_add_to_cart_button:hover {
+  background: #46672b;
+}
+
+@media (max-width: 900px) {
+  .gmd-001 .ab-tiers-card > .content {
+    gap: 24px;
+  }
+  .gmd-001 .ab-tiers-card .ab-col-right {
+    flex-basis: 240px;
+  }
+}
+@media (max-width: 640px) {
+  .gmd-001 .ab-tiers-card .purchase .total-price .price-total-original {
+    font-size: 14px;
+}
+
+.gmd-001 .ab-tiers-card .purchase .total-price {
+    font-size: 14px;
+}
+
+.gmd-001 .ab-tiers-card .purchase .total-price strong {
+    font-size: 14px;
+}
+.gmd-001 .ab-tiers-card .details .icon-list li p{font-size: 14px;}
+  /* stack: right column (image + basket) goes under the details */
+  .gmd-001 .ab-tiers-card > .content {
+    flex-direction: column;
+    gap: 15px;
+    grid-template-columns: 1fr 1fr;
+  }
+  .gmd-001 .ab-tiers-card .ab-col-right {
+    flex-basis: auto;
+    width: 100%;
+  }
+  .gmd-001 .ab-tiers-card .details .title {
+    font-size: 1rem;
+    max-width: none;
+    line-height: 20px;
+  }
+  .gmd-001 .ab-tiers-card .details .icon-list li,
+  .gmd-001 .ab-tiers-card .details .icon-list li strong {
+    font-size: 14px;
+  }
+  .gmd-001 .ab-tiers-card .ab-price ul.ab-price-tiers {
+    grid-template-columns: 1fr;
+    column-gap: 4px;
+    row-gap: 2px;
+            width: fit-content;
+  }
+  .gmd-001 .ab-tiers-card .ab-price li.ab-tier {
+
+        padding: 1px 5px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: fit-content;
+        gap: 5px;
+        line-height: normal;
+        border-radius: 4px;
+        margin: 2px 0;
+         padding-top: 22px;
+  }
+  .gmd-001 .ab-tiers-card .ab-tier .ab-tier-qty {
+    font-size: 14px;
+    width: 100%;
+            position: absolute;
+        top: 2px;
+        left: 5px
+  }
+  .gmd-001 .ab-tiers-card .ab-tier .ab-tier-was {
+    font-size: 14px;
+  }
+  .gmd-001 .ab-tiers-card .ab-tier .ab-tier-now {
+    font-size: 14px;
+  }
+.gmd-001 .ab-tiers-card .ab-price .ab-price-title{font-size: 14px;}
+
+.gmd-001 .ab-tiers-card .purchase form.cart > p:first-child {
+    font-size: 1rem !important;
+}
+
+.gmd-001 .ab-tiers-card .ab-col-right .image {
+    max-width: 95px;
+}
+
+.gmd-001 .ab-tiers-card .purchase input.qty {
+    width: 55px !important;
+}
+
+.gmd-001 .ab-tiers-card .purchase form.cart {
+    gap: 9px;
+}
+
+.gmd-001 .ab-tiers-card .ab-tier .ab-tier-check {
+    right: -18px;
+            top: -4px;
+}
+}
+
