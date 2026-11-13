@@ -6,18 +6,68 @@
         testName: 'Test Name',
         testVersion: 'v1'
     };
+    // Exact path or any sub-path of these is excluded
     const excludedUrls = [
-        '/nl/collections/schoenen',
-        '/nl/collections/sneakers',
-        '/nl/collections/loafers',
-        '/nl/collections/laarzen',
-        '/nl/collections/bruine-loafers'
+           // ---------- Schoenen ----------
+    '/nl/collections/schoenen',
+    '/nl/collections/sneakers',
+    '/nl/collections/loafers',
+    '/nl/collections/bruine-loafers',
+    '/nl/collections/laarzen',
+    '/nl/collections/sandalen',
+    // shoe brands (only shoes)
+    '/nl/collections/mercer',
+    '/nl/collections/toral',
+
+    // ---------- Accessoires ----------
+    '/nl/collections/accessoires',
+    // Sjaals
+    '/nl/collections/sjaals',
+    '/nl/collections/beige-sjaal',
+    '/nl/collections/blauwe-sjaal',
+    '/nl/collections/bruine-sjaal',
+    // Sieraden
+    '/nl/collections/sieraden',
+    '/nl/collections/kettingen',
+    '/nl/collections/gouden-ketting',
+    '/nl/collections/oorbellen',
+    '/nl/collections/gouden-oorbellen',
+    '/nl/collections/ellen-beekmans',   // jewellery brand
+    // Riemen
+    '/nl/collections/riemen',
+    '/nl/collections/grijze-riem',
+    // Other
+    '/nl/collections/tassen',
+    '/nl/collections/handschoenen',
+    '/nl/collections/petten',
+    '/nl/collections/sokken',
+    // Sjaals
+'/nl/collections/wollen-sjaal',
+'/nl/collections/cashmere-sjaal',
+
+// Mutsen & Hoeden
+'/nl/collections/mutsen',
+'/nl/collections/hoeden',
+
+// Armbanden
+'/nl/collections/armbanden',
+
+// Sokken
+'/nl/collections/wollen-sokken',
+'/nl/collections/witte-sokken',
+'/nl/collections/zwarte-sokken',
+
+// Riemen
+'/nl/collections/zwarte-riem',
+'/nl/collections/beige-riem',
+'/nl/collections/blauwe-riem',
+'/nl/collections/bruine-riem',
     ];
 
-    if (excludedUrls.includes(window.location.pathname)) {
-        return;
+    function isExcludedPath(path) {
+        path = (path || '').replace(/\/+$/, '');
+        return excludedUrls.some(function (u) { return path === u || path.indexOf(u + '/') === 0; });
     }
-    let debounceTimeout;
 
     function waitForElement(waitFor, callback, minElements = 1, isVariable = false, timer = 10000, frequency = 25) {
         let elements = isVariable ? window[waitFor] : document.querySelectorAll(waitFor);
@@ -26,8 +76,14 @@
         callback(elements): setTimeout(() => waitForElement(waitFor, callback, minElements, isVariable, timer - frequency), frequency);
     }
 
-    waitForElement("#collection-filters", ([pdp]) => {
-        document.body.classList.add(testInfo.className);
+    // No early return on excluded pages: the user can navigate client-side from an excluded page
+    // to /shop without reload, so the script has to be running everywhere.
+    waitForElement('body', () => {
+        // Body class only on non-excluded pages; re-synced on every client-side route change
+        function syncBodyClass() {
+            document.body.classList.toggle(testInfo.className, !isExcludedPath(location.pathname));
+        }
+        syncBodyClass();
 
 (function () {
   'use strict';
@@ -39,105 +95,100 @@
   var TOGGLE_ID = 'lm-size-toggle';
   var PANEL_ID = 'lm-size-filter';
   var READY_CLASS = 'lm-sf-ready';
-  var SIZE_PARAM = 'filter.v.t.shopify.size';
-  var SHOE_PARAM = 'filter.v.t.shopify.shoe-size';
+  var PROBING_CLASS = 'lm-sf-probing';
+  var CACHE_KEY = 'lm_sf_maat_v3';
+  var CACHE_TTL = 10 * 60 * 1000;
+  var MAX_ATTEMPTS = 4;
+  var QUIET_MS = 500;       // page must be quiet this long before we read the drawer
 
-  function range(from, to) {
-    var out = [];
-    for (var i = from; i <= to; i++) out.push([String(i), String(i)]);
-    return out;
-  }
-
-  // [display label, native filter value, label in native drawer (for availability)]
-  // `onlyOn`: optional list of paths where this group is shown (all pages if omitted)
-  var GROUPS = [
-    {
-      key: 'clothing',
-      title: 'Kledingmaat',
-      param: SIZE_PARAM,
-      sizes: [
-        ['XXS', 'XXS', 'XXS'],
-        ['XS - 34', 'XS - 34', 'XS · 34'],
-        ['S - 36', 'S - 36', 'S · 36'],
-        ['M - 38', 'M - 38', 'M · 38'],
-        ['L - 40', 'L - 40', 'L · 40'],
-        ['XL - 42', 'XL - 42', 'XL · 42'],
-        ['XXL', 'XXL- 44', 'XXL · 44']
-      ]
-    },
-    { key: 'jeans', title: 'Jeansmaat', param: SIZE_PARAM, sizes: range(24, 33) },
-    {
-      key: 'shoes',
-      title: 'Schoenmaat',
-      param: SHOE_PARAM,
-      sizes: range(35, 42),
-      onlyOn: ['/nl/collections/shop']
-    }
-  ];
-
-  function groupVisible(g) {
-    if (!g.onlyOn) return true;
-    var path = location.pathname.replace(/\/$/, '');
-    return g.onlyOn.indexOf(path) !== -1;
-  }
-
-  var state = { clothing: null, jeans: null, shoes: null };
   var isOpen = false;
 
-  // Availability read from the native filter drawer:
-  // { 'Kledingmaat': { 'XS · 34': true, ... }, 'Jeansmaat': {...}, ... }
-  var avail = null;
-  var probing = false;
-  var probedSearch = null;   // location.search the current `avail` belongs to
-  var probeTimer = null;
-
-  // Values this component owns, per URL param
-  var OWNED = {};
-  OWNED[SIZE_PARAM] = [];
-  OWNED[SHOE_PARAM] = [];
-  GROUPS.forEach(function (g) {
-    g.sizes.forEach(function (s) { OWNED[g.param].push(s[1]); });
-  });
-
-  var CHEVRON =
-    '<svg class="lm-sf-toggle__chevron" width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-    '<path fill="currentColor" stroke="currentColor" stroke-width="0.1" d="M5.12723 5.93969L9.94843 0.347513C10.1083 0.158702 9.86065 -0.127638 9.69348 0.062645C9.69349 0.0626329 4.99976 5.50701 4.99976 5.50701L0.306028 0.0626326C0.236887 -0.0174705 0.12389 -0.0186618 0.053442 0.0599533C-0.016902 0.138713 -0.0179215 0.267377 0.0510883 0.347513L4.87229 5.93969C4.93904 6.01989 5.06047 6.02032 5.12723 5.93969Z"></path>' +
-    '</svg>';
+  function log() {
+    if (window.lmSfDebug || testInfo.debug) {
+      try { console.log.apply(console, ['[size-filter]'].concat([].slice.call(arguments))); } catch (e) { /* ignore */ }
+    }
+  }
+  function norm(t) { return (t || '').replace(/\s+/g, ' ').trim(); }
+  function normPath(p) { return (p || '').replace(/\/+$/, ''); }
 
   function isCollectionPage() {
-    return /\/collections\//.test(location.pathname) &&
-      !excludedUrls.includes(location.pathname);
+    return /\/collections\//.test(location.pathname) && !isExcludedPath(location.pathname);
   }
 
-  // ---------- URL <-> state ----------
-  function readStateFromUrl() {
-    var params = new URLSearchParams(location.search);
-    GROUPS.forEach(function (g) {
-      var active = params.getAll(g.param);
-      var match = null;
-      g.sizes.forEach(function (s) {
-        if (!match && active.indexOf(s[1]) !== -1) match = s[1];
-      });
-      state[g.key] = match;
+  // ---------- Size data, per URL (path + filters) ----------
+  // groups = [{ title, param, chips: [{ label, param, value, enabled }] }]
+  // groups = []  → control has no "Maat" section on this URL → hide our toggle
+  var cache = {};           // key → { t, groups }
+  var lastForPath = {};     // pathname → groups (shown dimmed while the new URL is being read)
+
+  function filterEntries(params) {
+    var out = [];
+    params.forEach(function (v, k) { if (k.indexOf('filter.') === 0) out.push(k + '\u0000' + v); });
+    return out;
+  }
+  function pageKey() {
+    return normPath(location.pathname) + '?' + filterEntries(new URLSearchParams(location.search)).sort().join('&');
+  }
+
+  try {
+    var saved = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}');
+    Object.keys(saved).forEach(function (k) {
+      if (Date.now() - saved[k].t < CACHE_TTL) cache[k] = saved[k];
+    });
+  } catch (e) { /* ignore */ }
+
+  function saveData(key, groups) {
+    cache[key] = { t: Date.now(), groups: groups };
+    lastForPath[key.split('?')[0]] = groups;
+    try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch (e) { /* ignore */ }
+  }
+  function currentData() {
+    var hit = cache[pageKey()];
+    if (hit) return { groups: hit.groups, stale: false };
+    var prev = lastForPath[normPath(location.pathname)];
+    return prev ? { groups: prev, stale: true } : null;
+  }
+
+  // a minus b (count-aware)
+  function minus(a, b) {
+    var rest = b.slice();
+    return a.filter(function (x) {
+      var i = rest.indexOf(x);
+      if (i === -1) return true;
+      rest.splice(i, 1);
+      return false;
     });
   }
 
-  function buildUrl() {
-    var params = new URLSearchParams(location.search);
+  // ---------- URL helpers ----------
+  function isPressed(chip, params) {
+    return !!chip.param && params.getAll(chip.param).indexOf(chip.value) !== -1;
+  }
 
-    // Keep size values this component doesn't own (e.g. set via the drawer)
-    [SIZE_PARAM, SHOE_PARAM].forEach(function (param) {
-      var keep = params.getAll(param).filter(function (v) {
-        return OWNED[param].indexOf(v) === -1;
-      });
+  function buildUrl(groups, group, chip) {
+    var params = new URLSearchParams(location.search);
+    var on = isPressed(chip, params);
+
+    function removeValues(param, values) {
+      var keep = params.getAll(param).filter(function (v) { return values.indexOf(v) === -1; });
       params.delete(param);
       keep.forEach(function (v) { params.append(param, v); });
-    });
+    }
+    function valuesOf(g) {
+      return g.chips.filter(function (c) { return c.param === g.param && c.value; })
+        .map(function (c) { return c.value; });
+    }
 
-    // Same param twice = OR in Shopify
-    GROUPS.forEach(function (g) {
-      if (state[g.key]) params.append(g.param, state[g.key]);
-    });
+    // Single select per group (clicking the active one deselects it)
+    removeValues(chip.param, valuesOf(group));
+
+    if (!on) {
+      // Groups on another Shopify param (e.g. shoe-size) are AND-ed → keep them exclusive
+      groups.forEach(function (g) {
+        if (g.param && g.param !== chip.param) removeValues(g.param, valuesOf(g));
+      });
+      params.append(chip.param, chip.value); // same param twice = OR in Shopify
+    }
 
     params.delete('page');
     var qs = params.toString();
@@ -150,45 +201,26 @@
   function getFiber(el) {
     if (!el) return null;
     for (var k in el) {
-      if (k.indexOf('__reactFiber$') === 0 || k.indexOf('__reactInternalInstance$') === 0) {
-        return el[k];
-      }
+      if (k.indexOf('__reactFiber$') === 0 || k.indexOf('__reactInternalInstance$') === 0) return el[k];
     }
     return null;
   }
 
   function findRouter() {
     if (routerCache) return routerCache;
-
-    var start = document.getElementById(BAR_ID) || document.body;
-    var fiber = getFiber(start);
+    var fiber = getFiber(document.getElementById(BAR_ID) || document.body);
     var guard = 0;
-
     while (fiber && guard++ < 2000) {
       var v = fiber.memoizedProps && fiber.memoizedProps.value;
       if (v && typeof v === 'object') {
-        // React Router / Shopify Hydrogen (data router)
-        if (v.router && typeof v.router.navigate === 'function') {
-          routerCache = { type: 'rr-data', r: v.router };
-          return routerCache;
-        }
-        // React Router (navigator)
-        if (v.navigator && typeof v.navigator.push === 'function') {
-          routerCache = { type: 'rr-nav', r: v.navigator };
-          return routerCache;
-        }
-        // Next.js (app or pages router)
-        if (typeof v.push === 'function' && typeof v.prefetch === 'function') {
-          routerCache = { type: 'next', r: v };
-          return routerCache;
-        }
+        if (v.router && typeof v.router.navigate === 'function') return (routerCache = { type: 'rr-data', r: v.router });
+        if (v.navigator && typeof v.navigator.push === 'function') return (routerCache = { type: 'rr-nav', r: v.navigator });
+        if (typeof v.push === 'function' && typeof v.prefetch === 'function') return (routerCache = { type: 'next', r: v });
       }
       fiber = fiber.return;
     }
-
     if (window.next && window.next.router && typeof window.next.router.push === 'function') {
-      routerCache = { type: 'next', r: window.next.router };
-      return routerCache;
+      return (routerCache = { type: 'next', r: window.next.router });
     }
     return null;
   }
@@ -197,24 +229,24 @@
     var found = findRouter();
     try {
       if (found) {
-        if (found.type === 'rr-data') {
-          found.r.navigate(url, { preventScrollReset: true });
-        } else if (found.type === 'rr-nav') {
-          found.r.push(url);
-        } else if ('asPath' in found.r) {
-          found.r.push(url, undefined, { scroll: false }); // Next pages router
-        } else {
-          found.r.push(url, { scroll: false });            // Next app router
-        }
+        if (found.type === 'rr-data') found.r.navigate(url, { preventScrollReset: true });
+        else if (found.type === 'rr-nav') found.r.push(url);
+        else if ('asPath' in found.r) found.r.push(url, undefined, { scroll: false });
+        else found.r.push(url, { scroll: false });
         return;
       }
     } catch (e) {
       routerCache = null;
     }
-    location.assign(url); // last resort
+    location.assign(url);
   }
 
   // ---------- UI ----------
+  var CHEVRON =
+    '<svg class="lm-sf-toggle__chevron" width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    '<path fill="currentColor" stroke="currentColor" stroke-width="0.1" d="M5.12723 5.93969L9.94843 0.347513C10.1083 0.158702 9.86065 -0.127638 9.69348 0.062645C9.69349 0.0626329 4.99976 5.50701 4.99976 5.50701L0.306028 0.0626326C0.236887 -0.0174705 0.12389 -0.0186618 0.053442 0.0599533C-0.016902 0.138713 -0.0179215 0.267377 0.0510883 0.347513L4.87229 5.93969C4.93904 6.01989 5.06047 6.02032 5.12723 5.93969Z"></path>' +
+    '</svg>';
+
   function buildToggle() {
     var btn = document.createElement('button');
     btn.type = 'button';
@@ -226,11 +258,7 @@
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
       setOpen(!isOpen);
-      // Availability not loaded yet for this URL: check right away
-      if (isOpen && !probing && location.search !== probedSearch) {
-        clearTimeout(probeTimer);
-        probe();
-      }
+      if (isOpen) scheduleProbe(0);
     });
     return btn;
   }
@@ -241,38 +269,40 @@
     panel.className = 'font-avant-garde';
     panel.setAttribute('role', 'group');
     panel.setAttribute('aria-label', 'Filter op maat');
-    panel.setAttribute('data-path', location.pathname);
     panel.hidden = true;
+    panel.addEventListener('click', onChipClick);
+    return panel;
+  }
 
-    GROUPS.forEach(function (g) {
-      if (!groupVisible(g)) return;
-
+  // Rows are built from the control's drawer → exactly the same groups and sizes
+  function fillPanel(panel, groups) {
+    panel.innerHTML = '';
+    groups.forEach(function (g, gi) {
       var row = document.createElement('div');
       row.className = 'lm-sf__group';
 
       var label = document.createElement('p');
       label.className = 'lm-sf__label';
       label.textContent = g.title;
-      var rangeEl = document.createElement('span');
-      rangeEl.className = 'lm-sf__range';
-      rangeEl.textContent = g.sizes[0][0].split(' ')[0] + ' - ' +
-        g.sizes[g.sizes.length - 1][0].split(' ')[0];
-      label.appendChild(rangeEl);
+      if (g.chips.length > 1) {
+        var rangeEl = document.createElement('span');
+        rangeEl.className = 'lm-sf__range';
+        rangeEl.textContent = g.chips[0].label.split(' ')[0] + ' - ' +
+          g.chips[g.chips.length - 1].label.split(' ')[0];
+        label.appendChild(rangeEl);
+      }
 
       var chips = document.createElement('div');
       chips.className = 'lm-sf__chips';
-
-      g.sizes.forEach(function (s) {
+      g.chips.forEach(function (c, ci) {
         var btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'lm-sf__chip';
-        btn.setAttribute('data-group', g.key);
-        btn.setAttribute('data-title', g.title);
-        btn.setAttribute('data-label', s[2] || s[0]);
-        btn.setAttribute('data-value', s[1]);
+        btn.setAttribute('data-g', gi);
+        btn.setAttribute('data-c', ci);
         btn.setAttribute('aria-pressed', 'false');
         var span = document.createElement('span');
-        span.textContent = s[0];
+        span.textContent = c.label;
         btn.appendChild(span);
         chips.appendChild(btn);
       });
@@ -281,9 +311,7 @@
       row.appendChild(chips);
       panel.appendChild(row);
     });
-
-    panel.addEventListener('click', onChipClick);
-    return panel;
+    panel.__groups = groups;
   }
 
   function setOpen(open) {
@@ -294,56 +322,64 @@
   function render() {
     var toggle = document.getElementById(TOGGLE_ID);
     var panel = document.getElementById(PANEL_ID);
+    if (!toggle || !panel) return;
 
-    var count = 0;
-    GROUPS.forEach(function (g) {
-      if (groupVisible(g) && state[g.key]) count++;
-    });
+    var data = currentData();
+    var groups = data ? data.groups : null;
+    var params = new URLSearchParams(location.search);
 
-    if (toggle) {
-      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-      toggle.querySelector('.lm-sf-toggle__label').textContent =
-        'Maat' + (count ? ' (' + count + ')' : '');
-    }
+    // Control has no "Maat" on this URL → variant neither
+    var none = !!data && !data.stale && groups.length === 0;
+    if (toggle.hidden !== none) toggle.hidden = none;
+    if (none && isOpen) isOpen = false;
 
-    if (panel) {
-      panel.hidden = !isOpen;
-      var chips = panel.querySelectorAll('.lm-sf__chip');
-      for (var i = 0; i < chips.length; i++) {
-        var c = chips[i];
-        var on = state[c.getAttribute('data-group')] === c.getAttribute('data-value');
-        c.setAttribute('aria-pressed', on ? 'true' : 'false');
-
-        // Same availability as the native drawer (selected chips stay usable)
-        var title = c.getAttribute('data-title');
-        var off = !on && !!avail && !!avail[title] &&
-          avail[title][c.getAttribute('data-label')] !== true;
-        c.disabled = off;
-        c.setAttribute('aria-disabled', off ? 'true' : 'false');
+    // Panel content
+    if (!groups || !groups.length) {
+      if (panel.__groups !== 'loading') {
+        panel.innerHTML = '<p class="lm-sf__loading">Laden…</p>';
+        panel.__groups = 'loading';
       }
+    } else if (panel.__groups !== groups) {
+      fillPanel(panel, groups);
     }
+    panel.classList.toggle('lm-sf--updating', !!data && data.stale);
+    panel.hidden = !isOpen;
+
+    // Chip states
+    var count = 0;
+    if (groups && groups.length) {
+      groups.forEach(function (g, gi) {
+        var any = false;
+        g.chips.forEach(function (c, ci) {
+          var el = panel.querySelector('.lm-sf__chip[data-g="' + gi + '"][data-c="' + ci + '"]');
+          if (!el) return;
+          var on = isPressed(c, params);
+          if (on) any = true;
+          var off = !on && (!c.enabled || !c.value);   // same as the control's drawer
+          el.setAttribute('aria-pressed', on ? 'true' : 'false');
+          el.disabled = off;
+          el.setAttribute('aria-disabled', off ? 'true' : 'false');
+        });
+        if (any) count++;
+      });
+    }
+
+    toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    var lbl = toggle.querySelector('.lm-sf-toggle__label');
+    var text = 'Maat' + (count ? ' (' + count + ')' : '');
+    if (lbl.textContent !== text) lbl.textContent = text;
   }
 
   function onChipClick(e) {
     var btn = e.target.closest('.lm-sf__chip');
     if (!btn || btn.disabled) return;
-    var group = btn.getAttribute('data-group');
-    var value = btn.getAttribute('data-value');
-
-    // Single select per group; clicking the active one deselects it
-    state[group] = state[group] === value ? null : value;
-
-    // Shoe size is a separate Shopify filter (AND with clothing sizes),
-    // so keep it exclusive to avoid an always-empty result.
-    if (group === 'shoes' && state.shoes) {
-      state.clothing = null;
-      state.jeans = null;
-    } else if (group !== 'shoes' && state[group]) {
-      state.shoes = null;
-    }
-
-    render();
-    navigate(buildUrl());
+    var panel = document.getElementById(PANEL_ID);
+    var groups = panel && panel.__groups;
+    if (!groups || groups === 'loading') return;
+    var group = groups[+btn.getAttribute('data-g')];
+    var chip = group && group.chips[+btn.getAttribute('data-c')];
+    if (!chip || !chip.value) return;
+    navigate(buildUrl(groups, group, chip));
   }
 
   // Close on outside click / Escape
@@ -360,11 +396,19 @@
     }
   });
 
-  // ---------- Read availability from the native drawer ----------
+  // ---------- Read sizes from the control's filter drawer ----------
+  var probing = false;
+  var aborted = false;
+  var pendingReplay = null;
+  var probeTimer = null;
+  var attempts = {};        // per pageKey
+  var lastMutation = Date.now();
+
   function waitFor(fn, timeout) {
     return new Promise(function (resolve, reject) {
       var start = Date.now();
       (function tick() {
+        if (aborted) return reject(new Error('aborted'));
         var res = null;
         try { res = fn(); } catch (e) { /* ignore */ }
         if (res) return resolve(res);
@@ -374,17 +418,7 @@
     });
   }
 
-  function log() {
-    if (window.lmSfDebug) {
-      try { console.log.apply(console, ['[size-filter]'].concat([].slice.call(arguments))); } catch (e) { /* ignore */ }
-    }
-  }
-
-  function norm(t) {
-    return (t || '').replace(/\s+/g, ' ').trim();
-  }
-
-  // The FILTER drawer specifically (other headlessui dialogs, e.g. menu/cart, are ignored)
+  // The FILTER drawer specifically (menu / cart / search dialogs are ignored)
   function getDrawer() {
     var panels = document.querySelectorAll('[id^="headlessui-dialog-panel"]');
     for (var i = 0; i < panels.length; i++) {
@@ -401,51 +435,72 @@
     if (!drawer) return null;
     var btns = drawer.querySelectorAll('button[aria-controls]');
     for (var i = 0; i < btns.length; i++) {
-      // "Maat" or "Maat (1)" when a size is active
-      if (/^maat\b/i.test(norm(btns[i].textContent))) return btns[i];
+      if (/^maat\b/i.test(norm(btns[i].textContent))) return btns[i];   // "Maat" or "Maat (1)"
     }
     return null;
   }
 
+  // Returns { groups, fresh } or null when not rendered yet.
+  // fresh = every link in the drawer belongs to the CURRENT url (not the previous page)
   function readSizes(trigger) {
     var region = document.getElementById(trigger.getAttribute('aria-controls'));
     if (!region || region.hidden) return null;
     var titles = region.querySelectorAll('p');
     if (!titles.length) return null;
 
-    var data = {};
-    var chipCount = 0;
+    var cur = filterEntries(new URLSearchParams(location.search));
+    var groups = [];
+    var fresh = true;
+    var count = 0;
+
     for (var i = 0; i < titles.length; i++) {
-      var title = norm(titles[i].textContent);
       var wrap = titles[i].nextElementSibling;
       if (!wrap) continue;
-      data[title] = {};
+      var g = { title: norm(titles[i].textContent), param: null, chips: [] };
+
       for (var j = 0; j < wrap.children.length; j++) {
-        var chip = wrap.children[j];
-        var label = norm(chip.textContent);
-        var enabled = chip.tagName === 'A' &&
-          chip.getAttribute('aria-disabled') !== 'true' &&
-          !chip.querySelector('[aria-disabled="true"]');
-        data[title][label] = enabled;
-        chipCount++;
+        var el = wrap.children[j];
+        var a = el.tagName === 'A' ? el : el.querySelector('a[href]');
+        var chip = {
+          label: norm(el.textContent),
+          enabled: !!a && el.getAttribute('aria-disabled') !== 'true' && !el.querySelector('[aria-disabled="true"]'),
+          param: null,
+          value: null
+        };
+
+        if (a) {
+          var u = new URL(a.getAttribute('href'), location.origin);
+          if (normPath(u.pathname) !== normPath(location.pathname)) fresh = false;
+          var href = filterEntries(u.searchParams);
+          var add = minus(href, cur);
+          var rem = minus(cur, href);
+          var entry = add.length === 1 && !rem.length ? add[0] : (rem.length === 1 && !add.length ? rem[0] : null);
+          if (entry) {
+            var parts = entry.split('\u0000');
+            chip.param = parts[0];
+            chip.value = parts[1];
+            if (!g.param) g.param = chip.param;
+          } else {
+            fresh = false;
+          }
+        }
+        g.chips.push(chip);
+        count++;
       }
+      if (g.chips.length) groups.push(g);
     }
-    return chipCount ? data : null;
+    return count ? { groups: groups, fresh: fresh } : null;
   }
 
   function closeDrawer() {
     var drawer = getDrawer();
     if (!drawer) return;
-    var close = drawer.querySelector('button[aria-label="Filters sluiten"]') ||
-      drawer.querySelector('button[aria-label]');
-    if (close) {
-      close.click();
-    } else {
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-    }
+    var close = drawer.querySelector('button[aria-label="Filters sluiten"]') || drawer.querySelector('button[aria-label]');
+    if (close) close.click();
+    else document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   }
 
-  // React only reacts to clicks after hydration: wait until the button has React props
+  // React only reacts to clicks after hydration
   function isHydrated(el) {
     for (var k in el) {
       if (k.indexOf('__reactProps$') === 0 || k.indexOf('__reactEventHandlers$') === 0) return true;
@@ -453,19 +508,50 @@
     return false;
   }
 
-  var attempts = {};      // per URL
-  var MAX_ATTEMPTS = 4;
+  function findFilterButton(bar) {
+    var btn = bar.querySelector(':scope > .grid > :nth-child(1) button');
+    if (btn) return btn;
+    var all = bar.querySelectorAll('button');
+    for (var i = 0; i < all.length; i++) {
+      if (/^filter$/i.test(norm(all[i].textContent))) return all[i];
+    }
+    return null;
+  }
+
+  function anyDialogOpen() {
+    return !!document.querySelector('[role="dialog"]');
+  }
+
+  function scheduleProbe(delay) {
+    var key = pageKey();
+    if (probing || cache[key] || !isCollectionPage()) return;
+    if ((attempts[key] || 0) >= MAX_ATTEMPTS) return;
+    clearTimeout(probeTimer);
+    probeTimer = setTimeout(tryProbe, delay == null ? 300 : delay);
+  }
+
+  function tryProbe() {
+    // wait until the site has finished rendering the new results
+    var wait = QUIET_MS - (Date.now() - lastMutation);
+    if (wait > 0) { probeTimer = setTimeout(tryProbe, wait + 20); return; }
+    probe();
+  }
+
+  function retryLater(delay) {
+    clearTimeout(probeTimer);
+    probeTimer = setTimeout(tryProbe, delay);
+  }
 
   function probe() {
     if (probing) return;
-    var search = location.search;
-    if (search === probedSearch) return;
+    var key = pageKey();
+    if (cache[key] || (attempts[key] || 0) >= MAX_ATTEMPTS || !isCollectionPage()) return;
 
     var bar = document.getElementById(BAR_ID);
-    var filterBtn = bar && bar.querySelector(':scope > .grid > :nth-child(1) button');
-    if (!filterBtn) { log('no filter button yet'); return retryLater(search, 800); }
-    if (!isHydrated(filterBtn)) { log('page not hydrated yet'); return retryLater(search, 800, true); }
-    if (getDrawer()) { log('drawer open by user, retry later'); return retryLater(search, 1500, true); }
+    var filterBtn = bar && findFilterButton(bar);
+    if (!filterBtn) { log('no filter button yet'); return retryLater(800); }
+    if (!isHydrated(filterBtn)) { log('not hydrated yet'); return retryLater(800); }
+    if (anyDialogOpen()) { log('a dialog is open (filter/cart/menu/search), retry later'); return retryLater(1500); }
 
     var root = document.documentElement;
     var active = document.activeElement;
@@ -474,67 +560,88 @@
     var trigger = null;
 
     probing = true;
-    attempts[search] = (attempts[search] || 0) + 1;
-    log('probe start', search, 'attempt', attempts[search]);
-    root.classList.add('lm-sf-probing');
+    aborted = false;
+    attempts[key] = (attempts[key] || 0) + 1;
+    log('probe', key, 'attempt', attempts[key]);
+    root.classList.add(PROBING_CLASS);   // drawer invisible ONLY while this class is on
     filterBtn.click();
 
-    waitFor(findMaatTrigger, 5000)
-      .then(function (t) {
-        trigger = t;
-        if (t.getAttribute('aria-expanded') !== 'true') {
-          t.click();
-          openedMaat = true;
-        }
-        return waitFor(function () { return readSizes(t); }, 5000);
-      })
-      .then(function (data) {
-        log('availability', data);
-        if (location.search === search) {
-          avail = data;
-          probedSearch = search;
-        }
-      })
-      .catch(function (err) {
-        log('probe failed', err && err.message);
-      })
+    waitFor(getDrawer, 4000)
       .then(function () {
-        if (openedMaat && trigger && trigger.isConnected) trigger.click(); // leave drawer as it was
+        // drawer is open: no "Maat" in it → this collection has no size filter
+        return waitFor(findMaatTrigger, 1500).catch(function (err) {
+          if (err.message === 'timeout') return null;
+          throw err;
+        });
+      })
+      .then(function (t) {
+        if (!t) {
+          if (pageKey() === key) saveData(key, []);
+          log('no Maat in control');
+          return;
+        }
+        trigger = t;
+        if (t.getAttribute('aria-expanded') !== 'true') { t.click(); openedMaat = true; }
+        return waitFor(function () { return readSizes(t); }, 4000).then(function (res) {
+          log('read', res);
+          if (pageKey() !== key) return;
+          if (res.fresh) saveData(key, res.groups);
+          else log('drawer still shows the previous page, retry');
+        });
+      })
+      .catch(function (err) { log('probe failed', err && err.message); })
+      .then(function () {
+        if (!aborted && openedMaat && trigger && trigger.isConnected) trigger.click(); // leave Maat as it was
         closeDrawer();
-        setTimeout(function () {
-          root.classList.remove('lm-sf-probing');
-          probing = false;
-          if (Math.abs(window.scrollY - scrollY) > 2) window.scrollTo(0, scrollY);
+        var stillAborted = aborted;
+        aborted = false;   // let the wait below run
+        return waitFor(function () { return !getDrawer(); }, 1500).catch(function () {}).then(function () {
+          return stillAborted;
+        });
+      })
+      .then(function (wasAborted) {
+        root.classList.remove(PROBING_CLASS);
+        probing = false;
+
+        if (Math.abs(window.scrollY - scrollY) > 2) window.scrollTo(0, scrollY);
+        if (!wasAborted) {
           if (active && active.focus && active !== document.body) {
             try { active.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
           } else if (document.activeElement && document.activeElement.blur) {
             document.activeElement.blur();
           }
-          render();
-          if (location.search !== probedSearch) retryLater(location.search, 1000);
-          scheduleMount();
-        }, 400);
+        }
+
+        // The user clicked something (Filter / cart / menu / search) while we were reading:
+        // that click was blocked by the drawer, so do it for them now.
+        if (pendingReplay && pendingReplay.isConnected) {
+          var el = pendingReplay;
+          setTimeout(function () {
+            if (el.matches('input, textarea')) el.focus();
+            else el.click();
+          }, 30);
+        }
+        pendingReplay = null;
+
+        render();
+        if (!cache[pageKey()]) retryLater(wasAborted ? 2500 : 1000);
+        scheduleMount();
       });
   }
 
-  function retryLater(search, delay, free) {
-    // `free` = waiting for page/user, doesn't count as a failed attempt
-    if (!free && (attempts[search] || 0) >= MAX_ATTEMPTS) {
-      log('giving up for', search);
-      return;
-    }
-    clearTimeout(probeTimer);
-    probeTimer = setTimeout(probe, delay);
-  }
-
-  function scheduleProbe() {
-    var search = location.search;
-    if (search === probedSearch || probing) return;
-    if ((attempts[search] || 0) >= MAX_ATTEMPTS) return;
-    clearTimeout(probeTimer);
-    // short delay so the site has loaded the new results first
-    probeTimer = setTimeout(probe, 600);
-  }
+  // User interaction during a probe → stop immediately, never block the real UI
+  document.addEventListener('pointerdown', function (e) {
+    if (!probing || !e.isTrusted) return;
+    var t = e.target && e.target.closest ? e.target : null;
+    if (t && t.closest('#' + TOGGLE_ID + ', #' + PANEL_ID)) return;
+    pendingReplay = t ? t.closest('button, a, input, textarea, [role="button"]') : null;
+    aborted = true;
+    log('aborted by user');
+  }, true);
+  document.addEventListener('click', function (e) {
+    // the click got through by itself → don't replay it
+    if (pendingReplay && e.isTrusted && pendingReplay.contains(e.target)) pendingReplay = null;
+  }, true);
 
   // ---------- Mount / keep alive through React re-renders ----------
   function cleanup() {
@@ -544,10 +651,14 @@
     if (p) p.remove();
     var bar = document.getElementById(BAR_ID);
     if (bar) bar.classList.remove(READY_CLASS);
+    isOpen = false;
   }
 
+  var lastKey = null;
+
   function mount() {
-    if (!isCollectionPage()) { cleanup(); return; }
+    syncBodyClass();
+    if (!isCollectionPage()) { cleanup(); lastKey = null; return; }
 
     var bar = document.getElementById(BAR_ID);
     if (!bar) return;
@@ -556,23 +667,25 @@
 
     if (!bar.classList.contains(READY_CLASS)) bar.classList.add(READY_CLASS);
 
-    // "Maat" button inside the bar row (order handled in CSS)
     var toggle = document.getElementById(TOGGLE_ID);
     if (!toggle || toggle.parentElement !== grid) {
       if (toggle) toggle.remove();
       grid.appendChild(buildToggle());
     }
 
-    // Dropdown panel directly under the bar row
-    // (rebuilt when the path changes, so page-specific rows show/hide correctly)
     var panel = document.getElementById(PANEL_ID);
-    if (!panel || panel.parentElement !== bar || bar.lastElementChild !== panel ||
-        panel.getAttribute('data-path') !== location.pathname) {
+    if (!panel || panel.parentElement !== bar || bar.lastElementChild !== panel) {
       if (panel) panel.remove();
       bar.appendChild(buildPanel());
     }
 
-    readStateFromUrl();
+    var key = pageKey();
+    if (key !== lastKey) {
+      // other collection: close; same collection with other filters: stay open
+      if (lastKey && lastKey.split('?')[0] !== key.split('?')[0]) isOpen = false;
+      lastKey = key;
+    }
+
     render();
     if (!probing) scheduleProbe();
   }
@@ -591,16 +704,28 @@
     var orig = history[fn];
     history[fn] = function () {
       var res = orig.apply(this, arguments);
+      syncBodyClass();
+      lastMutation = Date.now();
       scheduleMount();
       return res;
     };
   });
-  window.addEventListener('popstate', scheduleMount);
+  window.addEventListener('popstate', function () { syncBodyClass(); lastMutation = Date.now(); scheduleMount(); });
 
-  new MutationObserver(scheduleMount).observe(document.body, {
-    childList: true,
-    subtree: true
-  });
+  function isOurs(node) {
+    var el = node && (node.nodeType === 1 ? node : node.parentElement);
+    return !!el && !!el.closest('#' + TOGGLE_ID + ', #' + PANEL_ID + ', #headlessui-portal-root, [data-headlessui-portal]');
+  }
+
+  new MutationObserver(function (records) {
+    for (var i = 0; i < records.length; i++) {
+      if (!isOurs(records[i].target)) {
+        lastMutation = Date.now();
+        scheduleMount();
+        return;
+      }
+    }
+  }).observe(document.body, { childList: true, subtree: true });
 
   scheduleMount();
 })();
