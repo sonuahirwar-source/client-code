@@ -1,34 +1,38 @@
+/* Le Marais – "Maat" dropdown in the filter bar (variant)
+   Order: Filter | ^ Maat | Sorteren op: Relevantie ............ 328 Artikelen */
 
-.gmd-7 #collection-filters.lm-sf-ready > .grid {
+/* ---------- Bar layout ---------- */
+.gmd-7 #collection-filters > .grid {
   display: flex !important;
   align-items: center;
   gap: 40px;
 }
 
-
-.gmd-7 #collection-filters.lm-sf-ready > .grid > :nth-child(1) {
+/* 1. Filter */
+.gmd-7 #collection-filters > .grid > :nth-child(1) {
   order: 1;
   flex: 0 0 auto;
 }
 
-
-.gmd-7 #collection-filters.lm-sf-ready > .grid >  #lm-size-toggle {
+/* 2. Maat (injected) */
+.gmd-7 #collection-filters > .grid > #lm-size-toggle {
   order: 2;
 }
 
-
-.gmd-7 #collection-filters.lm-sf-ready > .grid > :nth-child(3) {
+/* 3. Sorteren */
+.gmd-7 #collection-filters > .grid > :nth-child(3) {
   order: 3;
   flex: 0 1 auto;
 }
 
-.gmd-7 #collection-filters.lm-sf-ready > .grid > :nth-child(3) > button {
+.gmd-7 #collection-filters > .grid > :nth-child(3) > button {
   justify-content: flex-start;
   padding-left: 0;
   padding-right: 0;
 }
 
-.gmd-7 #collection-filters.lm-sf-ready > .grid > :nth-child(2) {
+/* 4. Count – far right */
+.gmd-7 #collection-filters > .grid > :nth-child(2) {
   order: 4;
   margin-left: auto;
   text-align: right;
@@ -52,6 +56,11 @@
   cursor: pointer;
   flex: 0 0 auto;
   transition: border-color 0.13s;
+}
+
+/* control has no "Maat" on this collection */
+.gmd-7 #lm-size-toggle[hidden] {
+  display: none !important;
 }
 
 .gmd-7 #lm-size-toggle[aria-expanded="true"] {
@@ -108,6 +117,21 @@
   margin-left: 6px;
   font-weight: 400;
   color: rgba(0, 0, 0, 0.3);
+}
+
+.gmd-7 #lm-size-filter .lm-sf__loading {
+  margin: 0;
+  padding: 2px 0 14px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+/* new URL still being read → show previous sizes dimmed */
+.gmd-7 #lm-size-filter .lm-sf__chips {
+  transition: opacity 0.15s;
+}
+.gmd-7 #lm-size-filter.lm-sf--updating .lm-sf__chips {
+  opacity: 0.5;
 }
 
 .gmd-7 #lm-size-filter .lm-sf__chips {
@@ -170,30 +194,28 @@
   outline-offset: 3px;
 }
 
-/* ---------- Native drawer opened invisibly while reading availability ---------- */
-html:has(.gmd-7){
-  overflow: auto !important;
+/* ---------- Drawer opened invisibly – ONLY while the script reads it ----------
+   (Before this was always on, which hid the Filter / cart / menu / search sidebars,
+   and overflow on <body> broke the sticky #collection-filters.) */
+html.lm-sf-probing {
+  overflow-y: auto !important;   /* undo the drawer's scroll lock, page doesn't jump */
   padding-right: 0 !important;
 }
 
-html body.gmd-7{
-  overflow: auto !important;
-  padding-right: 0 !important;
-}
-
- .gmd-7 #headlessui-portal-root,
-.gmd-7 [data-headlessui-portal] {
+html.lm-sf-probing #headlessui-portal-root,
+html.lm-sf-probing [data-headlessui-portal] {
+  visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
 }
 
 /* ---------- Mobile / tablet ---------- */
 @media (max-width: 1023px) {
-  .gmd-7 #collection-filters.lm-sf-ready > .grid {
+  .gmd-7 #collection-filters > .grid {
     gap: 16px;
   }
 
-  .gmd-7 #collection-filters.lm-sf-ready > .grid > :nth-child(3) > button {
+  .gmd-7 #collection-filters > .grid > :nth-child(3) > button {
     max-width: 120px;
   }
 
@@ -203,7 +225,7 @@ html body.gmd-7{
   }
 
   .gmd-7 #lm-size-filter .lm-sf__chips {
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     overflow-x: auto;
     padding-right: 12px;
     gap: 8px;
@@ -225,11 +247,12 @@ html body.gmd-7{
 }
 
 @media (max-width: 400px) {
-  .gmd-7 #collection-filters.lm-sf-ready > .grid {
+  .gmd-7 #collection-filters > .grid {
     gap: 12px;
   }
 
-  .gmd-7 #collection-filters.lm-sf-ready > .grid > :nth-child(3) > button {
-    max-width: 96px;
+  .gmd-7 #collection-filters > .grid > :nth-child(3) > button {
+           max-width: 83px;
+        overflow: hidden;
   }
 }
