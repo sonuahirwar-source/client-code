@@ -1,321 +1,308 @@
 
-.gmd-03 {
-    div[x-data="discountForm"] {
-        border-radius: 4px;
-        border: 1px solid #B1BDC8;
-        background: #FFF;
-        padding: 10px 16px;
+/* Le Marais – "Maat" dropdown in the filter bar (variant)
+   Order: Filter | ^ Maat | Sorteren op: Relevantie ............ 328 Artikelen */
+
+/* ---------- Bar layout ---------- */
+
+body.gmd-7 {
+  overflow-x: hidden !important;
+}
+
+.gmd-7 {
+  #collection-filters {
+    > .grid {
+      display: flex !important;
+      align-items: center;
+      gap: 40px;
+
+      /* 1. Filter */
+      > :nth-child(1) {
+        order: 1;
+        flex: 0 0 auto;
+      }
+
+      /* 2. Maat (injected) */
+      > #lm-size-toggle {
+        order: 2;
+      }
+
+      /* 3. Sorteren */
+      > :nth-child(3) {
+        order: 3;
+        flex: 0 1 auto;
+
+        > button {
+          justify-content: flex-start;
+          padding-left: 0;
+          padding-right: 0;
+        }
+      }
+
+      /* 4. Count – far right */
+      > :nth-child(2) {
+        order: 4;
+        margin-left: auto;
+        text-align: right;
+      }
+    }
+  }
+
+  /* ---------- Maat toggle ---------- */
+
+  #lm-size-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0 6px;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    background: none;
+    color: #000;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    flex: 0 0 auto;
+    transition: border-color 0.13s;
+
+    /* control has no "Maat" on this collection */
+    &[hidden] {
+      display: none !important;
     }
 
-    .py-3.border-x-0 {
-        border: none;
-        padding: 0;
+    &[aria-expanded="true"] {
+      border-bottom-color: #000;
     }
 
-    strong#block-discount-heading {
-        display: inline-flex;
-        align-items: center;
+    .lm-sf-toggle__label {
+      transform: translateY(1px);
+    }
+
+    .lm-sf-toggle__chevron {
+      width: 16px;
+      height: 9px;
+      flex: 0 0 auto;
+      transition: transform 0.13s;
+    }
+
+    &[aria-expanded="true"] {
+      .lm-sf-toggle__chevron {
+        transform: rotate(180deg);
+      }
+    }
+
+    &:focus-visible {
+      outline: 1px solid #000;
+      outline-offset: 4px;
+    }
+  }
+
+  /* ---------- Dropdown panel ---------- */
+
+  #lm-size-filter {
+    margin-top: 10px;
+    padding: 16px 16px 6px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: #fff;
+
+    &[hidden] {
+      display: none !important;
+    }
+
+    .lm-sf__group {
+      padding-bottom: 14px;
+    }
+
+    .lm-sf__label {
+      margin: 0 0 10px;
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: #000;
+    }
+
+    .lm-sf__range {
+      margin-left: 6px;
+      font-weight: 400;
+      color: rgba(0, 0, 0, 0.3);
+    }
+
+    .lm-sf__loading {
+      margin: 0;
+      padding: 2px 0 14px;
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.45);
+    }
+
+    /* New URL still being read → show previous sizes dimmed */
+    .lm-sf__chips {
+      transition: opacity 0.15s;
+
+      /* 
+      &.lm-sf--updating {
+        opacity: 0.5;
+      }
+      */
+
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      min-width: 0;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+
+    .lm-sf__chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 40px;
+      min-width: 40px;
+      padding: 0 12px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 9999px;
+      background: #fff;
+      color: #000;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: border-color 0.13s, box-shadow 0.13s;
+      -webkit-appearance: none;
+      appearance: none;
+
+      > span {
+        transform: translateY(1px);
+      }
+
+      &:hover {
+        border-color: rgba(0, 0, 0, 0.45);
+      }
+
+      /* Selected: black outline, white fill */
+      &[aria-pressed="true"] {
+        border-color: #000;
+        box-shadow: inset 0 0 0 0.5px #000;
+      }
+
+      /* Not available – faded + struck through */
+      &:disabled,
+      &:disabled:hover {
+        background: #fff;
+        border-color: rgba(0, 0, 0, 0.07);
+        color: rgba(0, 0, 0, 0.18);
+        text-decoration: line-through;
+        text-decoration-color: rgba(0, 0, 0, 0.18);
+        box-shadow: none;
+        cursor: not-allowed;
+      }
+
+      &:focus-visible {
+        outline: 1px solid #000;
+        outline-offset: 3px;
+      }
+    }
+  }
+}
+
+/* ---------- Drawer opened invisibly – ONLY while the script reads it ----------
+   (Before this was always on, which hid the Filter / cart / menu / search sidebars,
+   and overflow on <body> broke the sticky #collection-filters.) */
+
+html {
+  &.lm-sf-probing {
+    overflow-y: auto !important;
+    padding-right: 0 !important;
+  }
+
+  /* Size dropdown open → no body scroll */
+  &.lm-sf-lock,
+  &.lm-sf-lock.lm-sf-probing {
+    overflow: hidden !important;
+  }
+
+  &.lm-sf-probing {
+    #headlessui-portal-root,
+    [data-headlessui-portal] {
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+  }
+}
+
+html.lm-sf-lock body {
+  overflow: hidden !important;
+}
+
+/* ---------- Mobile / tablet ---------- */
+
+@media (max-width: 1023px) {
+  .gmd-7 {
+    #collection-filters {
+      > .grid {
+        gap: 16px;
+
+        > :nth-child(3) {
+          > button {
+            max-width: 83px;
+            overflow: hidden;
+          }
+        }
+      }
+    }
+
+    #lm-size-filter {
+      margin-top: 8px;
+      padding: 14px 0 4px 12px;
+
+      .lm-sf__chips {
+        flex-wrap: wrap;
+        overflow-x: auto;
+        padding-right: 12px;
         gap: 8px;
-        width: 100%;
-        position: relative;
-        cursor: pointer;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
 
-        * {
-            cursor: pointer;
+        &::-webkit-scrollbar {
+          display: none;
         }
+      }
 
-        label {
-            color: #000;
-            font-family: Verdana;
-            font-size: 16px;
-            font-style: normal;
-            font-weight: 700;
-            line-height: 32px;
-        }
-
-        &::before {
-            content: "";
-            display: inline-block;
-            width: 25px;
-            height: 25px;
-            flex-shrink: 0;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='25' viewBox='0 0 25 25' fill='none'%3E%3Cpath d='M0 12.3104V2.34375C0 1.04932 1.04932 0 2.34375 0H12.3104C12.932 0 13.5282 0.246935 13.9677 0.686475L24.3135 11.0323C25.2288 11.9476 25.2288 13.4315 24.3135 14.3468L14.3468 24.3135C13.4315 25.2288 11.9476 25.2288 11.0323 24.3135L0.686475 13.9677C0.246935 13.5282 0 12.932 0 12.3104ZM5.46875 3.125C4.17432 3.125 3.125 4.17432 3.125 5.46875C3.125 6.76318 4.17432 7.8125 5.46875 7.8125C6.76318 7.8125 7.8125 6.76318 7.8125 5.46875C7.8125 4.17432 6.76318 3.125 5.46875 3.125Z' fill='%234C74CD'/%3E%3C/svg%3E") center / contain no-repeat;
-        }
-
-        &::after {
-            content: "";
-            display: inline-block;
-            width: 20px;
-            height: 12px;
-            flex-shrink: 0;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='12' viewBox='0 0 20 12' fill='none'%3E%3Cpath d='M10.7772 11.6817L19.678 2.88158C20.1073 2.45716 20.1073 1.76907 19.678 1.34469L18.6399 0.318305C18.2114 -0.105391 17.5168 -0.106207 17.0873 0.316494L9.99998 7.29075L2.91274 0.316494C2.48319 -0.106207 1.78864 -0.105391 1.36009 0.318305L0.321957 1.34469C-0.107321 1.76912 -0.107321 2.45721 0.321957 2.88158L9.22271 11.6817C9.65199 12.1061 10.348 12.1061 10.7772 11.6817Z' fill='%232E2E2E'/%3E%3C/svg%3E") center / contain no-repeat;
-            margin-right: 0;
-            margin-left: auto;
-        }
+      .lm-sf__chip {
+        flex: 0 0 auto;
+        height: 38px;
+        min-width: 38px;
+        padding: 0 11px;
+        font-size: 12px;
+      }
     }
+  }
+}
 
-    form#discount-coupon-form {
-        input {
-            border-radius: 4px;
-            border: 1px solid #B1BDC8;
-            background: #FFF;
-            color: #6C757D;
-            font-family: Verdana;
-            font-size: 16px;
-            font-style: normal;
-            font-weight: 400;
-            line-height: normal;
-        }
-    }
+/* ---------- Small mobile ---------- */
 
-    div#amasty-stripe-button-modal {
-        form#discount-coupon-form {
-            max-height: 0;
-            opacity: 0;
+@media (max-width: 400px) {
+  .gmd-7 {
+    #collection-filters {
+      > .grid {
+        gap: 12px;
+
+        > :nth-child(3) {
+          > button {
+            max-width: 83px;
             overflow: hidden;
-            visibility: hidden;
-            transition: max-height 0.35s ease, opacity 0.3s ease, visibility 0.35s ease;
-
-            &.active {
-                max-height: 150px;
-                opacity: 1;
-                visibility: visible;
-                padding-top: 10px;
-            }
+          }
         }
+      }
     }
-
-    div[x-data="discountForm"] {
-        .pb-3.text-blue {
-            padding: 0;
-        }
-    }
-
-    .active strong#block-discount-heading::after {
-        transform: rotate(181deg);
-    }
-
-    .coupon-form-title {
-        padding-bottom: 0;
-    }
-
-    .coupon-form {
-        border-radius: 4px;
-        border: 1px solid #B1BDC8;
-        background: #FFF;
-        padding: 10px 16px;
-
-        form#discount-coupon-form {
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-            visibility: hidden;
-            padding-top: 0;
-            transition:
-                max-height 0.35s ease,
-                opacity 0.3s ease,
-                padding-top 0.35s ease,
-                visibility 0.35s ease;
-
-            &.active {
-                max-height: 150px;
-                opacity: 1;
-                visibility: visible;
-                padding-top: 12px;
-            }
-        }
-    }
-
-    .cart-summary {
-        fieldset.fieldset {
-            display: flex;
-        }
-
-        form#discount-coupon-form {
-            input {
-                &::placeholder {
-                    color: #6C757D;
-                    font-family: Verdana;
-                    font-size: 16px;
-                    font-style: normal;
-                    font-weight: 400;
-                    line-height: normal;
-                }
-
-                height: 36px;
-                margin-right: 22px;
-                min-width: 100%;
-                max-width: 100%;
-            }
-        }
-
-        button.btn-blue {
-            height: 36px;
-            margin-left: 10px;
-            border-radius: 4px;
-        }
-
-        .coupon-form-title {
-            color: #000;
-        }
-    }
-
-    .coupon-form-title {
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-        position: relative;
-        color: #4C74CD;
-        font-family: Verdana;
-        font-size: 16px;
-        font-weight: 700;
-        line-height: 32px;
-        padding-bottom: 0;
-
-        > span {
-            display: flex;
-            align-items: center;
-            margin-right: 10px;
-
-            svg {
-                width: 25px;
-                height: 25px;
-            }
-        }
-
-        &::after {
-            content: "";
-            width: 20px;
-            height: 12px;
-            flex-shrink: 0;
-            margin-left: auto;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='12' viewBox='0 0 20 12' fill='none'%3E%3Cpath d='M10.7772 11.6817L19.678 2.88158C20.1073 2.45716 20.1073 1.76907 19.678 1.34469L18.6399 0.318305C18.2114 -0.105391 17.5168 -0.106207 17.0873 0.316494L9.99998 7.29075L2.91274 0.316494C2.48319 -0.106207 1.78864 -0.105391 1.36009 0.318305L0.321957 1.34469C-0.107321 1.76912 -0.107321 2.45721 0.321957 2.88158L9.22271 11.6817C9.65199 12.1061 10.348 12.1061 10.7772 11.6817Z' fill='%232E2E2E'/%3E%3C/svg%3E") center / contain no-repeat;
-            transition: transform 0.3s ease;
-        }
-
-        &.active::after {
-            transform: rotate(180deg);
-        }
-
-        > span {
-            display: none;
-        }
-
-        &::before {
-            content: "";
-            display: inline-block;
-            width: 25px;
-            height: 25px;
-            flex-shrink: 0;
-            margin-right: 10px;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='25' viewBox='0 0 25 25' fill='none'%3E%3Cpath d='M0 12.3104V2.34375C0 1.04932 1.04932 0 2.34375 0H12.3104C12.932 0 13.5282 0.246935 13.9677 0.686475L24.3135 11.0323C25.2288 11.9476 25.2288 13.4315 24.3135 14.3468L14.3468 24.3135C13.4315 25.2288 11.9476 25.2288 11.0323 24.3135L0.686475 13.9677C0.246935 13.5282 0 12.932 0 12.3104ZM5.46875 3.125C4.17432 3.125 3.125 4.17432 3.125 5.46875C3.125 6.76318 4.17432 7.8125 5.46875 7.8125C6.76318 7.8125 7.8125 6.76318 7.8125 5.46875C7.8125 4.17432 6.76318 3.125 5.46875 3.125Z' fill='%234C74CD'/%3E%3C/svg%3E") center / contain no-repeat;
-        }
-    }
-
-    .product-add-form {
-        .buybuttonnew {
-            button {
-                span {
-                    font-size: 16px;
-                }
-
-                &:not(.absolute) {
-                    padding: 8px 12px;
-                }
-            }
-        }
-    }
-
-    @media (max-width: 768px) {
-        strong#block-discount-heading {
-            &::before {
-                height: 20px;
-                width: 20px;
-            }
-
-            label {
-                font-size: 14px;
-                line-height: normal;
-            }
-
-            &::after {
-                width: 16px;
-                height: 10px;
-            }
-        }
-
-        form#discount-coupon-form {
-            input {
-                font-size: 13px;
-            }
-        }
-
-        div#amasty-stripe-button-modal {
-            form#discount-coupon-form {
-                button span {
-                    font-size: 16px;
-                }
-
-                > div {
-                    display: grid;
-                    grid-template-columns: 2fr 1fr;
-
-                    > * {
-                        min-width: auto;
-                        width: auto;
-                    }
-                }
-            }
-        }
-
-        .catalog-product-view {
-            .product-add-form {
-                .buybuttonnew button {
-                    padding: 8px;
-                }
-            }
-        }
-
-        div[x-ref="amasty-stripe-button-modal"] {
-            padding-left: 10px;
-            padding-right: 10px;
-            overflow-x: hidden;
-        }
-
-        .coupon-form-title {
-            &::before {
-                width: 20px;
-                height: 20px;
-            }
-
-            font-size: 14px;
-
-            > span svg {
-                width: 22px;
-                height: 22px;
-            }
-
-            &::after {
-                width: 16px;
-                height: 10px;
-            }
-        }
-    }
-
-    @media (max-width: 450px) {
-        div#amasty-stripe-button-modal {
-            form#discount-coupon-form {
-                button span {
-                    font-size: 13px;
-                }
-
-                > div > * {
-                    min-width: 133px;
-                    width: auto;
-                    padding: 5px 8px;
-                    height: 40px;
-                }
-            }
-        }
-    }
+  }
 }
