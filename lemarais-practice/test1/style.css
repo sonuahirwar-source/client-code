@@ -7,7 +7,9 @@
   align-items: center;
   gap: 40px;
 }
-
+body.gmd-7 {
+    overflow-x: hidden;
+}
 /* 1. Filter */
 .gmd-7 #collection-filters > .grid > :nth-child(1) {
   order: 1;
@@ -130,9 +132,9 @@
 .gmd-7 #lm-size-filter .lm-sf__chips {
   transition: opacity 0.15s;
 }
-.gmd-7 #lm-size-filter.lm-sf--updating .lm-sf__chips {
+/* .gmd-7 #lm-size-filter.lm-sf--updating .lm-sf__chips {
   opacity: 0.5;
-}
+} */
 
 .gmd-7 #lm-size-filter .lm-sf__chips {
   display: flex;
