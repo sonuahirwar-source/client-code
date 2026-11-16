@@ -334,6 +334,26 @@
     render();
   }
 
+  // Lock body scroll while the dropdown is open
+  // Re-applied on every render: navigation / the site's drawer can reset overflow or scroll the page
+  var scrollLocked = false;
+  var lockedY = 0;
+  function lockScroll(lock) {
+    var html = document.documentElement;
+    if (lock) {
+      if (!scrollLocked) { scrollLocked = true; lockedY = window.scrollY; }
+      if (!html.classList.contains('lm-sf-lock')) html.classList.add('lm-sf-lock');
+      if (Math.abs(window.scrollY - lockedY) > 2) window.scrollTo(0, lockedY);
+    } else if (scrollLocked) {
+      scrollLocked = false;
+      html.classList.remove('lm-sf-lock');
+    }
+  }
+  // Something scrolled the page while locked (e.g. router after selecting a size) → snap back
+  window.addEventListener('scroll', function () {
+    if (scrollLocked && Math.abs(window.scrollY - lockedY) > 2) window.scrollTo(0, lockedY);
+  }, { passive: true });
+
   function render() {
     var toggle = document.getElementById(TOGGLE_ID);
     var panel = document.getElementById(PANEL_ID);
@@ -359,6 +379,7 @@
     }
     panel.classList.remove('lm-sf--updating');   // never dim the whole list
     panel.hidden = !isOpen;
+    lockScroll(isOpen);
 
     // Chip states
     var count = 0;
@@ -394,14 +415,13 @@
     var group = groups[+btn.getAttribute('data-g')];
     var chip = group && group.chips[+btn.getAttribute('data-c')];
     if (!chip || !chip.value) return;
-    var url = buildUrl(groups, group, chip);
-    setOpen(false);   // close dropdown after selecting a size
-    navigate(url);
+    navigate(buildUrl(groups, group, chip));   // dropdown stays open
   }
 
   // Close on outside click / Escape
   document.addEventListener('click', function (e) {
     if (!isOpen || probing) return;
+    if (!e.target.isConnected) return;   // clicked chip was re-rendered → not an outside click
     var bar = document.getElementById(BAR_ID);
     if (bar && !bar.contains(e.target)) setOpen(false);
   });
@@ -674,6 +694,7 @@
     var bar = document.getElementById(BAR_ID);
     if (bar) bar.classList.remove(READY_CLASS);
     isOpen = false;
+    lockScroll(false);
   }
 
   var lastKey = null;
