@@ -8,7 +8,7 @@
   gap: 40px;
 }
 body.gmd-7 {
-    overflow-x: hidden;
+    overflow-x: hidden !important;
 }
 /* 1. Filter */
 .gmd-7 #collection-filters > .grid > :nth-child(1) {
@@ -204,6 +204,13 @@ html.lm-sf-probing {
   padding-right: 0 !important;
 }
 
+/* Size dropdown open → no body scroll (also wins while the drawer is being read) */
+html.lm-sf-lock,
+html.lm-sf-lock.lm-sf-probing,
+html.lm-sf-lock body {
+  overflow: hidden !important;
+}
+
 html.lm-sf-probing #headlessui-portal-root,
 html.lm-sf-probing [data-headlessui-portal] {
   visibility: hidden !important;
@@ -218,7 +225,8 @@ html.lm-sf-probing [data-headlessui-portal] {
   }
 
   .gmd-7 #collection-filters > .grid > :nth-child(3) > button {
-    max-width: 120px;
+ max-width: 83px;
+        overflow: hidden;
   }
 
   .gmd-7 #lm-size-filter {
