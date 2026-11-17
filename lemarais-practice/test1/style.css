@@ -7,7 +7,7 @@
   align-items: center;
   gap: 40px;
 }
-body.gmd-7 {
+body{
     overflow-x: hidden !important;
 }
 /* 1. Filter */
@@ -95,6 +95,16 @@ body.gmd-7 {
   padding: 16px 16px 6px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   background: #fff;
+  /* max-height set by JS so the panel always fits under the sticky bar */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+
+    max-height: 100% !IMPORTANT;
+}
+
+.gmd-7 #lm-size-filter::-webkit-scrollbar {
+  display: none;
 }
 
 .gmd-7 #lm-size-filter[hidden] {
@@ -169,9 +179,7 @@ body.gmd-7 {
   transform: translateY(1px);
 }
 
-.gmd-7 #lm-size-filter .lm-sf__chip:hover {
-  border-color: rgba(0, 0, 0, 0.45);
-}
+
 
 /* Selected: black outline, white fill */
 .gmd-7 #lm-size-filter .lm-sf__chip[aria-pressed="true"] {
@@ -201,14 +209,37 @@ body.gmd-7 {
    and overflow on <body> broke the sticky #collection-filters.) */
 html.lm-sf-probing {
   overflow-y: auto !important;   /* undo the drawer's scroll lock, page doesn't jump */
+  overflow-x: hidden !important; /* body's overflow-x is reset below → keep the horizontal scrollbar away */
   padding-right: 0 !important;
 }
 
-/* Size dropdown open → no body scroll (also wins while the drawer is being read) */
-html.lm-sf-lock,
-html.lm-sf-lock.lm-sf-probing,
-html.lm-sf-lock body {
-  overflow: hidden !important;
+/* mobile scroll-lock shifts <body> (margin-top / position) → header + dropdown jump */
+html.lm-sf-probing body {
+  margin-top: 0 !important;
+  padding-right: 0 !important;
+  position: static !important;
+  top: auto !important;
+  overflow: visible !important;
+}
+
+/* site hides the chat button when html/body has overflow:hidden (scroll-lock of the
+   hidden drawer) → it blinked on every size select. Keep it visible while probing. */
+html.lm-sf-probing button[aria-label="Chat openen"] {
+  display: flex !important;
+}
+
+/* drawer got stuck half-closed (invisible backdrop over the page) → click-through
+   (set/removed by the script, only while no drawer is actually visible) */
+[data-lm-sf-healed],
+[data-lm-sf-healed] * {
+  pointer-events: none !important;
+}
+
+/* The drawer backdrop in its invisible (closed / leave-to) state must never block the
+   page. When the drawer really opens its classes change (opacity-100 …) → not matched. */
+.fixed.inset-0.opacity-0.backdrop-blur-none,
+.fixed.inset-0.opacity-0.bg-transparent {
+  pointer-events: none !important;
 }
 
 html.lm-sf-probing #headlessui-portal-root,
