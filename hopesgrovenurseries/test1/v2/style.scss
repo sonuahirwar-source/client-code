@@ -15,7 +15,7 @@
     color: #333;
     box-sizing: border-box;
     box-shadow: 0 0 0.5rem 0 rgba(126, 125, 73, 0.15);
-    padding: 1.5rem;
+    padding: 1.50rem;
     padding-top: 22px;
   }
 
@@ -102,7 +102,7 @@
             left: 0;
             top: 50%;
             transform: translateY(-50%);
-            font-family: "Font Awesome 5 Pro", "Helvetica", "Arial", sans-serif;
+            font-family: 'Font Awesome 5 Pro', 'Helvetica', 'Arial', sans-serif;
           }
 
           &::after {
@@ -110,21 +110,21 @@
           }
 
           &.age::before {
-            content: "\f073";
+            content: '\f073';
           }
 
           &.plants-per-metre::before {
-            content: "\f724";
+            content: '\f724';
             left: -3px;
           }
 
           &.ab-stock::before,
           &.minimum-quantity::before {
-            content: "\f466";
+            content: '\f466';
           }
 
           &.ab-unit-price::before {
-            content: "\f51e";
+            content: '\f51e';
           }
         }
       }
@@ -142,6 +142,43 @@
         margin: 0 auto;
         padding: 0;
         border-radius: 0;
+
+        .product-lightbox {
+          position: relative;
+          display: block;
+        }
+
+        .responsive-image-crop,
+        .image-container {
+          border-radius: 0;
+        }
+
+        img {
+          width: 100%;
+          height: auto;
+          display: block;
+        }
+
+        .zoom {
+          position: absolute;
+          top: 6px;
+          left: 4px;
+          width: 31px;
+          height: 31px;
+          margin: 0;
+          padding: 0;
+          border-radius: 50%;
+          background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234f7533' stroke-width='2.4' stroke-linecap='square'%3E%3Cpath d='M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5'/%3E%3C/svg%3E") no-repeat center / 18px;
+          font-size: 0;
+          color: transparent;
+          overflow: hidden;
+          z-index: 3;
+
+          &::before,
+          &::after {
+            display: none;
+          }
+        }
       }
 
       .purchase {
@@ -160,6 +197,7 @@
       }
     }
 
+    /* Delivery pill */
     .ab-delivery-banner {
       position: absolute;
       top: -13px;
@@ -184,6 +222,7 @@
       }
     }
 
+    /* Price tiers */
     .ab-price {
       margin: 0;
       padding: 0;
@@ -239,17 +278,27 @@
 
         &.is-active {
           background: #eef0e3;
+
+          .ab-tier-check {
+            display: block;
+          }
+
+          .ab-tier-qty,
+          .ab-tier-now {
+            color: #53753c;
+          }
         }
 
         &.ab-tier-disabled {
           opacity: 0.4;
           cursor: not-allowed;
-          background: transparent !important;
 
           * {
             color: #515151;
             text-decoration: line-through;
           }
+
+          background: transparent !important;
         }
       }
     }
@@ -260,7 +309,7 @@
         margin: 0;
         padding: 0;
         font-size: 16.34px;
-        font-family: "Roboto Slab Light";
+        font-family: 'Roboto Slab Light';
       }
 
       .ab-tier-qty {
@@ -296,87 +345,40 @@
           height: 23px;
         }
       }
+    }
 
-      &.is-active {
-        .ab-tier-check {
+    /* Promo badges */
+    .promo-image-bar {
+      &.ab-badge {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        left: auto;
+        bottom: auto;
+        width: 45px;
+        height: 45px;
+        margin: 0;
+        padding: 5px;
+        border-radius: 50%;
+        background: #a7201f;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 10px;
+        text-transform: uppercase;
+        transform: none;
+        z-index: 3;
+        font-family: "Roboto Slab Bold";
+
+        span {
           display: block;
         }
-
-        .ab-tier-qty,
-        .ab-tier-now {
-          color: #53753c;
-        }
-      }
-    }
-
-    .image {
-      .product-lightbox {
-        position: relative;
-        display: block;
       }
 
-      .responsive-image-crop,
-      .image-container {
-        border-radius: 0;
-      }
-
-      img {
-        width: 100%;
-        height: auto;
-        display: block;
-      }
-
-      .zoom {
-        position: absolute;
-        top: 6px;
-        left: 4px;
-        width: 31px;
-        height: 31px;
-        margin: 0;
-        padding: 0;
-        border-radius: 50%;
-        background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234f7533' stroke-width='2.4' stroke-linecap='square'%3E%3Cpath d='M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5'/%3E%3C/svg%3E") no-repeat center / 18px;
-        font-size: 0;
-        color: transparent;
-        overflow: hidden;
-        z-index: 3;
-
-        &::before,
-        &::after {
-          display: none;
-        }
-      }
-    }
-
-    .promo-image-bar.ab-badge {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      left: auto;
-      bottom: auto;
-      width: 45px;
-      height: 45px;
-      margin: 0;
-      padding: 5px;
-      border-radius: 50%;
-      background: #a7201f;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      font-size: 10px;
-      text-transform: uppercase;
-      transform: none;
-      z-index: 3;
-      font-family: "Roboto Slab Bold";
-
-      span {
-        display: block;
-      }
-
-      &.yellow {
+      &.yellow.ab-badge {
         background-color: #f2f501;
         color: #000;
         font-weight: 700;
@@ -386,7 +388,7 @@
         border-radius: 0;
         left: 0;
         padding: 0.25rem 0.125rem;
-        font-family: "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times, "Times New Roman", serif;
+        font-family: 'Roboto Slab Bold', "Courier Bold", Courier, Georgia, Times, "Times New Roman", serif;
         font-style: normal;
         font-size: 0.75rem;
         text-transform: uppercase;
@@ -395,6 +397,7 @@
       }
     }
 
+    /* Purchase */
     .purchase {
       .plant-calculator {
         padding: 0;
@@ -517,6 +520,7 @@
       }
     }
 
+    /* Waitlist */
     .wcwl_elements {
       background-color: #53753C;
       margin-top: 0;
@@ -556,6 +560,10 @@
             background-color: #f6f5f5 !important;
             border: 2px solid #f6f5f5 !important;
             box-shadow: none !important;
+
+            &::placeholder {
+              font-family: 'Roboto Slab Light';
+            }
           }
         }
 
@@ -579,10 +587,11 @@
     }
 
     p.waitlist-notice {
-      font-family: "Roboto Slab Light";
+      font-family: 'Roboto Slab Light';
     }
   }
 
+  /* Product details */
   .product-details {
     .product-intro {
       .summary {
@@ -591,6 +600,30 @@
 
       .root-type-selector {
         width: 100%;
+      }
+
+      .step-2 {
+        span.root-type {
+          position: relative;
+          padding-right: 1.5rem;
+          color: #a24191;
+
+          &::before {
+            right: 0;
+            left: auto;
+            content: "\f05a";
+            font-weight: 300;
+            position: absolute;
+            display: inline-block;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            font-family: 'Font Awesome 5 Pro', 'Helvetica', 'Arial', sans-serif;
+            font-size: inherit;
+            line-height: inherit;
+            cursor: pointer;
+          }
+        }
       }
     }
 
@@ -618,34 +651,8 @@
     }
   }
 
-  .product-intro {
-    .step-2 span.root-type {
-      position: relative;
-      padding-right: 1.5rem;
-      color: #a24191;
-
-      &::before {
-        right: 0;
-        left: auto;
-        content: "\f05a";
-        font-weight: 300;
-        position: absolute;
-        display: inline-block;
-        font-style: normal;
-        font-variant: normal;
-        text-rendering: auto;
-        font-family: "Font Awesome 5 Pro", "Helvetica", "Arial", sans-serif;
-        font-size: inherit;
-        line-height: inherit;
-        cursor: pointer;
-      }
-    }
-  }
-}
-
-// Tablet
-@media (max-width: 900px) {
-  .gmd-001-v2 {
+  /* Responsive */
+  @media (max-width: 900px) {
     .ab-tiers-card {
       > .content {
         gap: 24px;
@@ -656,14 +663,10 @@
       }
     }
   }
-}
 
-// Mobile
-@media (max-width: 640px) {
-  .gmd-001-v2 {
+  @media (max-width: 640px) {
     .ab-tiers-card {
       > .content {
-        flex-direction: column;
         gap: 15px;
         grid-template-columns: 1fr 1fr;
 
@@ -685,7 +688,10 @@
             padding-left: 20px;
             font-size: 14px;
 
-            p,
+            p {
+              font-size: 14px;
+            }
+
             strong {
               font-size: 14px;
             }
@@ -699,6 +705,25 @@
 
         .image {
           max-width: 95px;
+        }
+      }
+
+      .ab-tier {
+        span {
+          font-size: 14px;
+        }
+
+        .ab-tier-qty {
+          font-size: 14px;
+        }
+
+        .ab-tier-was,
+        .ab-tier-now {
+          font-size: 12px;
+        }
+
+        .ab-tier-check {
+          right: -18px;
         }
       }
 
@@ -727,30 +752,14 @@
         }
       }
 
-      .ab-tier {
-        span {
-          font-size: 14px;
-        }
-
-        .ab-tier-qty {
-          font-size: 14px;
-        }
-
-        .ab-tier-was,
-        .ab-tier-now {
-          font-size: 12px;
-        }
-
-        .ab-tier-check {
-          right: -18px;
-        }
-      }
-
       .purchase {
         .total-price {
           font-size: 14px;
 
-          strong,
+          strong {
+            font-size: 14px;
+          }
+
           .price-total-original {
             font-size: 14px;
           }
