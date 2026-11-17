@@ -62,6 +62,8 @@
 '/nl/collections/beige-riem',
 '/nl/collections/blauwe-riem',
 '/nl/collections/bruine-riem',
+'/nl/collections/mp-denmark',
+'/nl/collections/moismont',
     ];
 
     function isExcludedPath(path) {
@@ -96,7 +98,7 @@
   var PANEL_ID = 'lm-size-filter';
   var READY_CLASS = 'lm-sf-ready';
   var PROBING_CLASS = 'lm-sf-probing';
-  var CACHE_KEY = 'lm_sf_maat_v3';
+  var CACHE_KEY = 'lm_sf_maat_v4';   // v4: drop old cached "no Maat" results
   var CACHE_TTL = 10 * 60 * 1000;
   var MAX_ATTEMPTS = 4;
   var QUIET_MS = 500;       // page must be quiet this long before we read the drawer
@@ -153,15 +155,22 @@
     });
     return best ? best.groups : null;
   }
+  // Sizes are read ONCE per collection; every filter combination on it reuses that list.
+  // (Re-reading after each size click opened the hidden drawer again and again → focus/clicks
+  // got stolen, the 2nd quick click was lost, <html> kept changing, cursor blinked.)
+  // Only a SUCCESSFUL read (sizes found) counts for the whole collection.
+  // An empty read only applies to that exact URL, so a slow drawer can never hide "Maat" everywhere.
+  function hasPathData(path) {
+    return !!knownGroupsForPath(path);
+  }
   function currentData() {
     var path = normPath(location.pathname);
     var hit = cache[pageKey()];
     if (hit && hit.groups.length) return { groups: hit.groups, stale: false };
     var prev = knownGroupsForPath(path);
-    // Collection has sizes (seen before) → keep showing them, even if this filtered read came back empty
-    if (prev) return { groups: prev, stale: !hit };
-    if (hit) return { groups: hit.groups, stale: false };
-    return null;
+    if (prev) return { groups: prev, stale: false };
+    if (hit) return { groups: [], stale: false };   // this URL really has no "Maat"
+    return null;                                    // not read yet → toggle stays visible
   }
 
   // a minus b (count-aware)
@@ -273,7 +282,11 @@
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
       setOpen(!isOpen);
-      if (isOpen) scheduleProbe(0);
+      if (isOpen) {
+        // user explicitly asks for sizes → give the reader a fresh set of attempts
+        if (!cache[pageKey()]) attempts[pageKey()] = 0;
+        scheduleProbe(0);
+      }
     });
     return btn;
   }
@@ -334,24 +347,46 @@
     render();
   }
 
-  // Lock body scroll while the dropdown is open
-  // Re-applied on every render: navigation / the site's drawer can reset overflow or scroll the page
-  var scrollLocked = false;
-  var lockedY = 0;
-  function lockScroll(lock) {
-    var html = document.documentElement;
-    if (lock) {
-      if (!scrollLocked) { scrollLocked = true; lockedY = window.scrollY; }
-      if (!html.classList.contains('lm-sf-lock')) html.classList.add('lm-sf-lock');
-      if (Math.abs(window.scrollY - lockedY) > 2) window.scrollTo(0, lockedY);
-    } else if (scrollLocked) {
-      scrollLocked = false;
-      html.classList.remove('lm-sf-lock');
+  // NO body scroll lock: overflow:hidden on <html>/<body> breaks position:sticky
+  // (filter bar + site header scrolled away, top slider got cut off).
+  // Instead the panel gets a max-height so it always fits below the sticky bar.
+  // Calculated ONCE per open (and on resize / new content) – never on scroll:
+  // changing the height while scrolling made the sticky bar / header jump in and out.
+  // Value doesn't depend on whether the bar is stuck → stable, no feedback loop.
+  // Limit is only applied when the sizes really don't fit on screen → normally no inner scroll.
+  var fitDone = false;
+  function fitPanel(force) {
+    var bar = document.getElementById(BAR_ID);
+    var panel = document.getElementById(PANEL_ID);
+    if (!bar || !panel) return;
+    if (!isOpen || panel.hidden) {
+      fitDone = false;
+      if (panel.style.maxHeight) panel.style.maxHeight = '';
+      return;
     }
+    if (fitDone && !force) return;
+    fitDone = true;
+    var stickyTop = parseFloat(getComputedStyle(bar).top) || 0;
+    var avail = Math.round(window.innerHeight - stickyTop - panel.offsetTop - 12);
+    var val = '';
+    panel.style.maxHeight = '';
+    if (panel.scrollHeight > avail) val = Math.max(200, avail) + 'px';
+    if (panel.style.maxHeight !== val) panel.style.maxHeight = val;
   }
-  // Something scrolled the page while locked (e.g. router after selecting a size) → snap back
+  var fitQueued = false;
+  window.addEventListener('resize', function () {
+    if (fitQueued || !isOpen) return;
+    fitQueued = true;
+    requestAnimationFrame(function () { fitQueued = false; fitPanel(true); });
+  }, { passive: true });
+
+  // After selecting a size the router may jump to the top → put the page back once
+  var restoreY = null;
+  var restoreUntil = 0;
   window.addEventListener('scroll', function () {
-    if (scrollLocked && Math.abs(window.scrollY - lockedY) > 2) window.scrollTo(0, lockedY);
+    if (restoreY == null) return;
+    if (Date.now() > restoreUntil) { restoreY = null; return; }
+    if (window.scrollY < 5 && restoreY > 5) window.scrollTo(0, restoreY);
   }, { passive: true });
 
   function render() {
@@ -368,18 +403,30 @@
     if (toggle.hidden !== none) toggle.hidden = none;
     if (none && isOpen) isOpen = false;
 
-    // Panel content
+    // Panel content (new content → height may change → re-fit once)
+    var refit = false;
     if (!groups || !groups.length) {
       if (panel.__groups !== 'loading') {
         panel.innerHTML = '<p class="lm-sf__loading">Laden…</p>';
         panel.__groups = 'loading';
+        panel.__sig = null;
+        refit = true;
       }
     } else if (panel.__groups !== groups) {
-      fillPanel(panel, groups);
+      // Same sizes (other object, e.g. from session cache) → keep the buttons,
+      // rebuilding them between pointerdown and click swallowed the click
+      var sig = JSON.stringify(groups);
+      if (panel.__sig !== sig) {
+        fillPanel(panel, groups);
+        panel.__sig = sig;
+        refit = true;
+      } else {
+        panel.__groups = groups;
+      }
     }
     panel.classList.remove('lm-sf--updating');   // never dim the whole list
-    panel.hidden = !isOpen;
-    lockScroll(isOpen);
+    if (panel.hidden !== !isOpen) panel.hidden = !isOpen;
+    fitPanel(refit);
 
     // Chip states
     var count = 0;
@@ -415,6 +462,8 @@
     var group = groups[+btn.getAttribute('data-g')];
     var chip = group && group.chips[+btn.getAttribute('data-c')];
     if (!chip || !chip.value) return;
+    restoreY = window.scrollY;
+    restoreUntil = Date.now() + 1500;
     navigate(buildUrl(groups, group, chip));   // dropdown stays open
   }
 
@@ -529,13 +578,120 @@
     return count ? { groups: groups, fresh: fresh } : null;
   }
 
+  function pressEscape() {
+    var t = document.activeElement || document.body;
+    t.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, bubbles: true }));
+  }
+
+  // Probe only starts when no dialog is open, so any dialog now is the one we opened –
+  // close it even if it wasn't recognised as the filter drawer (otherwise it stays
+  // open invisibly and blocks the whole page).
   function closeDrawer() {
-    var drawer = getDrawer();
+    var drawer = getDrawer() || document.querySelector('[role="dialog"]');
     if (!drawer) return;
     var close = drawer.querySelector('button[aria-label="Filters sluiten"]') || drawer.querySelector('button[aria-label]');
     if (close) close.click();
-    else document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    else pressEscape();
   }
+
+  // While the hidden drawer is open, Headless UI marks the rest of the page `inert`
+  // → nothing is clickable. Undo that during the probe so the page never freezes.
+  function unInert() {
+    var els = document.querySelectorAll('[inert]');
+    for (var i = 0; i < els.length; i++) {
+      if (!els[i].closest('#headlessui-portal-root, [data-headlessui-portal]')) els[i].removeAttribute('inert');
+    }
+  }
+  var inertObserver = new MutationObserver(unInert);
+
+  // ---------- Self-heal: drawer stuck half-closed ----------
+  // Sometimes the hidden drawer's close transition never finishes: an invisible backdrop
+  // ("fixed inset-0 ... opacity-0 backdrop-blur-none") stays over the whole page and
+  // <html> keeps overflow:hidden → nothing can be clicked or scrolled until refresh.
+  // Detect that (invisible backdrop + no drawer panel on screen) and neutralise it.
+  var HEAL_ATTR = 'data-lm-sf-healed';
+  var stuckSince = 0;
+
+  function isOnScreen(el) {
+    var cs = getComputedStyle(el);
+    if (cs.visibility === 'hidden' || cs.display === 'none' || parseFloat(cs.opacity) < 0.05) return false;
+    var r = el.getBoundingClientRect();
+    return r.width > 0 && r.height > 0 && r.right > 1 && r.left < window.innerWidth - 1 &&
+      r.bottom > 1 && r.top < window.innerHeight - 1;
+  }
+
+  function revive(roots) {
+    for (var i = 0; i < roots.length; i++) {
+      if (roots[i].hasAttribute(HEAL_ATTR)) roots[i].removeAttribute(HEAL_ATTR);
+    }
+  }
+
+  function healOverlay() {
+    if (probing) { stuckSince = 0; return; }
+    // Backdrop can live in a Headless UI portal or anywhere else in the page
+    var backdrops = [].slice.call(document.querySelectorAll('.fixed.inset-0[class*="backdrop-blur"]'));
+    if (!backdrops.length) { stuckSince = 0; return; }
+    var roots = [].slice.call(document.querySelectorAll('#headlessui-portal-root, [data-headlessui-portal]'));
+    backdrops.forEach(function (b) { if (roots.indexOf(b) === -1) roots.push(b); });
+
+    var panelVisible = false;
+    var panels = document.querySelectorAll('[id^="headlessui-dialog-panel"]');
+    for (var k = 0; k < panels.length; k++) if (isOnScreen(panels[k])) panelVisible = true;
+    var backdropVisible = backdrops.some(function (el) { return parseFloat(getComputedStyle(el).opacity) >= 0.05; });
+
+    // A real drawer (filter / cart / menu) is open or opening → hands off
+    if (!backdrops.length || backdropVisible || panelVisible) {
+      stuckSince = 0;
+      revive(roots);
+      return;
+    }
+
+    if (!stuckSince) { stuckSince = Date.now(); return; }
+    if (Date.now() - stuckSince < 400) return;   // normal close transition is 300ms
+
+    // Stuck → make it click-through and give the page its scroll back
+    for (var m = 0; m < roots.length; m++) {
+      if (!roots[m].hasAttribute(HEAL_ATTR)) {
+        roots[m].setAttribute(HEAL_ATTR, '');   // CSS: [data-lm-sf-healed] * { pointer-events:none }
+        log('healed stuck drawer overlay');
+      }
+    }
+    [document.documentElement, document.body].forEach(function (el) {
+      if (el.style.overflow === 'hidden' || el.style.overflowY === 'hidden') {
+        el.style.removeProperty('overflow');
+        el.style.removeProperty('overflow-y');
+        el.style.removeProperty('padding-right');
+      }
+    });
+    unInert();
+  }
+  setInterval(healOverlay, 200);
+
+  // While the hidden drawer opens/closes, the site's scroll-lock (Headless UI) scrolls the
+  // page (mobile: jump to top + restore) and focus() scrolls too → header shows/hides and
+  // the dropdown jumps up/down on every probe. Block all of that while probing.
+  ['scrollTo', 'scroll', 'scrollBy'].forEach(function (fn) {
+    var orig = window[fn];
+    if (typeof orig !== 'function') return;
+    window[fn] = function () {
+      if (probing) return;
+      return orig.apply(window, arguments);
+    };
+  });
+  var origFocus = HTMLElement.prototype.focus;
+  HTMLElement.prototype.focus = function (opts) {
+    if (probing) {
+      var o = {};
+      if (opts && typeof opts === 'object') for (var k in opts) o[k] = opts[k];
+      o.preventScroll = true;
+      return origFocus.call(this, o);
+    }
+    return origFocus.apply(this, arguments);
+  };
+  // iOS scroll-lock blocks touch scrolling via a touchmove listener → page stays scrollable
+  window.addEventListener('touchmove', function (e) {
+    if (probing) e.stopPropagation();
+  }, { capture: true, passive: true });
 
   // React only reacts to clicks after hydration
   function isHydrated(el) {
@@ -562,6 +718,7 @@
   function scheduleProbe(delay) {
     var key = pageKey();
     if (probing || cache[key] || !isCollectionPage()) return;
+    if (hasPathData(key.split('?')[0])) return;   // collection already read
     if ((attempts[key] || 0) >= MAX_ATTEMPTS) return;
     clearTimeout(probeTimer);
     probeTimer = setTimeout(tryProbe, delay == null ? 300 : delay);
@@ -583,6 +740,7 @@
     if (probing) return;
     var key = pageKey();
     if (cache[key] || (attempts[key] || 0) >= MAX_ATTEMPTS || !isCollectionPage()) return;
+    if (hasPathData(key.split('?')[0])) return;
 
     var bar = document.getElementById(BAR_ID);
     var filterBtn = bar && findFilterButton(bar);
@@ -601,12 +759,15 @@
     attempts[key] = (attempts[key] || 0) + 1;
     log('probe', key, 'attempt', attempts[key]);
     root.classList.add(PROBING_CLASS);   // drawer invisible ONLY while this class is on
+    inertObserver.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['inert'] });
+    // Hard limit: a probe can never hang (e.g. drawer not recognised after PDP → PLP)
+    var watchdog = setTimeout(function () { log('probe watchdog'); aborted = true; }, 7000);
     filterBtn.click();
 
     waitFor(getDrawer, 4000)
       .then(function () {
         // drawer is open: no "Maat" in it → this collection has no size filter
-        return waitFor(findMaatTrigger, 1500).catch(function (err) {
+        return waitFor(findMaatTrigger, 3000).catch(function (err) {
           if (err.message === 'timeout') return null;
           throw err;
         });
@@ -618,8 +779,9 @@
             log('Maat not found yet on filtered url, retry');
             return;
           }
-          if (pageKey() === key) saveData(key, []);
-          log('no Maat in control');
+          // only believe "no Maat" after 2 reads – first one may just be a slow drawer
+          if (pageKey() === key && attempts[key] >= 2) saveData(key, []);
+          log('no Maat in control (attempt ' + attempts[key] + ')');
           return;
         }
         trigger = t;
@@ -634,18 +796,30 @@
       .catch(function (err) { log('probe failed', err && err.message); })
       .then(function () {
         if (!aborted && openedMaat && trigger && trigger.isConnected) trigger.click(); // leave Maat as it was
+        clearTimeout(watchdog);
         closeDrawer();
         var stillAborted = aborted;
         aborted = false;   // let the wait below run
-        return waitFor(function () { return !getDrawer(); }, 1500).catch(function () {}).then(function () {
-          return stillAborted;
-        });
+        var closed = function () { return !getDrawer() && !anyDialogOpen(); };
+        return waitFor(closed, 1500)
+          .catch(function () {
+            // still open → try Escape once more
+            closeDrawer();
+            pressEscape();
+            return waitFor(closed, 800).catch(function () {});
+          })
+          .then(function () { return stillAborted; });
       })
+      .catch(function () { return true; })
       .then(function (wasAborted) {
+        clearTimeout(watchdog);
+        inertObserver.disconnect();
+        unInert();
         root.classList.remove(PROBING_CLASS);
         probing = false;
 
-        if (Math.abs(window.scrollY - scrollY) > 2) window.scrollTo(0, scrollY);
+        // only undo a jump-to-top caused by the drawer, never fight the user's own scrolling
+        if (window.scrollY < 5 && scrollY > 5) window.scrollTo(0, scrollY);
         if (!wasAborted) {
           if (active && active.focus && active !== document.body) {
             try { active.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
@@ -694,7 +868,6 @@
     var bar = document.getElementById(BAR_ID);
     if (bar) bar.classList.remove(READY_CLASS);
     isOpen = false;
-    lockScroll(false);
   }
 
   var lastKey = null;
@@ -710,17 +883,15 @@
 
     if (!bar.classList.contains(READY_CLASS)) bar.classList.add(READY_CLASS);
 
+    // Move the existing nodes back into place instead of rebuilding them
+    // (rebuilding made the open dropdown flash away/back on every React update)
     var toggle = document.getElementById(TOGGLE_ID);
-    if (!toggle || toggle.parentElement !== grid) {
-      if (toggle) toggle.remove();
-      grid.appendChild(buildToggle());
-    }
+    if (!toggle) grid.appendChild(buildToggle());
+    else if (toggle.parentElement !== grid) grid.appendChild(toggle);
 
     var panel = document.getElementById(PANEL_ID);
-    if (!panel || panel.parentElement !== bar || bar.lastElementChild !== panel) {
-      if (panel) panel.remove();
-      bar.appendChild(buildPanel());
-    }
+    if (!panel) bar.appendChild(buildPanel());
+    else if (panel.parentElement !== bar || bar.lastElementChild !== panel) bar.appendChild(panel);
 
     var key = pageKey();
     if (key !== lastKey) {
