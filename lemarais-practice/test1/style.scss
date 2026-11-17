@@ -4,10 +4,6 @@
 
 /* ---------- Bar layout ---------- */
 
-body.gmd-7 {
-  overflow-x: hidden !important;
-}
-
 .gmd-7 {
   #collection-filters {
     > .grid {
@@ -47,8 +43,6 @@ body.gmd-7 {
     }
   }
 
-  /* ---------- Maat toggle ---------- */
-
   #lm-size-toggle {
     display: inline-flex;
     align-items: center;
@@ -67,13 +61,17 @@ body.gmd-7 {
     flex: 0 0 auto;
     transition: border-color 0.13s;
 
-    /* control has no "Maat" on this collection */
+    /* Control has no "Maat" on this collection */
     &[hidden] {
       display: none !important;
     }
 
     &[aria-expanded="true"] {
       border-bottom-color: #000;
+
+      .lm-sf-toggle__chevron {
+        transform: rotate(180deg);
+      }
     }
 
     .lm-sf-toggle__label {
@@ -85,12 +83,6 @@ body.gmd-7 {
       height: 9px;
       flex: 0 0 auto;
       transition: transform 0.13s;
-    }
-
-    &[aria-expanded="true"] {
-      .lm-sf-toggle__chevron {
-        transform: rotate(180deg);
-      }
     }
 
     &:focus-visible {
@@ -106,6 +98,16 @@ body.gmd-7 {
     padding: 16px 16px 6px;
     border: 1px solid rgba(0, 0, 0, 0.1);
     background: #fff;
+
+    /* Max-height set by JS so the panel always fits under the sticky bar */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    max-height: 100% !important;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
 
     &[hidden] {
       display: none !important;
@@ -142,105 +144,115 @@ body.gmd-7 {
     .lm-sf__chips {
       transition: opacity 0.15s;
 
-      /* 
-      &.lm-sf--updating {
+      /* &.lm-sf--updating {
         opacity: 0.5;
-      }
-      */
+      } */
 
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
       min-width: 0;
 
-      &::-webkit-scrollbar {
-        display: none;
-      }
-    }
-
-    .lm-sf__chip {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      height: 40px;
-      min-width: 40px;
-      padding: 0 12px;
-      border: 1px solid rgba(0, 0, 0, 0.12);
-      border-radius: 9999px;
-      background: #fff;
-      color: #000;
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 600;
-      line-height: 1;
-      white-space: nowrap;
-      cursor: pointer;
-      transition: border-color 0.13s, box-shadow 0.13s;
-      -webkit-appearance: none;
-      appearance: none;
-
-      > span {
-        transform: translateY(1px);
-      }
-
-      &:hover {
-        border-color: rgba(0, 0, 0, 0.45);
-      }
-
-      /* Selected: black outline, white fill */
-      &[aria-pressed="true"] {
-        border-color: #000;
-        box-shadow: inset 0 0 0 0.5px #000;
-      }
-
-      /* Not available – faded + struck through */
-      &:disabled,
-      &:disabled:hover {
+      .lm-sf__chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 40px;
+        min-width: 40px;
+        padding: 0 12px;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        border-radius: 9999px;
         background: #fff;
-        border-color: rgba(0, 0, 0, 0.07);
-        color: rgba(0, 0, 0, 0.18);
-        text-decoration: line-through;
-        text-decoration-color: rgba(0, 0, 0, 0.18);
-        box-shadow: none;
-        cursor: not-allowed;
-      }
+        color: #000;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: border-color 0.13s, box-shadow 0.13s;
+        -webkit-appearance: none;
+        appearance: none;
 
-      &:focus-visible {
-        outline: 1px solid #000;
-        outline-offset: 3px;
+        > span {
+          transform: translateY(1px);
+        }
+
+        /* Selected: black outline, white fill */
+        &[aria-pressed="true"] {
+          border-color: #000;
+          box-shadow: inset 0 0 0 0.5px #000;
+        }
+
+        /* Not available – faded + struck through */
+        &:disabled,
+        &:disabled:hover {
+          background: #fff;
+          border-color: rgba(0, 0, 0, 0.07);
+          color: rgba(0, 0, 0, 0.18);
+          text-decoration: line-through;
+          text-decoration-color: rgba(0, 0, 0, 0.18);
+          box-shadow: none;
+          cursor: not-allowed;
+        }
+
+        &:focus-visible {
+          outline: 1px solid #000;
+          outline-offset: 3px;
+        }
       }
     }
   }
+}
+
+/* ---------- Global styles ---------- */
+
+body {
+  overflow-x: hidden !important;
 }
 
 /* ---------- Drawer opened invisibly – ONLY while the script reads it ----------
+
    (Before this was always on, which hid the Filter / cart / menu / search sidebars,
-   and overflow on <body> broke the sticky #collection-filters.) */
+   and overflow on <body> broke the sticky #collection-filters.)
+*/
 
-html {
-  &.lm-sf-probing {
-    overflow-y: auto !important;
+html.lm-sf-probing {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-right: 0 !important;
+
+  /* Mobile scroll-lock shifts body → header + dropdown jump */
+  body {
+    margin-top: 0 !important;
     padding-right: 0 !important;
+    position: static !important;
+    top: auto !important;
+    overflow: visible !important;
   }
 
-  /* Size dropdown open → no body scroll */
-  &.lm-sf-lock,
-  &.lm-sf-lock.lm-sf-probing {
-    overflow: hidden !important;
+  /* Keep chat button visible while probing */
+  button[aria-label="Chat openen"] {
+    display: flex !important;
   }
 
-  &.lm-sf-probing {
-    #headlessui-portal-root,
-    [data-headlessui-portal] {
-      visibility: hidden !important;
-      opacity: 0 !important;
-      pointer-events: none !important;
-    }
+  #headlessui-portal-root,
+  [data-headlessui-portal] {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
   }
 }
 
-html.lm-sf-lock body {
-  overflow: hidden !important;
+/* Drawer backdrop – click-through when invisible */
+[data-lm-sf-healed],
+[data-lm-sf-healed] * {
+  pointer-events: none !important;
+}
+
+.fixed.inset-0.opacity-0.backdrop-blur-none,
+.fixed.inset-0.opacity-0.bg-transparent {
+  pointer-events: none !important;
 }
 
 /* ---------- Mobile / tablet ---------- */
@@ -251,11 +263,9 @@ html.lm-sf-lock body {
       > .grid {
         gap: 16px;
 
-        > :nth-child(3) {
-          > button {
-            max-width: 83px;
-            overflow: hidden;
-          }
+        > :nth-child(3) > button {
+          max-width: 83px;
+          overflow: hidden;
         }
       }
     }
@@ -275,20 +285,18 @@ html.lm-sf-lock body {
         &::-webkit-scrollbar {
           display: none;
         }
-      }
 
-      .lm-sf__chip {
-        flex: 0 0 auto;
-        height: 38px;
-        min-width: 38px;
-        padding: 0 11px;
-        font-size: 12px;
+        .lm-sf__chip {
+          flex: 0 0 auto;
+          height: 38px;
+          min-width: 38px;
+          padding: 0 11px;
+          font-size: 12px;
+        }
       }
     }
   }
 }
-
-/* ---------- Small mobile ---------- */
 
 @media (max-width: 400px) {
   .gmd-7 {
@@ -296,11 +304,9 @@ html.lm-sf-lock body {
       > .grid {
         gap: 12px;
 
-        > :nth-child(3) {
-          > button {
-            max-width: 83px;
-            overflow: hidden;
-          }
+        > :nth-child(3) > button {
+          max-width: 83px;
+          overflow: hidden;
         }
       }
     }
