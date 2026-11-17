@@ -15,7 +15,7 @@
     color: #333;
     box-sizing: border-box;
     box-shadow: 0 0 0.5rem 0 rgba(126, 125, 73, 0.15);
-    padding: 1.5rem;
+    padding: 1.50rem;
     padding-top: 22px;
   }
 
@@ -102,7 +102,7 @@
             left: 0;
             top: 50%;
             transform: translateY(-50%);
-            font-family: "Font Awesome 5 Pro", "Helvetica", "Arial", sans-serif;
+            font-family: 'Font Awesome 5 Pro', 'Helvetica', 'Arial', sans-serif;
           }
 
           &::after {
@@ -110,17 +110,17 @@
           }
 
           &.age::before {
-            content: "\f073";
+            content: '\f073';
           }
 
           &.plants-per-metre::before {
             left: -3px;
-            content: "\f724";
+            content: '\f724';
           }
 
           &.ab-stock::before,
           &.minimum-quantity::before {
-            content: "\f466";
+            content: '\f466';
           }
         }
       }
@@ -156,6 +156,7 @@
       }
     }
 
+    // DELIVERY PILL
     .ab-delivery-banner {
       position: absolute;
       top: -13px;
@@ -180,6 +181,7 @@
       }
     }
 
+    // PRICE FOR EACH – TIER BOXES
     .ab-price {
       margin: 0;
       padding: 0;
@@ -247,12 +249,13 @@
         &.ab-tier-disabled {
           opacity: 0.4;
           cursor: not-allowed;
-          background: transparent !important;
 
           * {
             color: #515151;
             text-decoration: line-through;
           }
+
+          background: transparent !important;
         }
       }
     }
@@ -296,14 +299,9 @@
           height: 23px;
         }
       }
-
-      &.is-active {
-        .ab-tier-check {
-          display: block;
-        }
-      }
     }
 
+    // IMAGE, BADGE AND ZOOM
     .image {
       .product-lightbox {
         position: relative;
@@ -343,37 +341,39 @@
       }
     }
 
-    .promo-image-bar.ab-badge {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      left: auto;
-      bottom: auto;
-      width: 45px;
-      height: 45px;
-      margin: 0;
-      padding: 5px;
-      border-radius: 50%;
-      background: #a7201f;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      font-size: 10px;
-      text-transform: uppercase;
-      transform: none;
-      z-index: 3;
-      font-family: "Roboto Slab Bold";
+    .promo-image-bar {
+      &.ab-badge {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        left: auto;
+        bottom: auto;
+        width: 45px;
+        height: 45px;
+        margin: 0;
+        padding: 5px;
+        border-radius: 50%;
+        background: #a7201f;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 10px;
+        text-transform: uppercase;
+        transform: none;
+        z-index: 3;
+        font-family: "Roboto Slab Bold";
 
-      span {
-        display: block;
+        span {
+          display: block;
+        }
       }
 
-      &.yellow {
+      &.yellow.ab-badge {
         background-color: #f2f501;
-        color: #000;
+        color: #000000;
         font-weight: 700;
         bottom: 0;
         top: auto;
@@ -381,7 +381,7 @@
         border-radius: 0;
         left: 0;
         padding: 0.25rem 0.125rem;
-        font-family: "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times, "Times New Roman", serif;
+        font-family: 'Roboto Slab Bold', "Courier Bold", Courier, Georgia, Times, "Times New Roman", serif;
         font-style: normal;
         font-size: 0.75rem;
         text-transform: uppercase;
@@ -390,6 +390,7 @@
       }
     }
 
+    // PURCHASE
     .purchase {
       .plant-calculator {
         padding: 0;
@@ -503,6 +504,7 @@
       }
     }
 
+    // WAITLIST
     .wcwl_elements {
       background-color: #53753C;
       margin-top: 0;
@@ -542,6 +544,10 @@
             background-color: #f6f5f5 !important;
             border: 2px solid #f6f5f5 !important;
             box-shadow: none !important;
+
+            &::placeholder {
+              font-family: 'Roboto Slab Light';
+            }
           }
         }
 
@@ -563,12 +569,45 @@
         }
       }
     }
+
+    p.waitlist-notice {
+      font-family: 'Roboto Slab Light';
+    }
   }
 
+  // PRODUCT DETAILS
   .product-details {
     .product-intro {
       .summary {
         display: none;
+      }
+
+      .root-type-selector {
+        width: 100%;
+      }
+
+      .step-2 {
+        span.root-type {
+          position: relative;
+          padding-right: 1.5rem;
+          color: #a24191;
+
+          &::before {
+            right: 0;
+            left: auto;
+            content: "\f05a";
+            font-weight: 300;
+            position: absolute;
+            display: inline-block;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            font-family: 'Font Awesome 5 Pro', 'Helvetica', 'Arial', sans-serif;
+            font-size: inherit;
+            line-height: inherit;
+            cursor: pointer;
+          }
+        }
       }
     }
 
@@ -579,10 +618,6 @@
       column-gap: 15px;
       justify-content: space-between;
     }
-  }
-
-  .product-details .product-intro .root-type-selector {
-    width: 100%;
   }
 
   .help-link.step-1 {
@@ -600,37 +635,8 @@
     }
   }
 
-  .product-intro {
-    .step-2 span.root-type {
-      position: relative;
-      padding-right: 1.5rem;
-      color: #a24191;
-
-      &::before {
-        right: 0;
-        left: auto;
-        content: "\f05a";
-        font-weight: 300;
-        position: absolute;
-        display: inline-block;
-        font-style: normal;
-        font-variant: normal;
-        text-rendering: auto;
-        font-family: "Font Awesome 5 Pro", "Helvetica", "Arial", sans-serif;
-        font-size: inherit;
-        line-height: inherit;
-        cursor: pointer;
-      }
-    }
-  }
-
-  p.waitlist-notice {
-    font-family: "Roboto Slab Light";
-  }
-}
-
-@media (max-width: 900px) {
-  .gmd-001 {
+  // RESPONSIVE
+  @media (max-width: 900px) {
     .ab-tiers-card {
       > .content {
         gap: 24px;
@@ -641,64 +647,40 @@
       }
     }
   }
-}
 
-@media (max-width: 640px) {
-  .gmd-001 {
+  @media (max-width: 640px) {
     .ab-tiers-card {
-      > .content:has(.wcwl_elements) {
-        padding-bottom: 150px;
+      > .content {
+        gap: 15px;
+        grid-template-columns: 1fr 1fr;
+        flex-direction: column;
+
+        &:has(.wcwl_elements) {
+          padding-bottom: 150px;
+        }
       }
 
       .details {
-        .icon-list li {
-          padding-left: 20px;
-
-          p {
-            font-size: 14px;
-          }
-
-          strong {
-            font-size: 14px;
-          }
-        }
-
         .title {
           font-size: 1rem;
           max-width: none;
           line-height: 20px;
           margin-bottom: 10px;
         }
-      }
 
-      .purchase {
-        .total-price {
-          font-size: 14px;
+        .icon-list {
+          li {
+            padding-left: 20px;
 
-          strong {
-            font-size: 14px;
+            p {
+              font-size: 14px;
+            }
+
+            &,
+            strong {
+              font-size: 14px;
+            }
           }
-
-          .price-total-original {
-            font-size: 14px;
-          }
-        }
-
-        .single_add_to_cart_button {
-          font-size: 10px !important;
-          padding: 5px !important;
-        }
-
-        form.cart {
-          gap: 5px;
-
-          > p:first-child {
-            font-size: 1rem !important;
-          }
-        }
-
-        input.qty {
-          width: 55px !important;
         }
       }
 
@@ -756,6 +738,42 @@
           top: -4px;
         }
       }
+
+      .purchase {
+        form.cart {
+          gap: 5px;
+
+          > p:first-child {
+            font-size: 1rem !important;
+          }
+        }
+
+        input.qty {
+          width: 55px !important;
+        }
+
+        .total-price {
+          font-size: 14px;
+
+          strong,
+          .price-total-original {
+            font-size: 14px;
+          }
+        }
+
+        .single_add_to_cart_button {
+          font-size: 10px !important;
+          padding: 5px !important;
+        }
+      }
+
+      .product-listing.ab-tiers-card {
+        margin: 22px 0 25px;
+      }
+    }
+
+    .product-listing.ab-tiers-card {
+      margin: 22px 0 25px;
     }
   }
 }
