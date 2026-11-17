@@ -598,6 +598,9 @@ content: "";
 .gmd-001 .ab-tiers-card  p.waitlist-notice {
     font-family: 'Roboto Slab Light';
 }
+.gmd-001 .ab-tiers-card .wcwl_elements.bound .wcwl_email_elements input.wcwl_email::placeholder {
+    font-family: 'Roboto Slab Light';
+}
 @media (max-width: 900px) {
   .gmd-001 .ab-tiers-card > .content {
     gap: 24px;
