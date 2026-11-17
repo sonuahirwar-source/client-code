@@ -18,8 +18,22 @@
  
     waitForElement(".woocommerce .product-module.product-intro ", ([pdp]) => {
         document.body.classList.add(testInfo.className);
-       /* Paste inside your waitForElement(...) callback,
-   right after: document.body.classList.add(testInfo.className); */
+ // Trigger popup when clicking product intro root type
+document.addEventListener('click', function (e) {
+    const rootType = e.target.closest(
+        '.gmd-001 .product-intro .root-type'
+    );
+
+    if (!rootType) return;
+
+    const popupTrigger = document.querySelector(
+        '.gmd-001 .product-intro .open-popup-module'
+    );
+
+    if (popupTrigger) {
+        popupTrigger.click();
+    }
+}); 
         const CHECK_SVG =
             '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
@@ -30,15 +44,19 @@
 
         /* "Beech Green Bare Root Hedging 1.5-2ft 40/60cm" -> "40-60cm (1.5-2ft) - Bare Root" */
         function shortTitle(t) {
-            const cm = t.match(/(\d+)\s*\/\s*(\d+)\s*cm/i);
+            /* "... Bare Root Hedging 40/60cm 1-2ft"  -> "40-60cm (1-2ft) - Bare Root"
+               "... Potted Hedging 16/24in 40/60cm"   -> "40-60cm - Potted" */
+            const cm = t.match(/(\d+(?:\.\d+)?)\s*[\/-]\s*(\d+(?:\.\d+)?)\s*cm/i);
+            if (!cm) return null;
             const ft = t.match(/(\d+(?:\.\d+)?\s*-\s*\d+(?:\.\d+)?\s*ft)/i);
-            if (!cm || !ft) return null;
             let type = '';
             if (/bare\s*root/i.test(t)) type = 'Bare Root';
             else if (/root\s*ball/i.test(t)) type = 'Root Ball';
-            else if (/pot\s*grown|potted/i.test(t)) type = 'Pot Grown';
+            else if (/pot\s*grown/i.test(t)) type = 'Pot Grown';
+            else if (/potted/i.test(t)) type = 'Potted';
             else if (/cell\s*grown/i.test(t)) type = 'Cell Grown';
-            return `${cm[1]}-${cm[2]}cm (${ft[1].replace(/\s+/g, '')})${type ? ' - ' + type : ''}`;
+            else if (/instant/i.test(t)) type = 'Instant';
+            return `${cm[1]}-${cm[2]}cm${ft ? ' (' + ft[1].replace(/\s+/g, '') + ')' : ''}${type ? ' - ' + type : ''}`;
         }
 
         function fire(el, type) {
@@ -89,11 +107,6 @@
 
             /* 3. Icon list: Age / Plants per metre / In stock */
             const list = $('.icon-list', card);
-            const age = $('li.age', card);
-            if (age) {
-                const years = num(age.textContent);
-                if (!isNaN(years)) age.innerHTML = `Age <strong>${years} year${years === 1 ? '' : 's'}</strong>`;
-            }
             const stockP = $('.image .stock', card);
             const stockN = stockP ? num(stockP.textContent) : NaN;
             if (list && stockP && !isNaN(stockN) && stockP.classList.contains('in-stock') && !$('.ab-stock', list)) {
@@ -124,7 +137,6 @@
             const promo = $('.promo-image-bar', card);
             if (promo && !promo.classList.contains('ab-badge')) {
                 promo.classList.add('ab-badge');
-                promo.innerHTML = promo.textContent.trim().split(/\s+/).map((w) => `<span>${w}</span>`).join(' ');
             }
 
             /* 5. Tier cards from the pricing table */
