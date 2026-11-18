@@ -721,6 +721,7 @@
   .gmd-001 .ab-tiers-card .purchase .total-price {
     margin-top: 0;
     font-size: 1rem;
+            flex-wrap: wrap;
   }
 
   .gmd-001 .ab-tiers-card .details .icon-list li p {
