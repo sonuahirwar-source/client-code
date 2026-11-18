@@ -107,6 +107,20 @@ document.addEventListener('click', function (e) {
 
             /* 3. Icon list: Age / Plants per metre / In stock */
             const list = $('.icon-list', card);
+            /* "<li class="age"><p>2 year old</p></li>" -> "<li class="age">Age <strong>2 years</strong></li>" */
+            const ageLi = list && $('li.age', list);
+            if (ageLi && !ageLi.getAttribute('data-ab-age')) {
+                const ageTxt = ageLi.textContent.replace(/\s+/g, ' ').trim();
+                /* only exact "2 year old" style text – "3 year old feathered whip" stays as is */
+                const m = ageTxt.match(/^(\d+(?:\.\d+)?(?:\s*-\s*\d+(?:\.\d+)?)?)\s*(year|yr|month|week)s?\s*old$/i);
+                if (m) {
+                    const n = m[1].replace(/\s+/g, '');
+                    const unit = m[2].toLowerCase() === 'yr' ? 'year' : m[2].toLowerCase();
+                    const plural = n === '1' ? unit : unit + 's';
+                    ageLi.setAttribute('data-ab-age', ageTxt);
+                    ageLi.innerHTML = `Age <strong>${n} ${plural}</strong>`;
+                }
+            }
             const stockP = $('.image .stock', card);
             const stockN = stockP ? num(stockP.textContent) : NaN;
             if (list && stockP && !isNaN(stockN) && stockP.classList.contains('in-stock') && !$('.ab-stock', list)) {
@@ -119,6 +133,17 @@ document.addEventListener('click', function (e) {
             }
             const minQ = $('li.minimum-quantity', card);
             if (minQ && num(minQ.textContent) <= 1) minQ.classList.add('ab-hide');
+
+            /* "November Delivery - Pre-Order" -> "November Delivery<br>Pre-Order" */
+            $$('button.single_add_to_cart_button', card).forEach((btn) => {
+                if (btn.getAttribute('data-ab-btn')) return;
+                const t = btn.textContent.replace(/\s+/g, ' ').trim();
+                const parts = t.split(/\s+[-–]\s+/);
+                if (parts.length === 2 && /pre-?order/i.test(parts[1])) {
+                    btn.setAttribute('data-ab-btn', t);
+                    btn.innerHTML = `${parts[0]}<br>${parts[1]}`;
+                }
+            });
 
             /* 3b. Simple 2-column structure:
                    .content = [ .details (left) | .ab-col-right (.image + .purchase) ] */
