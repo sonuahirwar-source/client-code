@@ -5,31 +5,29 @@
 .gmd-001-v2 .product-listing.ab-tiers-card {
   position: relative;
   display: block;
-  margin: 28px 0 14px;
   background: #fff;
-  border-radius: 12px;
+  border-radius: 0.5rem;
   overflow: visible;
   font-family: "Roboto Slab", Georgia, serif;
   color: #333;
-  box-sizing: border-box;
   box-shadow: 0 0 0.5rem 0 rgba(126, 125, 73, 0.15);
-  padding: 1.50rem;
-  padding-top: 22px;
+  padding: 1.25rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
 }
 
-/* row */
 .gmd-001-v2 .ab-tiers-card > .content {
   display: grid;
-  flex-wrap: nowrap;
   align-items: flex-start;
-  gap: 45px;
   width: 100%;
   margin: 0;
-  padding: 0;
-  grid-template-columns: 1fr 0.6fr;
+  grid-template-columns: minmax(0, 1fr) 12.5rem;
+  grid-template-areas: "details image" "details purchase";
+  grid-template-rows: auto 1fr;
+  column-gap: 2rem;
+  row-gap: 0;
 }
 
-/* left column */
 .gmd-001-v2 .ab-tiers-card .details {
   flex: 1 1 auto;
   min-width: 0;
@@ -38,17 +36,16 @@
   float: none;
   padding: 0;
   margin: 0;
+  padding: 0.5rem;
 }
 
-/* right column */
 .gmd-001-v2 .ab-tiers-card .ab-col-right {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 18px;
+  row-gap: 0.75rem;
 }
 .gmd-001-v2 .ab-tiers-card .ab-col-right .image {
-  max-width: 124px;
   float: none;
   margin: 0 auto;
   padding: 0;
@@ -63,9 +60,6 @@
   border: 0;
 }
 
-/* =========================================================
-   DELIVERY PILL
-   ========================================================= */
 .gmd-001-v2 .ab-tiers-card .ab-delivery-banner {
   position: absolute;
   top: -13px;
@@ -76,66 +70,69 @@
   margin: 0;
 }
 .gmd-001-v2 .ab-tiers-card .ab-delivery-banner a {
-  background: #fff;
   color: #4f7533;
-  text-decoration: none;
+}
+.gmd-001-v2 .ab-tiers-card .ab-delivery-banner {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
   max-width: calc(100% - 2rem);
   padding: 0.3rem 1.5rem;
+  background-color: #ffffff;
   border-radius: 30px;
   box-shadow: 0 0 0.5rem 0 rgba(126, 125, 73, 0.25);
   text-align: center;
   font-family:
     "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times,
     "Times New Roman", serif;
+  font-display: swap;
   font-style: normal;
   color: #53753c;
   font-size: 0.75rem;
 }
 
-/* =========================================================
-   TITLE
-   ========================================================= */
 .gmd-001-v2 .ab-tiers-card .details .title {
-  margin: 0 0 15px;
+  margin: 0 0 12px;
   padding: 0;
   max-width: 340px;
   text-transform: none;
   letter-spacing: 0;
-  font-size: 24.51px;
+  font-size: 1.5rem;
   color: rgb(83, 117, 60);
 }
 
-/* =========================================================
-   ICON LIST
-   ========================================================= */
 .gmd-001-v2 .ab-tiers-card .details .icon-list {
   list-style: none;
   padding: 0;
   margin: 0 0 20px;
-  display: block;
+  display: flex;
+  gap: 0.5rem;
+  flex-direction: column;
+  align-items: start;
+  margin-bottom: 0.25rem;
 }
 .gmd-001-v2 .ab-tiers-card .details .icon-list li {
   position: relative;
   display: block;
   float: none;
   width: auto;
-  padding: 0 0 0 25px;
-  margin: 0 0 5px;
+  padding: 0 0 0 24.51px;
   background: none;
   border: 0;
-  color: #333;
-  font-size: 15px;
-  font-family: "Roboto Slab Light";
+  color: #515151;
+  font-size: 1rem;
+  font-family: "Roboto Slab Light", sans-serif;
 }
 .gmd-001-v2 .ab-tiers-card .details .icon-list li:last-child {
   margin-bottom: 0;
-  display: none;
 }
 .gmd-001-v2 .ab-tiers-card .details .icon-list li p {
   /* display: inline ; */
   margin: 0;
   padding: 0;
-  font-size: 16.34px;
+  font-size: 1rem;
 }
 .gmd-001-v2 .ab-tiers-card .details .icon-list li strong {
   font-weight: 700;
@@ -149,70 +146,67 @@
 }
 
 .gmd-001-v2 .ab-tiers-card .details .icon-list li::before {
-content: "";
-    position: absolute;
-    left: 0;
-    top: 50%;
-    /* width: 17px; */
-    transform: translateY(-50%);
-    font-family: 'Font Awesome 5 Pro', 'Helvetica', 'Arial', sans-serif;
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: "Font Awesome 5 Pro", "Helvetica", "Arial", sans-serif;
 }
 .gmd-001-v2 .ab-tiers-card .details .icon-list li::after {
   display: none;
 }
 
 .gmd-001-v2 .ab-tiers-card .details .icon-list li.age::before {
-     content: '\f073';
+  content: "\f073";
 }
 .gmd-001-v2 .ab-tiers-card .details .icon-list li.plants-per-metre::before {
-     content: '\f724';
-     
-  left: -3px;
+  content: "\f724";
 }
 .gmd-001-v2 .ab-tiers-card .details .icon-list li.ab-stock::before,
 .gmd-001-v2 .ab-tiers-card .details .icon-list li.minimum-quantity::before {
-    content: '\f466';
+  content: "\f466";
 }
 
-/* =========================================================
-   PRICE FOR EACH – TIER BOXES
-   ========================================================= */
 .gmd-001-v2 .ab-tiers-card .ab-price {
   margin: 0;
   padding: 0;
+  margin-top: 1rem;
 }
 .gmd-001-v2 .ab-tiers-card .ab-price .ab-price-title {
-  margin: 0 0 12px;
+  margin-bottom: 0.5rem;
   padding: 0;
   color: #373539;
-  font-size: 16.34px;
-  font-family: "Roboto Slab Bold";
+  font-size: 1rem;
+  font-family:
+    "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times,
+    "Times New Roman", serif;
 }
 .gmd-001-v2 .ab-tiers-card .ab-price ul.ab-price-tiers {
   list-style: none;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.5rem 1.25rem;
   margin: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-    gap: 0px;
-    width: fit-content;
+  list-style: none;
 }
 .gmd-001-v2 .ab-tiers-card .ab-price li.ab-tier {
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  margin: 0;
-  padding: 7px 11px;
-  background: transparent;
-  border: 0;
-  border-radius: 6px;
+  margin: 0 !important;
+  height: auto;
+  min-height: 0;
+  align-self: stretch;
+  padding: 0.4rem 0.75rem !important;
+  border-radius: 0.4rem;
   cursor: pointer;
-  user-select: none;
-  outline: none;
-  list-style: none;
-  transition: background-color 0.15s ease;
-    width: fit-content;
+  transition: background-color 200ms linear;
+  line-height: 1.35;
+  color: #515151;
 }
 .gmd-001-v2 .ab-tiers-card .ab-price li.ab-tier::before,
 .gmd-001-v2 .ab-tiers-card .ab-price li.ab-tier::after {
@@ -220,7 +214,8 @@ content: "";
   display: none;
 }
 .gmd-001-v2 .ab-tiers-card .ab-price li.ab-tier:hover {
-     background-color: #f1f1e2;
+  background-color: #f1f1e2 !important;
+  color: #53753c;
 }
 .gmd-001-v2 .ab-tiers-card .ab-price li.ab-tier:focus-visible {
   box-shadow: 0 0 0 2px #4f7533;
@@ -230,26 +225,44 @@ content: "";
   display: block;
   margin: 0;
   padding: 0;
-      font-size: 16.34px;
-    font-family: 'Roboto Slab Light';
+  font-size: 1rem;
+  font-family: "Roboto Slab Light", sans-serif;
+}
+.gmd-001-v2 .ab-tiers-card .details .icon-list li.ab-unit-price::before {
+  content: "\f51e";
+}
+.gmd-001-v2 .ab-tiers-card .purchase .total-price .price-total-original {
+  flex: 0 0 auto;
+  font-family:
+    "Roboto Slab Light", Courier, Courier, Georgia, Times, "Times New Roman",
+    serif !important;
+  margin-left: auto;
+  margin-right: 0;
+  text-align: right;
+  text-decoration: line-through;
+  opacity: 0.6;
+  color: #7a7a7a;
 }
 .gmd-001-v2 .ab-tiers-card .ab-tier .ab-tier-qty {
-  color: #333;
-  font-size: 16.34px;
-  font-family: "Roboto Slab Bold";
-
+  font-family:
+    "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times,
+    "Times New Roman", serif;
 }
 .gmd-001-v2 .ab-tiers-card .ab-tier .ab-tier-was {
-  color: #7a7a7a;
+  font-family:
+    "Roboto Slab Light", Courier, Courier, Georgia, Times, "Times New Roman",
+    serif !important;
   text-decoration: line-through;
-  font-size: 15px;
-  font-family: "Roboto Slab Light";
-      opacity: 0.6;
+  opacity: 0.6;
+  color: #7a7a7a;
+  font-size: 1rem;
 }
 .gmd-001-v2 .ab-tiers-card .ab-tier .ab-tier-now {
   color: #333;
-  font-size: 15.6px;
-  font-family: "Roboto Slab Bold";
+  font-size: 1rem;
+  font-family:
+    "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times,
+    "Times New Roman", serif;
 }
 .gmd-001-v2 .ab-tiers-card .ab-tier .ab-tier-check {
   display: none;
@@ -260,15 +273,32 @@ content: "";
   line-height: 0;
 }
 .gmd-001-v2 .ab-tiers-card .ab-tier .ab-tier-check svg {
-  width: 16px;
+  width: 18px;
   height: 23px;
 }
 
 .gmd-001-v2 .ab-tiers-card .ab-price li.ab-tier.is-active {
-  background: #eef0e3;
+  background-color: #f1f1e2;
+  color: #53753c;
 }
 .gmd-001-v2 .ab-tiers-card .ab-tier.is-active .ab-tier-check {
-  display: block;
+  display: none;
+}
+.gmd-001-v2 .ab-tiers-card .ab-price li.ab-tier.is-active::before {
+  content: "\f00c";
+  font-display: swap;
+  display: inline-block;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  line-height: 1;
+  font-family: "Font Awesome 5 Pro", "Helvetica", "Arial", sans-serif;
+  font-weight: 900;
+  position: absolute;
+  top: -0.3rem;
+  right: 0.25rem;
+  font-size: 1rem;
+  color: #53753c;
 }
 .gmd-001-v2 .ab-tiers-card .ab-tier.is-active .ab-tier-qty,
 .gmd-001-v2 .ab-tiers-card .ab-tier.is-active .ab-tier-now {
@@ -276,12 +306,9 @@ content: "";
 }
 .gmd-001-v2 .ab-tiers-card .ab-price li.ab-tier.ab-tier-disabled {
   opacity: 0.4;
-  cursor: not-allowed;
+  cursor: default;
 }
 
-/* =========================================================
-   IMAGE, 50% BADGE, ZOOM ICON
-   ========================================================= */
 .gmd-001-v2 .ab-tiers-card .image .product-lightbox {
   position: relative;
   display: block;
@@ -292,56 +319,74 @@ content: "";
 }
 .gmd-001-v2 .ab-tiers-card .image img {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
 }
 
 .gmd-001-v2 .ab-tiers-card .promo-image-bar.ab-badge {
   position: absolute;
-  top: 5px;
-  right: 5px;
-  left: auto;
+  top: 0.5rem;
+  right: 0.5rem;
   bottom: auto;
-  width: 45px;
-  height: 45px;
-  margin: 0;
-  padding: 0;
-  border-radius: 50%;
-  background: #a7201f;
-  color: #fff;
+  left: auto;
+  transform: none;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  width: 3.1rem;
+  height: 3.1rem;
+  margin: 0;
+  padding: 0;
+  border-radius: 50%;
+  background-color: #a21f1f;
   text-align: center;
-  font-size: 10px;
   text-transform: uppercase;
-  transform: none;
-  z-index: 3;
-  font-family: "Roboto Slab Bold";
+  font-size: 0.7rem;
+  line-height: 1.15;
+  font-family:
+    "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times,
+    "Times New Roman", serif;
+  font-display: swap;
+  font-style: normal;
+  color: #ffffff;
+  line-height: 0.74rem;
 }
 .gmd-001-v2 .ab-tiers-card .promo-image-bar.ab-badge span {
   display: block;
 }
 
 .gmd-001-v2 .ab-tiers-card .image .zoom {
-  position: absolute;
-  top: 6px;
-  left: 4px;
-  width: 31px;
-  height: 31px;
-  margin: 0;
+  width: 2rem;
+  height: 2rem;
+  top: 0.5rem;
+  left: 2.6rem;
   padding: 0;
   border-radius: 50%;
-  background: #fff
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234f7533' stroke-width='2.4' stroke-linecap='square'%3E%3Cpath d='M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5'/%3E%3C/svg%3E")
-    no-repeat center / 18px;
+  background-color: #ffffff;
   font-size: 0;
-  color: transparent;
+  line-height: 0;
   overflow: hidden;
-  z-index: 3;
 }
-.gmd-001-v2 .ab-tiers-card .image .zoom::before,
+.gmd-001-v2 .ab-tiers-card .image .zoom:before {
+  content: "\f065";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: none;
+  border-radius: 0;
+  background-color: transparent;
+  font-size: 0.85rem;
+  line-height: 1;
+  color: #53753c;
+  font-family: "Font Awesome 5 Pro", "Helvetica", "Arial", sans-serif;
+}
+
 .gmd-001-v2 .ab-tiers-card .image .zoom::after {
   display: none;
 }
@@ -361,13 +406,15 @@ content: "";
   row-gap: 13px;
   margin: 0;
   padding: 0;
+  gap: 0.5rem;
 }
 .gmd-001-v2 .ab-tiers-card .purchase form.cart > p:first-child {
   margin: 0;
   padding: 0;
+
+  font-size: 0.9rem;
   color: #515151;
-  font-size: 14.4px;
-  font-family: "Roboto Slab Light";
+  font-family: "Roboto Slab Light", sans-serif;
 }
 .gmd-001-v2 .ab-tiers-card .purchase form.cart > .row {
   justify-self: end;
@@ -375,7 +422,33 @@ content: "";
   padding: 0;
   width: auto;
   display: block;
+  height: 32px;
 }
+
+.gmd-001-v2
+  .ab-tiers-card
+  > .content:has(.wcwl_elements)
+  .ab-price
+  li.ab-tier.is-active {
+  background-color: unset;
+  color: #333 !important;
+}
+.gmd-001-v2
+  .ab-tiers-card
+  > .content:has(.wcwl_elements)
+  .ab-price
+  li.ab-tier.is-active::before {
+  display: none;
+}
+.gmd-001-v2
+  .ab-tiers-card
+  > .content:has(.wcwl_elements)
+  .ab-price
+  li.ab-tier.is-active
+  * {
+  color: #333;
+}
+
 .gmd-001-v2 .ab-tiers-card .purchase .quantity {
   margin: 0;
   padding: 0;
@@ -387,18 +460,17 @@ content: "";
   display: none;
 }
 .gmd-001-v2 .ab-tiers-card .purchase input.qty {
-  width: 66px !important;
-  max-height: 18px;
-  margin: 0;
-  border: 3px solid #e7e8d6;
-  border-radius: 6px;
-  background: #f3f3f3;
-  box-shadow: none;
-  color: #333;
-  font-size: 0.9rem;
+  width: 4.25rem !important;
+  height: 1.9rem !important;
+  min-height: 1.9rem !important;
+  padding: 0 !important;
+  line-height: 1.9rem !important;
+  font-size: 0.9rem !important;
   text-align: center;
-  font-family: "Roboto Slab Light";
-  min-height: 30px !important;
+  background-color: #f6f5f5 !important;
+  border: 2px solid #f6f5f5 !important;
+  box-shadow: none !important;
+  font-family: "Roboto Slab Light", sans-serif;
 }
 .gmd-001-v2 .ab-tiers-card .purchase input.qty::-webkit-outer-spin-button,
 .gmd-001-v2 .ab-tiers-card .purchase input.qty::-webkit-inner-spin-button {
@@ -413,318 +485,331 @@ content: "";
   align-items: baseline;
   margin: 0;
   padding: 0;
+  gap: 0.3rem;
+
+  font-size: 0.9rem;
+  font-family:
+    "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times,
+    "Times New Roman", serif;
+  font-style: normal;
   color: #373539;
-  font-size: 0.9rem;
-  font-family: "Roboto Slab Bold";
-  font-size: 0.9rem;
-  font-family: "Roboto Slab Bold";
+  margin-top: 0.3rem;
 }
 .gmd-001-v2 .ab-tiers-card .purchase .total-price strong {
-  font-size: 0.9rem;
-  font-family: "Roboto Slab Bold";
   color: rgb(55, 53, 57) !important;
+  font-size: 1rem;
 }
 .gmd-001-v2 .ab-tiers-card .purchase .total-price .price-total-original:empty {
   display: none;
 }
 
 .gmd-001-v2 .ab-tiers-card .purchase .single_add_to_cart_button {
-    grid-column: 1 / -1;
-    width: 100%;
-    height: auto;
-    margin: 0;
-    padding: 4px 20px !important;
-    border: 0;
-    border-radius: 999px;
-    background: #557a35 !important;
-    box-shadow: none;
-    color: #fff;
-    font-size: 11.7px;
-    text-transform: uppercase;
-    letter-spacing: 0;
-    cursor: pointer;
-    font-family: "Roboto Slab Bold";
-    min-height: 14px;
-    line-height: normal;
-    white-space: normal;
+  grid-column: 1 / -1;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  background: #557a35 !important;
+  box-shadow: none;
+  letter-spacing: 0;
+  cursor: pointer;
+  font-family:
+    "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times,
+    "Times New Roman", serif;
+  height: auto;
+  min-height: 0;
+  padding: 0.4rem 0.75rem !important;
+  line-height: 1.2;
+  white-space: normal;
+  background-color: #53753c !important;
+  border-color: #53753c !important;
+  color: #fff !important;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 0.75rem !important;
 }
 .gmd-001-v2 .ab-tiers-card .purchase .single_add_to_cart_button:hover {
   background: #46672b;
 }
-.gmd-001-v2 .ab-tiers-card .details .icon-list li.ab-unit-price::before {
-      content: '\f51e';
-}
-.gmd-001-v2 .ab-tiers-card .purchase .total-price .price-total-original {
-  margin-left: auto;
-  margin-right: 6px;
-  color: #7a7a7a;
-  text-decoration: line-through;
-  font-size: 14.4px;
-  font-family: "Roboto Slab Light";
-}
-
 .gmd-001-v2 .product-details .product-intro .summary {
-    display: none;
+  display: none;
 }
 .gmd-001-v2 .product-details .line-divider-bottom {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    column-gap: 15px;
-        justify-content: space-between;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 15px;
+  justify-content: space-between;
 }
 
 .gmd-001-v2 .product-details .product-intro .root-type-selector {
-    width: 100%;
+  width: 100%;
 }
 
 .gmd-001-v2 .help-link.step-1 .text-with-icon.icon-left:before {
-    right: 0;
-    left: auto;
-        content: "\f05a";
-    font-weight: 300;
-        font-size: 18px;
+  right: 0;
+  left: auto;
+  content: "\f05a";
+  font-weight: 300;
+  font-size: 1.15rem;
 }
 
 .gmd-001-v2 .help-link.step-1 .text-with-icon.icon-left {
-    padding-right: 1.5rem;
-    padding-left: 0;
+  padding-right: 1.5rem;
+  padding-left: 0;
 }
 .gmd-001-v2 .product-intro .step-2 span.root-type {
-    position: relative;
-    padding-right: 1.5rem;
-    color: #a24191;
+  position: relative;
+  padding-right: 1.5rem;
+  color: #a24191;
 }
 
 .gmd-001-v2 .product-intro .step-2 span.root-type::before {
-    right: 0;
-    left: auto;
-    content: "\f05a";
-    font-weight: 300;
-    position: absolute;
-    display: inline-block;
-    font-style: normal;
-    font-variant: normal;
-    text-rendering: auto;
-    font-family: 'Font Awesome 5 Pro', 'Helvetica', 'Arial', sans-serif;
-    font-size: inherit;
-    line-height: inherit;
-        cursor: pointer;
+  right: 0;
+  left: auto;
+  content: "\f05a";
+  font-weight: 300;
+  position: absolute;
+  display: inline-block;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  font-family: "Font Awesome 5 Pro", "Helvetica", "Arial", sans-serif;
+  font-size: inherit;
+  line-height: inherit;
+  cursor: pointer;
+  font-size: 1.15rem;
+  top: 50%;
+
+  transform: translateY(-50%);
 }
 
 .gmd-001-v2 .ab-tiers-card .ab-price li.ab-tier.ab-tier-disabled * {
-    color: #515151;
-    text-decoration: line-through;
+  color: #515151;
+  text-decoration: line-through;
 }
 .gmd-001-v2 .ab-tiers-card .ab-price li.ab-tier.ab-tier-disabled {
-    background: transparent !important;
+  background: transparent !important;
 }
-.gmd-001-v2 .ab-tiers-card  .promo-image-bar.yellow.ab-badge {
-    background-color: #f2f501;
-    color: #000000;
-    font-weight: 700;
-    bottom: 0;
-    top: auto;
-    width: 100%;
-    border-radius: 0;
-    left: 0;
-    padding: 0.25rem 0.125rem;
-    font-family: 'Roboto Slab Bold', "Courier Bold", Courier, Georgia, Times, "Times New Roman", serif;
-    font-style: normal;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    text-align: center;
-        height: auto;
+.gmd-001-v2 .ab-tiers-card .promo-image-bar.yellow.ab-badge {
+  background-color: #f2f501;
+  color: #000000;
+  font-weight: 700;
+  bottom: 0;
+  top: auto;
+  width: 100%;
+  border-radius: 0;
+  left: 0;
+  padding: 0.25rem 0.125rem;
+  font-family:
+    "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times,
+    "Times New Roman", serif;
+  font-style: normal;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  text-align: center;
+  height: auto;
+  line-height: 1.4;
 }
 .gmd-001-v2 .ab-tiers-card .promo-image-bar.ab-badge {
-    padding: 5px;
+  padding: 5px;
 }
 .gmd-001-v2 .ab-tiers-card .ab-col-right .purchase:has(.wcwl_elements) {
-    position: absolute;
-    bottom: 0;
-    left: 0;
- 
+  position: absolute;
+  bottom: 0;
+  left: 0;
 }
 
 .gmd-001-v2 .ab-tiers-card .wcwl_elements {
-    background-color: transparent;
-    margin-top: 0;
-    padding: 0.9rem;
-    overflow: visible;
-    background-size: auto 100%;
-    background-color: #53753C;
-    flex-wrap: wrap;
+  background-color: transparent;
+  margin-top: 0;
+  padding: 0.9rem;
+  overflow: visible;
+  background-size: auto 100%;
+  background-color: #53753c;
+  flex-wrap: wrap;
 }
 
 .gmd-001-v2 .ab-tiers-card > .content:has(.wcwl_elements) {
-    padding-bottom: 120px;
-    position: relative;
+  padding-bottom: 105px;
+  position: relative;
 }
 .gmd-001-v2 .ab-tiers-card .wcwl_elements.bound {
-    display: flex;
-    flex-wrap: wrap;
-    width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .gmd-001-v2 .ab-tiers-card .wcwl_elements.bound .wcwl_intro {
-    width: 100%;
-    flex: 0 0 100%;
-    order: unset;
-    font-size: 0.9rem;
-    line-height: 1.3;
-    display: block;
+  width: 100%;
+  flex: 0 0 100%;
+  order: unset;
+  font-size: 0.9rem;
+  line-height: 1.3;
+  display: block;
 }
 
 .gmd-001-v2 .ab-tiers-card .wcwl_elements.bound .wcwl_email_elements {
-    width: auto ;
-    flex: 1 1 0 ;
-    min-width: 0 ;
+  width: auto;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
-.gmd-001-v2 .ab-tiers-card .wcwl_elements.bound .wcwl_email_elements input.wcwl_email {
-    display: block;
-    width: 100%;
-    max-width: 100%;
-    margin: 0;
-    height: 2.25rem;
-    min-height: 0;
-    line-height: 2.25rem;
-    font-size: 0.9rem;
-    background-color: #f6f5f5 !important;
-    border: 2px solid #f6f5f5 !important;
-    box-shadow: none !important;
+.gmd-001-v2
+  .ab-tiers-card
+  .wcwl_elements.bound
+  .wcwl_email_elements
+  input.wcwl_email {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  height: 2.25rem;
+  min-height: 0;
+  line-height: 2.25rem;
+  font-size: 0.9rem;
+  background-color: #f6f5f5 !important;
+  border: 2px solid #f6f5f5 !important;
+  box-shadow: none !important;
+  font-family:
+    "Roboto Slab Light", Courier, Courier, Georgia, Times, "Times New Roman",
+    serif !important;
 }
 
 .gmd-001-v2 .ab-tiers-card .wcwl_elements.bound .wcwl_control {
-    display: block;
-    margin: 0;
+  display: block;
+  margin: 0;
 }
 
 .gmd-001-v2 .ab-tiers-card .wcwl_elements.bound .wcwl_control button {
-    width: 100%;
-    width: auto;
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
-    height: 2.25rem;
-    min-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    line-height: 2.25rem;
-    white-space: nowrap;
+  width: 100%;
+  width: auto;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  height: 2.25rem;
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  line-height: 2.25rem;
+  white-space: nowrap;
 }
-.gmd-001-v2 .ab-tiers-card  p.waitlist-notice {
-    font-family: 'Roboto Slab Light';
+.gmd-001-v2 .ab-tiers-card p.waitlist-notice {
+  font-family: "Roboto Slab Light", sans-serif;
 }
-.gmd-001-v2 .ab-tiers-card .wcwl_elements.bound .wcwl_email_elements input.wcwl_email::placeholder {
-    font-family: 'Roboto Slab Light';
+.gmd-001-v2
+  .ab-tiers-card
+  .wcwl_elements.bound
+  .wcwl_email_elements
+  input.wcwl_email::placeholder {
+  font-family:
+    "Roboto Slab Light", Courier, Courier, Georgia, Times, "Times New Roman",
+    serif !important;
+}
+.gmd-001-v2 .ab-tiers-card .responsive-image-crop.one-by-one-four {
+  width: 63.96226415%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-bottom: 90%;
+  position: relative !important;
+}
+
+.gmd-001-v2 .ab-tiers-card .image.rounded-corners-tight {
+  grid-area: image;
+  width: 100%;
+  margin-bottom: 0;
+}
+.gmd-001-v2 .ab-tiers-card .details .icon-list li.ab-unit-price::before {
+  content: "\f51e";
 }
 @media (max-width: 900px) {
-  .gmd-001-v2 .ab-tiers-card > .content {
-    gap: 24px;
-  }
   .gmd-001-v2 .ab-tiers-card .ab-col-right {
     flex-basis: 240px;
   }
 }
 @media (max-width: 640px) {
-    .gmd-001-v2 .ab-tiers-card > .content:has(.wcwl_elements) {
+  .gmd-001-v2 .ab-tiers-card > .content:has(.wcwl_elements) {
     padding-bottom: 150px;
-}
+  }
   .gmd-001-v2 .product-listing.ab-tiers-card {
-    margin: 22px 0 25px;
-}
-  /* new */
-  .gmd-001-v2 .ab-tiers-card .purchase .total-price .price-total-original {
-    font-size: 14px;
-}
+    padding: 1rem 0.9rem;
+  }
 
-.gmd-001-v2 .ab-tiers-card .purchase .total-price {
-    font-size: 14px;
-}
+  .gmd-001-v2 .ab-tiers-card .details .icon-list li {
+    padding-left: 20px;
+  }
+  .gmd-001-v2 .ab-tiers-card .purchase .total-price {
+    margin-top: 0;
+    font-size: 1rem;
+  }
 
-.gmd-001-v2 .ab-tiers-card .purchase .total-price strong {
+  .gmd-001-v2 .ab-tiers-card .details .icon-list li p {
     font-size: 14px;
-}
-.gmd-001-v2 .ab-tiers-card .details .icon-list li p{font-size: 14px;}
-  /* stack: right column (image + basket) goes under the details */
+  }
+
   .gmd-001-v2 .ab-tiers-card > .content {
-    flex-direction: column;
-    gap: 15px;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 46%);
+    grid-template-areas: "details image" "details purchase";
+    grid-template-rows: auto 1fr;
+    column-gap: 0.9rem;
   }
   .gmd-001-v2 .ab-tiers-card .ab-col-right {
     flex-basis: auto;
     width: 100%;
   }
   .gmd-001-v2 .ab-tiers-card .details .title {
-font-size: 1rem;
-    max-width: none;
-    line-height: 20px;
-            margin-bottom: 10px;
-  }
-  .gmd-001-v2 .ab-tiers-card .ab-tier span{
-    font-size: 14px;
+    font-size: 1rem;
+    line-height: 140%;
+    margin: 0 0 12px;
   }
   .gmd-001-v2 .ab-tiers-card .details .icon-list li,
   .gmd-001-v2 .ab-tiers-card .details .icon-list li strong {
     font-size: 14px;
   }
   .gmd-001-v2 .ab-tiers-card .ab-price ul.ab-price-tiers {
-    grid-template-columns: 1fr;
-    column-gap: 4px;
-    row-gap: 2px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    width: fit-content;
   }
-  .gmd-001-v2 .ab-tiers-card .details .icon-list li {
-    padding-left: 20px;
-}
+  .gmd-001-v2 .ab-tiers-card .purchase .single_add_to_cart_button {
+    padding: 0.4rem 0.5rem !important;
+  }
   .gmd-001-v2 .ab-tiers-card .ab-price li.ab-tier {
-        width: auto;
-        padding: 1px 5px;
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        width: fit-content;
-        gap: 5px;
-        line-height: normal;
-        border-radius: 4px;
-        margin: 2px 0;
-  }
-  .gmd-001-v2 .ab-tiers-card .ab-tier .ab-tier-qty {
-    font-size: 14px;
-
-  }
-  .gmd-001-v2 .ab-tiers-card .ab-tier .ab-tier-was {
-    font-size: 12px;
-  }
-  .gmd-001-v2 .ab-tiers-card .ab-tier .ab-tier-now {
-    font-size: 12px;
-  }
-.gmd-001-v2 .ab-tiers-card .ab-price .ab-price-title{
-  font-size: 14px;        
-   margin-bottom: 5px;
-  }
-.gmd-001-v2 .ab-tiers-card .purchase .single_add_to_cart_button {
-    font-size: 10px !IMPORTANT;
-    padding: 5px !important;
-}
-.gmd-001-v2 .ab-tiers-card .purchase form.cart > p:first-child {
-    font-size: 1rem !important;
-}
-
-.gmd-001-v2 .ab-tiers-card .ab-col-right .image {
-    max-width: 95px;
-}
-
-.gmd-001-v2 .ab-tiers-card .purchase input.qty {
-    width: 55px !important;
-}
-
-.gmd-001-v2 .ab-tiers-card .purchase form.cart {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: fit-content;
     gap: 5px;
-}
+    padding: 0.2rem 0.5rem !important;
+    font-size: 1rem;
+    line-height: 1.3;
+  }
 
-.gmd-001-v2 .ab-tiers-card .ab-tier .ab-tier-check {
+  .gmd-001-v2 .ab-tiers-card .image .zoom {
+    left: 2.4rem;
+  }
+  .gmd-001-v2 .ab-tiers-card .ab-price li.ab-tier.is-active::before {
+    top: 0 !important;
+    bottom: auto;
+    right: -1.1rem;
+    font-size: 0.9rem;
+  }
+
+  .gmd-001-v2 .ab-tiers-card .purchase form.cart > p:first-child {
+    font-size: 1rem !important;
+  }
+
+  .gmd-001-v2 .ab-tiers-card .purchase input.qty {
+    width: 3.5rem !important;
+    line-height: 1.7rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  .gmd-001-v2 .ab-tiers-card .purchase form.cart {
+    gap: 0.4rem;
+  }
+
+  .gmd-001-v2 .ab-tiers-card .ab-tier .ab-tier-check {
     right: -18px;
+    top: -4px;
+  }
 }
-}
-
