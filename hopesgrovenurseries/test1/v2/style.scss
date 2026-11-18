@@ -1,4 +1,3 @@
-
 .gmd-001-v2 {
   .ab-hide {
     display: none !important;
@@ -7,32 +6,45 @@
   .product-listing.ab-tiers-card {
     position: relative;
     display: block;
-    margin: 28px 0 14px;
     background: #fff;
-    border-radius: 12px;
+    border-radius: 0.5rem;
     overflow: visible;
     font-family: "Roboto Slab", Georgia, serif;
     color: #333;
-    box-sizing: border-box;
     box-shadow: 0 0 0.5rem 0 rgba(126, 125, 73, 0.15);
-    padding: 1.50rem;
-    padding-top: 22px;
+    padding: 1.25rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
   }
 
   .ab-tiers-card {
     > .content {
       display: grid;
-      flex-wrap: nowrap;
       align-items: flex-start;
-      gap: 45px;
       width: 100%;
       margin: 0;
-      padding: 0;
-      grid-template-columns: 1fr 0.6fr;
+      grid-template-columns: minmax(0, 1fr) 12.5rem;
+      grid-template-areas: "details image" "details purchase";
+      grid-template-rows: auto 1fr;
+      column-gap: 2rem;
+      row-gap: 0;
 
       &:has(.wcwl_elements) {
-        padding-bottom: 120px;
+        padding-bottom: 105px;
         position: relative;
+
+        .ab-price li.ab-tier.is-active {
+          background-color: unset;
+          color: #333 !important;
+
+          &::before {
+            display: none;
+          }
+
+          * {
+            color: #333;
+          }
+        }
       }
     }
 
@@ -42,16 +54,16 @@
       width: auto;
       max-width: none;
       float: none;
-      padding: 0;
+      padding: 0.5rem;
       margin: 0;
 
       .title {
-        margin: 0 0 15px;
+        margin: 0 0 12px;
         padding: 0;
         max-width: 340px;
         text-transform: none;
         letter-spacing: 0;
-        font-size: 24.51px;
+        font-size: 1.5rem;
         color: rgb(83, 117, 60);
       }
 
@@ -59,30 +71,32 @@
         list-style: none;
         padding: 0;
         margin: 0 0 20px;
-        display: block;
+        display: flex;
+        gap: 0.5rem;
+        flex-direction: column;
+        align-items: start;
+        margin-bottom: 0.25rem;
 
         li {
           position: relative;
           display: block;
           float: none;
           width: auto;
-          padding: 0 0 0 25px;
-          margin: 0 0 5px;
+          padding: 0 0 0 24.51px;
           background: none;
           border: 0;
-          color: #333;
-          font-size: 15px;
-          font-family: "Roboto Slab Light";
+          color: #515151;
+          font-size: 1rem;
+          font-family: "Roboto Slab Light", sans-serif;
 
           &:last-child {
             margin-bottom: 0;
-            display: none;
           }
 
           p {
             margin: 0;
             padding: 0;
-            font-size: 16.34px;
+            font-size: 1rem;
           }
 
           strong {
@@ -102,7 +116,7 @@
             left: 0;
             top: 50%;
             transform: translateY(-50%);
-            font-family: 'Font Awesome 5 Pro', 'Helvetica', 'Arial', sans-serif;
+            font-family: "Font Awesome 5 Pro", "Helvetica", "Arial", sans-serif;
           }
 
           &::after {
@@ -110,21 +124,20 @@
           }
 
           &.age::before {
-            content: '\f073';
+            content: "\f073";
           }
 
           &.plants-per-metre::before {
-            content: '\f724';
-            left: -3px;
+            content: "\f724";
           }
 
           &.ab-stock::before,
           &.minimum-quantity::before {
-            content: '\f466';
+            content: "\f466";
           }
 
           &.ab-unit-price::before {
-            content: '\f51e';
+            content: "\f51e";
           }
         }
       }
@@ -134,51 +147,13 @@
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      gap: 18px;
+      row-gap: 0.75rem;
 
       .image {
-        max-width: 124px;
         float: none;
         margin: 0 auto;
         padding: 0;
         border-radius: 0;
-
-        .product-lightbox {
-          position: relative;
-          display: block;
-        }
-
-        .responsive-image-crop,
-        .image-container {
-          border-radius: 0;
-        }
-
-        img {
-          width: 100%;
-          height: auto;
-          display: block;
-        }
-
-        .zoom {
-          position: absolute;
-          top: 6px;
-          left: 4px;
-          width: 31px;
-          height: 31px;
-          margin: 0;
-          padding: 0;
-          border-radius: 50%;
-          background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234f7533' stroke-width='2.4' stroke-linecap='square'%3E%3Cpath d='M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5'/%3E%3C/svg%3E") no-repeat center / 18px;
-          font-size: 0;
-          color: transparent;
-          overflow: hidden;
-          z-index: 3;
-
-          &::before,
-          &::after {
-            display: none;
-          }
-        }
       }
 
       .purchase {
@@ -197,70 +172,72 @@
       }
     }
 
-    /* Delivery pill */
     .ab-delivery-banner {
       position: absolute;
-      top: -13px;
+      top: 0;
       left: 50%;
-      transform: translateX(-50%);
-      z-index: 5;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      max-width: calc(100% - 2rem);
+      padding: 0.3rem 1.5rem;
+      background-color: #ffffff;
+      border-radius: 30px;
+      box-shadow: 0 0 0.5rem 0 rgba(126, 125, 73, 0.25);
+      text-align: center;
+      font-family:
+        "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times,
+        "Times New Roman", serif;
+      font-display: swap;
+      font-style: normal;
+      color: #53753c;
+      font-size: 0.75rem;
       white-space: nowrap;
       margin: 0;
 
       a {
-        background: #fff;
-        color: #53753c;
-        text-decoration: none;
-        max-width: calc(100% - 2rem);
-        padding: 0.3rem 1.5rem;
-        border-radius: 30px;
-        box-shadow: 0 0 0.5rem 0 rgba(126, 125, 73, 0.25);
-        text-align: center;
-        font-family: "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times, "Times New Roman", serif;
-        font-style: normal;
-        font-size: 0.75rem;
+        color: #4f7533;
       }
     }
 
-    /* Price tiers */
     .ab-price {
       margin: 0;
       padding: 0;
+      margin-top: 1rem;
 
       .ab-price-title {
-        margin: 0 0 12px;
+        margin-bottom: 0.5rem;
         padding: 0;
         color: #373539;
-        font-size: 16.34px;
-        font-family: "Roboto Slab Bold";
+        font-size: 1rem;
+        font-family:
+          "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times,
+          "Times New Roman", serif;
       }
 
       ul.ab-price-tiers {
         list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: stretch;
+        gap: 0.5rem 1.25rem;
         margin: 0;
         padding: 0;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0;
-        width: fit-content;
       }
 
       li.ab-tier {
         position: relative;
         display: flex;
         flex-direction: column;
-        align-items: flex-start;
-        margin: 0;
-        padding: 7px 11px;
-        background: transparent;
-        border: 0;
-        border-radius: 6px;
+        margin: 0 !important;
+        height: auto;
+        min-height: 0;
+        align-self: stretch;
+        padding: 0.4rem 0.75rem !important;
+        border-radius: 0.4rem;
         cursor: pointer;
-        user-select: none;
-        outline: none;
-        list-style: none;
-        transition: background-color 0.15s ease;
-        width: fit-content;
+        transition: background-color 200ms linear;
+        line-height: 1.35;
+        color: #515151;
 
         &::before,
         &::after {
@@ -269,7 +246,8 @@
         }
 
         &:hover {
-          background-color: #f1f1e2;
+          background-color: #f1f1e2 !important;
+          color: #53753c;
         }
 
         &:focus-visible {
@@ -277,10 +255,28 @@
         }
 
         &.is-active {
-          background: #eef0e3;
+          background-color: #f1f1e2;
+          color: #53753c;
+
+          &::before {
+            content: "\f00c";
+            font-display: swap;
+            display: inline-block;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            line-height: 1;
+            font-family: "Font Awesome 5 Pro", "Helvetica", "Arial", sans-serif;
+            font-weight: 900;
+            position: absolute;
+            top: -0.3rem;
+            right: 0.25rem;
+            font-size: 1rem;
+            color: #53753c;
+          }
 
           .ab-tier-check {
-            display: block;
+            display: none;
           }
 
           .ab-tier-qty,
@@ -291,14 +287,13 @@
 
         &.ab-tier-disabled {
           opacity: 0.4;
-          cursor: not-allowed;
+          cursor: default;
+          background: transparent !important;
 
           * {
             color: #515151;
             text-decoration: line-through;
           }
-
-          background: transparent !important;
         }
       }
     }
@@ -308,28 +303,32 @@
         display: block;
         margin: 0;
         padding: 0;
-        font-size: 16.34px;
-        font-family: 'Roboto Slab Light';
+        font-size: 1rem;
+        font-family: "Roboto Slab Light", sans-serif;
       }
 
       .ab-tier-qty {
-        color: #333;
-        font-size: 16.34px;
-        font-family: "Roboto Slab Bold";
+        font-family:
+          "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times,
+          "Times New Roman", serif;
       }
 
       .ab-tier-was {
-        color: #7a7a7a;
+        font-family:
+          "Roboto Slab Light", Courier, Courier, Georgia, Times, "Times New Roman",
+          serif !important;
         text-decoration: line-through;
-        font-size: 15px;
-        font-family: "Roboto Slab Light";
         opacity: 0.6;
+        color: #7a7a7a;
+        font-size: 1rem;
       }
 
       .ab-tier-now {
         color: #333;
-        font-size: 15.6px;
-        font-family: "Roboto Slab Bold";
+        font-size: 1rem;
+        font-family:
+          "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times,
+          "Times New Roman", serif;
       }
 
       .ab-tier-check {
@@ -341,37 +340,100 @@
         line-height: 0;
 
         svg {
-          width: 16px;
+          width: 18px;
           height: 23px;
         }
       }
     }
 
-    /* Promo badges */
+    .image {
+      .product-lightbox {
+        position: relative;
+        display: block;
+      }
+
+      .responsive-image-crop,
+      .image-container {
+        border-radius: 0;
+      }
+
+      img {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      &.rounded-corners-tight {
+        grid-area: image;
+        width: 100%;
+        margin-bottom: 0;
+      }
+
+      .zoom {
+        width: 2rem;
+        height: 2rem;
+        top: 0.5rem;
+        left: 2.6rem;
+        padding: 0;
+        border-radius: 50%;
+        background-color: #ffffff;
+        font-size: 0;
+        line-height: 0;
+        overflow: hidden;
+
+        &:before {
+          content: "\f065";
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          transform: none;
+          border-radius: 0;
+          background-color: transparent;
+          font-size: 0.85rem;
+          line-height: 1;
+          color: #53753c;
+          font-family: "Font Awesome 5 Pro", "Helvetica", "Arial", sans-serif;
+        }
+
+        &::after {
+          display: none;
+        }
+      }
+    }
+
     .promo-image-bar {
       &.ab-badge {
         position: absolute;
-        top: 5px;
-        right: 5px;
-        left: auto;
+        top: 0.5rem;
+        right: 0.5rem;
         bottom: auto;
-        width: 45px;
-        height: 45px;
-        margin: 0;
-        padding: 5px;
-        border-radius: 50%;
-        background: #a7201f;
-        color: #fff;
+        left: auto;
+        transform: none;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        width: 3.1rem;
+        height: 3.1rem;
+        margin: 0;
+        padding: 5px;
+        border-radius: 50%;
+        background-color: #a21f1f;
         text-align: center;
-        font-size: 10px;
         text-transform: uppercase;
-        transform: none;
-        z-index: 3;
-        font-family: "Roboto Slab Bold";
+        font-size: 0.7rem;
+        line-height: 0.74rem;
+        font-family:
+          "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times,
+          "Times New Roman", serif;
+        font-display: swap;
+        font-style: normal;
+        color: #ffffff;
 
         span {
           display: block;
@@ -380,7 +442,7 @@
 
       &.yellow.ab-badge {
         background-color: #f2f501;
-        color: #000;
+        color: #000000;
         font-weight: 700;
         bottom: 0;
         top: auto;
@@ -388,16 +450,18 @@
         border-radius: 0;
         left: 0;
         padding: 0.25rem 0.125rem;
-        font-family: 'Roboto Slab Bold', "Courier Bold", Courier, Georgia, Times, "Times New Roman", serif;
+        font-family:
+          "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times,
+          "Times New Roman", serif;
         font-style: normal;
         font-size: 0.75rem;
         text-transform: uppercase;
         text-align: center;
         height: auto;
+        line-height: 1.4;
       }
     }
 
-    /* Purchase */
     .purchase {
       .plant-calculator {
         padding: 0;
@@ -412,13 +476,14 @@
         row-gap: 13px;
         margin: 0;
         padding: 0;
+        gap: 0.5rem;
 
         > p:first-child {
           margin: 0;
           padding: 0;
+          font-size: 0.9rem;
           color: #515151;
-          font-size: 14.4px;
-          font-family: "Roboto Slab Light";
+          font-family: "Roboto Slab Light", sans-serif;
         }
 
         > .row {
@@ -427,6 +492,7 @@
           padding: 0;
           width: auto;
           display: block;
+          height: 32px;
         }
       }
 
@@ -443,18 +509,17 @@
       }
 
       input.qty {
-        width: 66px !important;
-        max-height: 18px;
-        margin: 0;
-        border: 3px solid #e7e8d6;
-        border-radius: 6px;
-        background: #f3f3f3;
-        box-shadow: none;
-        color: #333;
-        font-size: 0.9rem;
+        width: 4.25rem !important;
+        height: 1.9rem !important;
+        min-height: 1.9rem !important;
+        padding: 0 !important;
+        line-height: 1.9rem !important;
+        font-size: 0.9rem !important;
         text-align: center;
-        font-family: "Roboto Slab Light";
-        min-height: 30px !important;
+        background-color: #f6f5f5 !important;
+        border: 2px solid #f6f5f5 !important;
+        box-shadow: none !important;
+        font-family: "Roboto Slab Light", sans-serif;
 
         &::-webkit-outer-spin-button,
         &::-webkit-inner-spin-button {
@@ -470,23 +535,31 @@
         align-items: baseline;
         margin: 0;
         padding: 0;
-        color: #373539;
+        gap: 0.3rem;
         font-size: 0.9rem;
-        font-family: "Roboto Slab Bold";
+        font-family:
+          "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times,
+          "Times New Roman", serif;
+        font-style: normal;
+        color: #373539;
+        margin-top: 0.3rem;
 
         strong {
-          font-size: 0.9rem;
-          font-family: "Roboto Slab Bold";
           color: rgb(55, 53, 57) !important;
+          font-size: 1rem;
         }
 
         .price-total-original {
+          flex: 0 0 auto;
+          font-family:
+            "Roboto Slab Light", Courier, Courier, Georgia, Times, "Times New Roman",
+            serif !important;
           margin-left: auto;
-          margin-right: 6px;
-          color: #7a7a7a;
+          margin-right: 0;
+          text-align: right;
           text-decoration: line-through;
-          font-size: 14.4px;
-          font-family: "Roboto Slab Light";
+          opacity: 0.6;
+          color: #7a7a7a;
 
           &:empty {
             display: none;
@@ -497,22 +570,26 @@
       .single_add_to_cart_button {
         grid-column: 1 / -1;
         width: 100%;
-        height: auto;
         margin: 0;
-        padding: 4px 20px !important;
         border: 0;
-        border-radius: 999px;
         background: #557a35 !important;
         box-shadow: none;
-        color: #fff;
-        font-size: 11.7px;
-        text-transform: uppercase;
         letter-spacing: 0;
         cursor: pointer;
-        font-family: "Roboto Slab Bold";
-        min-height: 14px;
-        line-height: normal;
+        font-family:
+          "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times,
+          "Times New Roman", serif;
+        height: auto;
+        min-height: 0;
+        padding: 0.4rem 0.75rem !important;
+        line-height: 1.2;
         white-space: normal;
+        background-color: #53753c !important;
+        border-color: #53753c !important;
+        color: #fff !important;
+        text-align: center;
+        text-transform: uppercase;
+        font-size: 0.75rem !important;
 
         &:hover {
           background: #46672b;
@@ -520,13 +597,13 @@
       }
     }
 
-    /* Waitlist */
     .wcwl_elements {
-      background-color: #53753C;
+      background-color: transparent;
       margin-top: 0;
       padding: 0.9rem;
       overflow: visible;
       background-size: auto 100%;
+      background-color: #53753c;
       flex-wrap: wrap;
 
       &.bound {
@@ -560,9 +637,14 @@
             background-color: #f6f5f5 !important;
             border: 2px solid #f6f5f5 !important;
             box-shadow: none !important;
+            font-family:
+              "Roboto Slab Light", Courier, Courier, Georgia, Times, "Times New Roman",
+              serif !important;
 
             &::placeholder {
-              font-family: 'Roboto Slab Light';
+              font-family:
+                "Roboto Slab Light", Courier, Courier, Georgia, Times, "Times New Roman",
+                serif !important;
             }
           }
         }
@@ -572,6 +654,7 @@
           margin: 0;
 
           button {
+            width: 100%;
             width: auto;
             padding-left: 1.25rem;
             padding-right: 1.25rem;
@@ -587,44 +670,21 @@
     }
 
     p.waitlist-notice {
-      font-family: 'Roboto Slab Light';
+      font-family: "Roboto Slab Light", sans-serif;
+    }
+
+    .responsive-image-crop.one-by-one-four {
+      width: 63.96226415%;
+      margin-left: auto;
+      margin-right: auto;
+      padding-bottom: 90%;
+      position: relative !important;
     }
   }
 
-  /* Product details */
   .product-details {
-    .product-intro {
-      .summary {
-        display: none;
-      }
-
-      .root-type-selector {
-        width: 100%;
-      }
-
-      .step-2 {
-        span.root-type {
-          position: relative;
-          padding-right: 1.5rem;
-          color: #a24191;
-
-          &::before {
-            right: 0;
-            left: auto;
-            content: "\f05a";
-            font-weight: 300;
-            position: absolute;
-            display: inline-block;
-            font-style: normal;
-            font-variant: normal;
-            text-rendering: auto;
-            font-family: 'Font Awesome 5 Pro', 'Helvetica', 'Arial', sans-serif;
-            font-size: inherit;
-            line-height: inherit;
-            cursor: pointer;
-          }
-        }
-      }
+    .product-intro .summary {
+      display: none;
     }
 
     .line-divider-bottom {
@@ -636,142 +696,122 @@
     }
   }
 
-  .help-link.step-1 {
-    .text-with-icon.icon-left {
-      padding-right: 1.5rem;
-      padding-left: 0;
+  .product-details .product-intro .root-type-selector {
+    width: 100%;
+  }
 
-      &:before {
-        right: 0;
-        left: auto;
-        content: "\f05a";
-        font-weight: 300;
-        font-size: 18px;
-      }
+  .help-link.step-1 .text-with-icon.icon-left {
+    padding-right: 1.5rem;
+    padding-left: 0;
+
+    &:before {
+      right: 0;
+      left: auto;
+      content: "\f05a";
+      font-weight: 300;
+      font-size: 1.15rem;
     }
   }
 
-  /* Responsive */
-  @media (max-width: 900px) {
-    .ab-tiers-card {
-      > .content {
-        gap: 24px;
-      }
+  .product-intro .step-2 span.root-type {
+    position: relative;
+    padding-right: 1.5rem;
+    color: #a24191;
 
-      .ab-col-right {
-        flex-basis: 240px;
-      }
+    &::before {
+      right: 0;
+      left: auto;
+      content: "\f05a";
+      font-weight: 300;
+      position: absolute;
+      display: inline-block;
+      font-style: normal;
+      font-variant: normal;
+      text-rendering: auto;
+      font-family: "Font Awesome 5 Pro", "Helvetica", "Arial", sans-serif;
+      font-size: inherit;
+      line-height: inherit;
+      cursor: pointer;
+      font-size: 1.15rem;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+  }
+
+  .ab-tiers-card .promo-image-bar.ab-badge {
+    padding: 5px;
+  }
+
+  .ab-tiers-card .promo-image-bar.yellow.ab-badge {
+    background-color: #f2f501;
+    color: #000000;
+    font-weight: 700;
+    bottom: 0;
+    top: auto;
+    width: 100%;
+    border-radius: 0;
+    left: 0;
+    padding: 0.25rem 0.125rem;
+    font-family:
+      "Roboto Slab Bold", "Courier Bold", Courier, Georgia, Times,
+      "Times New Roman", serif;
+    font-style: normal;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    text-align: center;
+    height: auto;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 900px) {
+    .ab-tiers-card .ab-col-right {
+      flex-basis: 240px;
     }
   }
 
   @media (max-width: 640px) {
     .ab-tiers-card {
-      > .content {
-        gap: 15px;
-        grid-template-columns: 1fr 1fr;
+      > .content:has(.wcwl_elements) {
+        padding-bottom: 150px;
+      }
 
-        &:has(.wcwl_elements) {
-          padding-bottom: 150px;
-        }
+      .product-listing.ab-tiers-card {
+        padding: 1rem 0.9rem;
       }
 
       .details {
+        .icon-list li {
+          padding-left: 20px;
+        }
+
         .title {
           font-size: 1rem;
-          max-width: none;
-          line-height: 20px;
-          margin-bottom: 10px;
+          line-height: 140%;
+          margin: 0 0 12px;
         }
 
-        .icon-list {
-          li {
-            padding-left: 20px;
-            font-size: 14px;
-
-            p {
-              font-size: 14px;
-            }
-
-            strong {
-              font-size: 14px;
-            }
-          }
-        }
-      }
-
-      .ab-col-right {
-        flex-basis: auto;
-        width: 100%;
-
-        .image {
-          max-width: 95px;
-        }
-      }
-
-      .ab-tier {
-        span {
+        .icon-list li p {
           font-size: 14px;
         }
 
-        .ab-tier-qty {
+        .icon-list li,
+        .icon-list li strong {
           font-size: 14px;
-        }
-
-        .ab-tier-was,
-        .ab-tier-now {
-          font-size: 12px;
-        }
-
-        .ab-tier-check {
-          right: -18px;
-        }
-      }
-
-      .ab-price {
-        .ab-price-title {
-          font-size: 14px;
-          margin-bottom: 5px;
-        }
-
-        ul.ab-price-tiers {
-          grid-template-columns: 1fr;
-          column-gap: 4px;
-          row-gap: 2px;
-        }
-
-        li.ab-tier {
-          width: fit-content;
-          padding: 1px 5px;
-          display: flex;
-          flex-direction: row;
-          flex-wrap: wrap;
-          gap: 5px;
-          line-height: normal;
-          border-radius: 4px;
-          margin: 2px 0;
         }
       }
 
       .purchase {
         .total-price {
-          font-size: 14px;
-
-          strong {
-            font-size: 14px;
-          }
-
-          .price-total-original {
-            font-size: 14px;
-          }
+          margin-top: 0;
+          font-size: 1rem;
         }
 
         .single_add_to_cart_button {
-          font-size: 10px !important;
-          padding: 5px !important;
+          padding: 0.4rem 0.5rem !important;
         }
 
         form.cart {
-          gap: 5px;
+          gap: 0.4rem;
 
           > p:first-child {
             font-size: 1rem !important;
@@ -779,13 +819,68 @@
         }
 
         input.qty {
-          width: 55px !important;
+          width: 3.5rem !important;
+          line-height: 1.7rem !important;
+          font-size: 0.85rem !important;
         }
       }
-    }
 
-    .product-listing.ab-tiers-card {
-      margin: 22px 0 25px;
+      > .content {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 46%);
+        grid-template-areas: "details image" "details purchase";
+        grid-template-rows: auto 1fr;
+        column-gap: 0.9rem;
+      }
+
+      .ab-col-right {
+        flex-basis: auto;
+        width: 100%;
+      }
+
+      .ab-price {
+        ul.ab-price-tiers {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.25rem;
+          width: fit-content;
+        }
+
+        li.ab-tier {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
+          width: fit-content;
+          gap: 5px;
+          padding: 0.2rem 0.5rem !important;
+          font-size: 1rem;
+          line-height: 1.3;
+
+          &.is-active::before {
+            top: 0 !important;
+            bottom: auto;
+            right: -1.1rem;
+            font-size: 0.9rem;
+          }
+        }
+      }
+
+      .image .zoom {
+        left: 2.4rem;
+      }
+
+      .ab-tier {
+        .ab-tier-qty {
+          width: 100%;
+          position: absolute;
+          top: 2px;
+          left: 5px;
+        }
+
+        .ab-tier-check {
+          right: -18px;
+          top: -4px;
+        }
+      }
     }
   }
 }
