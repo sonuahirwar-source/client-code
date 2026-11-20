@@ -1,14 +1,5 @@
 /* Raamdecoratie – color image gallery under swatches (category page) */
-
 .gmd-002 {
-  .gmd-frozen {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
-
   .gmd-all-color-images {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr 20px;
@@ -16,6 +7,18 @@
     width: 100%;
     margin-bottom: 12px;
     align-items: center;
+  }
+
+  .rd-plp-card {
+    .swatch-attribute {
+      height: auto;
+      min-height: auto !important;
+      margin-bottom: 0;
+    }
+  }
+
+  div:has(> div > .swatch-attribute) {
+    margin-bottom: 0;
   }
 
   @keyframes gmd-dots {
@@ -105,13 +108,19 @@
 
   &.catalog-category-view {
     .product-item-img {
-      margin-bottom: 10px !important;
+      margin-bottom: 2px !important;
+      order: inherit;
+      margin-left: 0 !important;
     }
   }
 
   @media (max-width: 767px) {
     .gmd-all-color-images {
       grid-template-columns: 1fr 1fr 1fr 20px;
+      width: 160px !important;
+      max-width: 160px !important;
+      margin-bottom: 12px !important;
+      margin-top: -4px;
     }
 
     .gmd-color-more {
@@ -121,13 +130,14 @@
 
     &.catalog-category-view {
       .item.product.product-item.card.rd-plp-card {
-        gap: 6px !important;
-        gap: 3.344px;
+        gap: 0px 9px !important;
       }
     }
 
-    .gmd-color-image-item:nth-of-type(n + 4) {
-      display: none;
+    .gmd-color-image-item {
+      &:nth-of-type(n + 4) {
+        display: none;
+      }
     }
 
     .gmd-color-more {
