@@ -9,7 +9,7 @@
 
     const LIST_SELECTOR = '.catalog-category-view #product-list';
     const SWATCH_SELECTOR = '.swatch-option[data-option-id]';
-    const CACHE_KEY = 'gmd002-color-galleries';
+    const CACHE_KEY = 'gmd002-color-galleries-v2';
     const CACHE_TTL = 24 * 60 * 60 * 1000;
     const MAX_TRIES = 3;
 
@@ -133,11 +133,14 @@
             const list = pid && cfg.images?.[pid];
             if (!Array.isArray(list) || !list.length) return;
 
+            // Videos are kept (flagged) so they count in "+X", but are not rendered as thumbnails
             const images = [...list]
-                .filter(i => !i.type || i.type === 'image')
                 .sort((a, b) => (b.isMain ? 1 : 0) - (a.isMain ? 1 : 0) || (+a.position || 0) - (+b.position || 0))
-                .map(i => ({ thumb: i.thumb || i.img || i.full, img: i.img || i.full || i.thumb }))
-                .filter(i => i.thumb);
+                .map(i => {
+                    const isVideo = !!i.type && i.type !== 'image';
+                    return { thumb: i.thumb || i.img || i.full, img: i.img || i.full || i.thumb, ...(isVideo && { video: true }) };
+                })
+                .filter(i => i.thumb || i.video);
 
             if (images.length) galleries[swatch.dataset.optionId] = images;
         });
@@ -218,7 +221,8 @@
             if (!force && optionId === renderedId) return syncActive();
             renderedId = optionId;
 
-            const images = getImages(optionId);
+            const media = getImages(optionId);
+            const images = media.filter(i => !i.video);
             const color = swatches.find(s => s.dataset.optionId === optionId);
             const label = color?.getAttribute('option-label') || color?.getAttribute('aria-label') || '';
 
@@ -246,7 +250,7 @@
             });
 
             // "+X" -> product page (desktop after 5, mobile after 3)
-            const total = images.length;
+            const total = media.length; // images + videos
             const productUrl = getProductUrl(card);
             if (productUrl) {
                 [['desktop', 5], ['mobile', 3]].forEach(([type, limit]) => {
