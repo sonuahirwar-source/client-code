@@ -9,11 +9,11 @@
 
     const LIST_SELECTOR = '.catalog-category-view #product-list';
     const SWATCH_SELECTOR = '.swatch-option[data-option-id]';
+    const CACHE_KEY = 'gmd002-color-galleries';
+    const CACHE_TTL = 24 * 60 * 60 * 1000;
     const MAX_TRIES = 3;
 
     const log = (...args) => testInfo.debug && console.log(`[${testInfo.className}]`, ...args);
-    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-    const mediaCache = new Map(); // childProductId -> Promise<src|null>
 
     let debounceTimeout;
 
@@ -27,6 +27,8 @@
     /* ---------- helpers ---------- */
 
     const isVisible = el => !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+    const fileName = url => (url || '').split('?')[0].split('/').pop().toLowerCase();
+    const toAbs = u => { try { return new URL(u, location.href).href; } catch (e) { return u; } };
 
     // Unique swatches per option id, prefer the visible copy
     function getSwatches(container) {
@@ -42,45 +44,22 @@
     const getSelectedId = container =>
         container.querySelector(`${SWATCH_SELECTOR}.selected`)?.dataset.optionId || null;
 
-    // Magento deselects a selected swatch on click -> only click when not selected
-    function selectSwatch(container, swatch) {
-        if (getSelectedId(container) !== swatch.dataset.optionId) swatch.click();
-    }
+    const getProductId = card =>
+        card.querySelector('[data-product-id]')?.getAttribute('data-product-id') || null;
 
-    function getColorLabel(swatch) {
-        return swatch.getAttribute('option-label') ||
-            swatch.getAttribute('data-option-label') ||
-            swatch.querySelector('input')?.getAttribute('aria-label') ||
-            swatch.getAttribute('aria-label') ||
-            'Color';
-    }
+    const getMainImage = card =>
+        card.querySelector('.product-image-flipper-wrap img.product-image-photo') ||
+        card.querySelector('.product-image-flipper-wrap img') ||
+        card.querySelector('img.product-image-photo');
 
-    function getJQuery() {
-        if (window.jQuery) return Promise.resolve(window.jQuery);
-        return new Promise(resolve => {
-            if (typeof window.require !== 'function') return resolve(null);
-            window.require(['jquery'], resolve, () => resolve(null));
-        });
-    }
+    const getProductUrl = card =>
+        card.querySelector('a.product-item-link')?.href ||
+        card.querySelector('a.product-item-photo')?.href ||
+        card.querySelector('a[href]')?.href;
 
-    // Find the Magento SwatchRenderer widget of this card (waits until it is initialised)
-    async function getSwatchConfig($, card, container) {
-        const holders = new Set();
-        for (let el = container; el && el !== card.parentElement; el = el.parentElement) holders.add(el);
-        card.querySelectorAll('[class*="swatch-opt"], [data-role^="swatch-option"]').forEach(el => holders.add(el));
+    /* ---------- config: { index, images } ---------- */
 
-        for (let i = 0; i < 10; i++) {
-            for (const el of holders) {
-                const data = $(el).data() || {};
-                const widget = Object.values(data).find(v => v?.options?.jsonConfig);
-                if (widget) return widget.options;
-            }
-            await sleep(100);
-        }
-        return null;
-    }
-
-    // Find { index, images } (configurable config) anywhere inside an object
+    // Find { index, images } anywhere inside an object
     function findCfg(obj, depth = 0) {
         if (!obj || typeof obj !== 'object' || depth > 3) return null;
         if (obj.index && obj.images && typeof obj.images === 'object' && Object.keys(obj.images).length) return obj;
@@ -95,9 +74,23 @@
         return null;
     }
 
-    // Site API (Amasty conf): /rdpdp/product/config/id/{id}/ -> same jsonConfig incl. images
-    const configCache = new Map();
-    async function getConfigFromApi(card) {
+    // 1. Hyvä / Alpine: Amasty component data (raw data stack, $data proxy has no keys)
+    function getAlpineConfig(card) {
+        for (const el of card.querySelectorAll('[x-data]')) {
+            for (const data of el._x_dataStack || []) {
+                const cfg = findCfg(data);
+                if (cfg) {
+                    log('Alpine config from', el.getAttribute('x-data'));
+                    return cfg;
+                }
+            }
+        }
+        return null;
+    }
+
+    // 2. Site API (Amasty conf bootstrap -> configUrl)
+    const apiCache = new Map();
+    async function getApiConfig(card) {
         const pid = getProductId(card);
         const boot = pid && document.getElementById(`rd-amconf-bootstrap-${pid}`);
         if (!boot) return null;
@@ -106,8 +99,8 @@
         try { url = JSON.parse(boot.textContent).configUrl; } catch (e) { return null; }
         if (!url) return null;
 
-        if (!configCache.has(url)) {
-            configCache.set(url, fetch(url, {
+        if (!apiCache.has(url)) {
+            apiCache.set(url, fetch(url, {
                     credentials: 'same-origin',
                     headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
                 })
@@ -115,24 +108,9 @@
                 .then(data => findCfg(data))
                 .catch(() => null));
         }
-        const cfg = await configCache.get(url);
-        if (cfg) log('Using config API', url);
-        return cfg ? { jsonConfig: cfg, mediaCallback: null } : null;
-    }
-
-    // Hyvä (Alpine.js): Amasty component data holds jsonConfig { index, images }
-    function getAlpineConfig(card) {
-        // Alpine.$data() is a proxy without own keys -> read the raw data stack
-        for (const el of card.querySelectorAll('[x-data]')) {
-            for (const data of el._x_dataStack || []) {
-                const cfg = findCfg(data, 0);
-                if (cfg) {
-                    log('Using Alpine config from', el.getAttribute('x-data'));
-                    return { jsonConfig: cfg, mediaCallback: null };
-                }
-            }
-        }
-        return null;
+        const cfg = await apiCache.get(url);
+        if (cfg) log('API config', url);
+        return cfg;
     }
 
     function getChildProductId(cfg, swatch) {
@@ -147,178 +125,26 @@
         }) || null;
     }
 
-    // Magento's own swatch media endpoint (same one the circles use), no DOM changes
-    function fetchMedia(url, productId) {
-        if (!url || !productId) return Promise.resolve(null);
-        if (mediaCache.has(productId)) return mediaCache.get(productId);
+    // optionId -> [{ thumb, img }] (all images of that color, main first)
+    function buildGalleries(cfg, swatches) {
+        const galleries = {};
+        swatches.forEach(swatch => {
+            const pid = getChildProductId(cfg, swatch);
+            const list = pid && cfg.images?.[pid];
+            if (!Array.isArray(list) || !list.length) return;
 
-        const reqUrl = new URL(url, location.origin);
-        reqUrl.searchParams.set('product_id', productId);
+            const images = [...list]
+                .filter(i => !i.type || i.type === 'image')
+                .sort((a, b) => (b.isMain ? 1 : 0) - (a.isMain ? 1 : 0) || (+a.position || 0) - (+b.position || 0))
+                .map(i => ({ thumb: i.thumb || i.img || i.full, img: i.img || i.full || i.thumb }))
+                .filter(i => i.thumb);
 
-        const promise = fetch(reqUrl.toString(), {
-                credentials: 'same-origin',
-                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
-            })
-            .then(r => (r.ok ? r.json() : null))
-            .then(data => data && (data.small || data.medium || data.large || data.gallery?.[0]?.img) || null)
-            .catch(() => null);
-
-        mediaCache.set(productId, promise);
-        return promise;
-    }
-
-    async function getImageSrc(options, swatch) {
-        const cfg = options.jsonConfig;
-        const productId = getChildProductId(cfg, swatch);
-        if (!productId) return null;
-
-        // 1. images already in the page config
-        const imgs = cfg.images?.[productId];
-        if (Array.isArray(imgs) && imgs.length) {
-            const main = imgs.find(i => i.isMain) || imgs[0];
-            const src = main.thumb || main.img || main.full;
-            if (src) return src;
-        }
-
-        // 2. ajax media endpoint
-        return fetchMedia(options.mediaCallback, productId);
-    }
-
-    // Preload so the whole gallery appears at once
-    function preload(src) {
-        return new Promise(resolve => {
-            const img = new Image();
-            const done = ok => resolve(ok ? src : null);
-            const t = setTimeout(() => done(true), 1000);
-            img.onload = () => { clearTimeout(t); done(true); };
-            img.onerror = () => { clearTimeout(t); done(false); };
-            img.src = src;
+            if (images.length) galleries[swatch.dataset.optionId] = images;
         });
+        return galleries;
     }
 
-    /* ---------- fallback: click circles behind a frozen copy (user sees no change) ---------- */
-
-    const getSrc = img => img.currentSrc || img.src;
-
-    // Remove Alpine (Hyvä) + id attributes so the copy is 100% static and never steals x-ref
-    function makeStatic(root) {
-        [root, ...root.querySelectorAll('*')].forEach(node => {
-            [...node.attributes].forEach(({ name }) => {
-                if (name === 'id' || name.startsWith('x-') || name.startsWith(':') || name.startsWith('@')) {
-                    node.removeAttribute(name);
-                }
-            });
-        });
-    }
-
-    // Show a static copy in place of el, hide the real el (it still works for .click())
-    function freeze(el) {
-        const clone = el.cloneNode(true);
-        makeStatic(clone);
-        clone.classList.add('gmd-freeze-clone');
-        if (clone.tagName === 'IMG') {
-            clone.src = getSrc(el);
-            clone.removeAttribute('srcset');
-            clone.removeAttribute('sizes');
-            clone.removeAttribute('loading');
-        }
-        el.insertAdjacentElement('afterend', clone);
-        el.classList.add('gmd-frozen');
-        const oldStyle = el.getAttribute('style');
-        el.style.cssText += ';position:absolute!important;top:0!important;left:0!important;visibility:hidden!important;pointer-events:none!important;';
-        return () => {
-            clone.remove();
-            el.classList.remove('gmd-frozen');
-            oldStyle === null ? el.removeAttribute('style') : el.setAttribute('style', oldStyle);
-        };
-    }
-
-    // Real main image of the card (never our frozen copy)
-    const getMainImage = card =>
-        card.querySelector('.product-image-flipper-wrap img.product-image-photo:not(.gmd-freeze-clone)') ||
-        card.querySelector('.product-image-flipper-wrap img:not(.gmd-freeze-clone)') ||
-        card.querySelector('img.product-image-photo:not(.gmd-freeze-clone)');
-
-    const firstSrcset = v => (v || '').split(',')[0].trim().split(/\s+/)[0] || '';
-    const toAbs = u => { try { return new URL(u, location.href).href; } catch (e) { return u; } };
-
-    // Read image from ATTRIBUTES (currentSrc does not update while the img is hidden / lazy)
-    function readImage(card) {
-        const img = getMainImage(card);
-        if (!img) return { sig: '', url: '' };
-        const src = img.getAttribute('src') || '';
-        const dataSrc = img.getAttribute('data-src') || img.getAttribute('data-original') || '';
-        const srcset = img.getAttribute('srcset') || img.getAttribute('data-srcset') || '';
-        const source = img.closest('picture')?.querySelector('source')?.getAttribute('srcset') || '';
-
-        const realSrc = src && !src.startsWith('data:') ? src : '';
-        const url = toAbs(realSrc || dataSrc || firstSrcset(srcset) || firstSrcset(source));
-        return { sig: [src, dataSrc, srcset, source].join('|'), url };
-    }
-
-    // Returns true if the image actually changed
-    async function waitForImageChange(card, oldSig, timeout = 4000) {
-        const start = Date.now();
-        while (Date.now() - start < timeout) {
-            await sleep(30);
-            if (readImage(card).sig !== oldSig) break;
-        }
-        // let late updates settle (raw url -> cached url)
-        let last = readImage(card).sig;
-        await sleep(120);
-        while (readImage(card).sig !== last) {
-            last = readImage(card).sig;
-            await sleep(120);
-        }
-        return readImage(card).sig !== oldSig;
-    }
-
-    async function captureByClicking(card, container, mainImage, swatches) {
-        const result = new Map();
-        const originalId = getSelectedId(container);
-        const originalSig = readImage(card).sig;
-
-        // Circles are NOT cloned (no double circles), only image + price are frozen
-        const unfreezers = [mainImage, card.querySelector('.price-box')]
-            .filter(Boolean)
-            .map(freeze);
-
-        try {
-            for (const swatch of swatches) {
-                const optionId = swatch.dataset.optionId;
-                if (getSelectedId(container) !== optionId) {
-                    const oldSig = readImage(card).sig;
-                    swatch.click();
-                    // Image did not change -> this color has no own image, don't copy the previous one
-                    if (!await waitForImageChange(card, oldSig)) {
-                        log('No own image for', optionId);
-                        continue;
-                    }
-                }
-                result.set(optionId, readImage(card).url);
-                log('Captured', optionId, result.get(optionId));
-            }
-
-            // Restore original state
-            if (originalId) {
-                const original = getSwatches(container).find(s => s.dataset.optionId === originalId);
-                if (original) selectSwatch(container, original);
-            } else {
-                container.querySelector(`${SWATCH_SELECTOR}.selected`)?.click(); // deselect
-            }
-            const sig = readImage(card).sig;
-            if (sig !== originalSig) await waitForImageChange(card, sig, 2000);
-        } finally {
-            unfreezers.forEach(fn => fn());
-        }
-
-        return result;
-    }
-
-    /* ---------- cache: next page view is instant ---------- */
-
-    const CACHE_KEY = 'gmd002-color-images';
-    const CACHE_TTL = 24 * 60 * 60 * 1000;
+    /* ---------- cache ---------- */
 
     function readCache() {
         try {
@@ -329,144 +155,137 @@
 
     function getCached(productId) {
         const entry = productId && readCache()[productId];
-        return entry && Date.now() - entry.t < CACHE_TTL ? entry.images : null;
+        return entry && Date.now() - entry.t < CACHE_TTL ? entry.g : null;
     }
 
-    function setCached(productId, srcMap) {
-        if (!productId || !srcMap.size) return;
+    function setCached(productId, galleries) {
+        if (!productId || !Object.keys(galleries).length) return;
         try {
             const data = readCache();
-            data[productId] = { t: Date.now(), images: Object.fromEntries(srcMap) };
+            data[productId] = { t: Date.now(), g: galleries };
             localStorage.setItem(CACHE_KEY, JSON.stringify(data));
         } catch (e) { /* storage full / blocked */ }
     }
 
-    const getProductId = card =>
-        card.querySelector('[data-product-id]')?.getAttribute('data-product-id') ||
-        card.querySelector('[data-product_id]')?.getAttribute('data-product_id') || null;
+    /* ---------- gallery ---------- */
 
-    /* ---------- duplicates + swatch fallback ---------- */
-
-    const colorName = swatch => getColorLabel(swatch).split(' - ')[0].trim().toLowerCase();
-
-    // Same image for several colors -> keep it only for the color whose name is in the file name
-    function removeDuplicates(swatches, srcMap) {
-        const groups = new Map();
-        swatches.forEach(s => {
-            const src = srcMap.get(s.dataset.optionId);
-            if (!src) return;
-            const key = src.split('?')[0];
-            if (!groups.has(key)) groups.set(key, []);
-            groups.get(key).push(s);
-        });
-
-        groups.forEach((list, key) => {
-            if (list.length < 2) return;
-            const file = decodeURIComponent(key.split('/').pop()).toLowerCase();
-            const owner = list.find(s => {
-                const name = colorName(s);
-                return name && (file.includes(name.replace(/\s+/g, '-')) ||
-                    file.includes(name.replace(/\s+/g, '_')) ||
-                    file.includes(name.replace(/\s+/g, '')));
-            });
-            list.forEach(s => s !== owner && srcMap.delete(s.dataset.optionId));
-            log('Duplicate image removed:', key, 'owner:', owner && colorName(owner));
-        });
+    function createLoader(container) {
+        const loader = document.createElement('div');
+        loader.className = 'gmd-all-color-images gmd-color-loading';
+        loader.setAttribute('aria-label', 'Loading');
+        loader.innerHTML = '<span></span><span></span><span></span>';
+        container.insertAdjacentElement('beforebegin', loader);
+        return loader;
     }
 
-    // The circle's own look (image or color) when a color has no product image
-    function getSwatchVisual(swatch) {
-        const v = swatch.getAttribute('data-option-tooltip-value') ||
-            swatch.getAttribute('option-tooltip-value') || '';
-        if (/^(#|rgb)/i.test(v)) return { color: v };
-        if (/\.(jpe?g|png|webp|gif|svg)/i.test(v)) return { src: v };
-
-        const cs = getComputedStyle(swatch);
-        const url = cs.backgroundImage.match(/url\(["']?(.*?)["']?\)/);
-        if (url) return { src: url[1] };
-        const inner = swatch.querySelector('img');
-        if (inner) return { src: getSrc(inner) };
-        if (cs.backgroundColor && !/^(transparent|rgba\(0, 0, 0, 0\))$/.test(cs.backgroundColor)) {
-            return { color: cs.backgroundColor };
-        }
-        return null;
+    // Change the card's main image (Hyvä amFlipper reads data-img-src)
+    function setMainImage(card, src) {
+        const img = getMainImage(card);
+        if (!img) return;
+        img.setAttribute('data-img-src', src);
+        img.removeAttribute('srcset');
+        img.src = src;
     }
 
-    /* ---------- build gallery ---------- */
-
-    function buildGallery(card, container, items) {
+    function setupGallery(card, container, swatches, galleries) {
         card.querySelector('.gmd-all-color-images')?.remove();
 
         const gallery = document.createElement('div');
         gallery.className = 'gmd-all-color-images';
+        container.insertAdjacentElement('beforebegin', gallery);
+
+        let renderedId = null;
 
         const syncActive = () => {
-            const selectedId = getSelectedId(container);
+            const current = fileName(getMainImage(card)?.getAttribute('src'));
             gallery.querySelectorAll('.gmd-color-image-item').forEach(item => {
-                item.classList.toggle('active', item.dataset.optionId === selectedId);
+                item.classList.toggle('active', fileName(item.dataset.img) === current);
             });
         };
 
-        items.forEach(({ swatch, src, color: bg }) => {
-            const color = getColorLabel(swatch);
-            const wrapper = document.createElement('div');
-            wrapper.className = 'gmd-color-image-item';
-            wrapper.dataset.optionId = swatch.dataset.optionId;
-            wrapper.title = color;
+        // Images of the selected color; no config -> main + flipper image of the card
+        const getImages = optionId => {
+            if (optionId && galleries[optionId]) return galleries[optionId];
+            const img = getMainImage(card);
+            if (!img) return [];
+            return [img.getAttribute('data-img-src') || img.getAttribute('src'), img.getAttribute('data-flipper-src')]
+                .filter(Boolean)
+                .map(src => ({ thumb: toAbs(src), img: toAbs(src) }));
+        };
 
-            if (src) {
+        const render = (force = false) => {
+            const optionId = getSelectedId(container) || swatches[0]?.dataset.optionId || null;
+            if (!force && optionId === renderedId) return syncActive();
+            renderedId = optionId;
+
+            const images = getImages(optionId);
+            const color = swatches.find(s => s.dataset.optionId === optionId);
+            const label = color?.getAttribute('option-label') || color?.getAttribute('aria-label') || '';
+
+            gallery.innerHTML = '';
+            images.forEach((image, i) => {
+                const item = document.createElement('div');
+                item.className = 'gmd-color-image-item';
+                item.dataset.img = image.img;
+                item.title = label;
+
                 const img = document.createElement('img');
-                img.src = src;
-                img.alt = color;
-                wrapper.append(img);
-            } else {
-                wrapper.classList.add('gmd-color-image-item--swatch');
-                wrapper.style.background = bg;
+                img.src = image.thumb;
+                img.alt = `${label} ${i + 1}`.trim();
+                item.append(img);
+
+                // Thumbnail click -> show it as main image
+                item.addEventListener('click', e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setMainImage(card, image.img);
+                    syncActive();
+                });
+
+                gallery.appendChild(item);
+            });
+
+            // "+X" -> product page (desktop after 5, mobile after 3)
+            const total = images.length;
+            const productUrl = getProductUrl(card);
+            if (productUrl) {
+                [['desktop', 5], ['mobile', 3]].forEach(([type, limit]) => {
+                    if (total <= limit) return;
+                    const more = document.createElement('a');
+                    more.className = `gmd-color-more gmd-color-more--${type}`;
+                    more.href = productUrl;
+                    more.textContent = `+${total - limit}`;
+                    more.setAttribute('aria-label', `${total - limit} more images`);
+                    gallery.appendChild(more);
+                });
             }
 
-            // Image click -> same circle selected
-            wrapper.addEventListener('click', e => {
-                e.preventDefault();
-                e.stopPropagation();
-                selectSwatch(container, swatch);
-                syncActive();
-            });
+            syncActive();
+            log('Rendered', optionId, total, 'images');
+        };
 
-            gallery.appendChild(wrapper);
-        });
+        // Circle click (selection change) -> gallery of that color
+        let raf;
+        new MutationObserver(() => {
+            cancelAnimationFrame(raf);
+            raf = requestAnimationFrame(() => render());
+        }).observe(container, { subtree: true, attributes: true, attributeFilter: ['class'] });
 
-        // "+X" -> product page (desktop after 5, mobile after 3)
-        const total = items.length;
-        const productUrl =
-            card.querySelector('a.product-item-link')?.href ||
-            card.querySelector('a.product-item-photo')?.href ||
-            card.querySelector('a[href]')?.href;
-
-        if (productUrl) {
-            [['desktop', 5], ['mobile', 3]].forEach(([type, limit]) => {
-                if (total <= limit) return;
-                const more = document.createElement('a');
-                more.className = `gmd-color-more gmd-color-more--${type}`;
-                more.href = productUrl;
-                more.textContent = `+${total - limit}`;
-                more.setAttribute('aria-label', `${total - limit} more colors`);
-                gallery.appendChild(more);
-            });
+        // Main image changed by the site -> update active (and fallback gallery when no config)
+        const mainImg = getMainImage(card);
+        if (mainImg) {
+            new MutationObserver(() => {
+                const id = getSelectedId(container);
+                id && galleries[id] ? syncActive() : render(true);
+            }).observe(mainImg, { attributes: true, attributeFilter: ['src', 'data-img-src', 'data-flipper-src'] });
         }
 
-        container.insertAdjacentElement('beforebegin', gallery);
-
-        // Circle click (or any selection change) -> same image active
-        new MutationObserver(syncActive).observe(container, {
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['class']
-        });
-        syncActive();
+        render(true);
     }
 
-    async function processCard($, card) {
-        if (card.dataset.gmdColorGallery === 'done' || card.dataset.gmdColorGallery === 'busy') return;
+    async function processCard(card) {
+        const state = card.dataset.gmdColorGallery;
+        if (state === 'done' || state === 'busy') return;
         const tries = +(card.dataset.gmdTries || 0);
         if (tries >= MAX_TRIES) return;
 
@@ -478,78 +297,24 @@
         card.dataset.gmdColorGallery = 'busy';
         card.dataset.gmdTries = tries + 1;
 
-        // Loading dots where the gallery will appear
-        card.querySelector('.gmd-all-color-images')?.remove();
-        const loader = document.createElement('div');
-        loader.className = 'gmd-all-color-images gmd-color-loading';
-        loader.setAttribute('aria-label', 'Loading');
-        loader.innerHTML = '<span></span><span></span><span></span>';
-        container.insertAdjacentElement('beforebegin', loader);
-
-        const mainImage = getMainImage(card);
-
         const productId = getProductId(card);
-        const srcMap = new Map();
+        let galleries = getCached(productId);
 
-        // 0. Cache from an earlier page view (instant)
-        const cached = getCached(productId);
-        if (cached) {
-            swatches.forEach(s => cached[s.dataset.optionId] && srcMap.set(s.dataset.optionId, cached[s.dataset.optionId]));
-            log('Cache images:', srcMap.size, '/', swatches.length);
-        }
-
-        // 1. Magento / Hyvä config (no clicks)
-        const options = srcMap.size < swatches.length &&
-            (getAlpineConfig(card) || await getConfigFromApi(card) || ($ && await getSwatchConfig($, card, container)));
-        if (options) {
-            await Promise.all(swatches.map(async swatch => {
-                const src = await getImageSrc(options, swatch).catch(() => null);
-                if (src) srcMap.set(swatch.dataset.optionId, src);
-            }));
-        }
-        removeDuplicates(swatches, srcMap);
-        log('Config images:', srcMap.size, '/', swatches.length);
-
-        // 2. Fallback: click hidden circles behind a frozen copy
-        const missing = swatches.filter(s => !srcMap.has(s.dataset.optionId));
-        if (missing.length && mainImage) {
-            const clicked = await captureByClicking(card, container, mainImage, missing);
-            clicked.forEach((src, id) => src && srcMap.set(id, src));
-            removeDuplicates(swatches, srcMap);
-        }
-
-        // Save for the next page view
-        if (!cached || srcMap.size > Object.keys(cached).length) setCached(productId, srcMap);
-
-        // 3. Colors still without own image -> use the circle's own image / color
-        const results = await Promise.all(swatches.map(async swatch => {
-            const src = srcMap.get(swatch.dataset.optionId);
-            const loaded = src && await preload(src);
-            if (loaded) return { swatch, src: loaded };
-
-            const visual = getSwatchVisual(swatch);
-            if (visual?.src) return { swatch, src: await preload(visual.src) };
-            if (visual?.color) return { swatch, color: visual.color };
-            return { swatch };
-        }));
-
-        const items = results.filter(r => r.src || r.color);
-        if (!items.length) {
+        if (!galleries) {
+            const loader = createLoader(container);
+            const cfg = getAlpineConfig(card) || await getApiConfig(card);
+            galleries = cfg ? buildGalleries(cfg, swatches) : {};
+            setCached(productId, galleries);
             loader.remove();
-            card.dataset.gmdColorGallery = '';
-            return;
         }
 
-        buildGallery(card, container, items);
+        log('Card', productId, Object.keys(galleries).length, '/', swatches.length, 'colors with gallery');
+        setupGallery(card, container, swatches, galleries);
         card.dataset.gmdColorGallery = 'done';
-        log(`Card: ${items.length}/${swatches.length} color images`, card);
     }
 
-    async function processAll() {
-        const $ = await getJQuery();
-        if (!$) log('jQuery not found, using click fallback');
-        const cards = [...document.querySelectorAll(`${LIST_SELECTOR} .product-item`)];
-        await Promise.all(cards.map(card => processCard($, card)));
+    function processAll() {
+        document.querySelectorAll(`${LIST_SELECTOR} .product-item`).forEach(card => processCard(card));
     }
 
     waitForElement(`${LIST_SELECTOR} .products .product-item ${SWATCH_SELECTOR}`, ([swatch]) => {
@@ -559,7 +324,7 @@
         // Cards / swatches rendered later (lazy load, filters, ajax paging)
         const list = swatch.closest('#product-list') || document.querySelector(LIST_SELECTOR);
         new MutationObserver(mutations => {
-            if (!mutations.some(m => m.addedNodes.length)) return;
+            if (!mutations.some(m => [...m.addedNodes].some(n => n.nodeType === 1 && !n.closest?.('.gmd-all-color-images')))) return;
             clearTimeout(debounceTimeout);
             debounceTimeout = setTimeout(processAll, 200);
         }).observe(list, { childList: true, subtree: true });
