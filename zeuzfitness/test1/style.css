@@ -35,13 +35,16 @@ display:none;
   .gmd-16 .gmd-show-more-button {
     display: none !IMPORTANT;
 }
-.gmd-16 .product-info .gmd-custom-variant-name{
+.gmd-16 .product-info .gmd-custom-variant-name,.gmd-16 .product-info .gmd-custom-variant-stock{
     min-height: 31px;
     display: flex;
     align-items: center;
 }
 .gmd-16 .product-info .gmd-custom-variant-row {
      align-items: flex-start !important;
+}
+.gmd-16 .product-info .gmd-custom-variant-stock::before {
+    top: 12px;
 }
 }
 @media (min-width: 1000px) and (max-width: 1150px) {
