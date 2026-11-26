@@ -31,9 +31,17 @@
 display:none;
 }
 
-@media(min-width:768px){
+@media(min-width:767px){
   .gmd-16 .gmd-show-more-button {
     display: none !IMPORTANT;
+}
+.gmd-16 .product-info .gmd-custom-variant-name{
+    min-height: 31px;
+    display: flex;
+    align-items: center;
+}
+.gmd-16 .product-info .gmd-custom-variant-row {
+     align-items: flex-start !important;
 }
 }
 @media (min-width: 1000px) and (max-width: 1150px) {
