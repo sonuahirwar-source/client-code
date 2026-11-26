@@ -44,7 +44,7 @@ display:none;
      align-items: flex-start !important;
 }
 .gmd-16 .product-info .gmd-custom-variant-stock::before {
-    top: 12px;
+ top: 12px !important;
 }
 }
 @media (min-width: 1000px) and (max-width: 1150px) {
